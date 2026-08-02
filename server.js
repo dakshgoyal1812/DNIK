@@ -3,7 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Provided API Keys
 const OPENROUTER_API_KEY = "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";
