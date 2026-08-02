@@ -4,7 +4,8 @@
   "description": "Aria 3D Avatar AI Voice Companion",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "Start": "node server.js"
   },
   "engines": {
     "node": ">=18.0.0"
