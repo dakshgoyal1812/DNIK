@@ -612,15 +612,15 @@ function fetchGoogleTranslateTTS(text) {
     });
 }
 
-// 2. Call Gemini 3.1 Flash TTS with Google Key Rotation (Kore Voice)
+// 2. Call Gemini 3.1 Flash TTS with Google Key Rotation (Puck Voice - Anime Style)
 async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     if (!text) return null;
 
-    const baseStyle = "An ultra-realistic, soft-spoken, warm, and natural human female companion voice. Expressive quality, clear Indian Hindi accent, smooth breathing, natural speech rhythm, gentle pitch, and affectionate intonation.";
+    const baseStyle = "A high-pitched and playful young female voice, expressive quality, suited for anime-style character performances.";
     const moodStyle = moodStr ? ` Express emotion: ${moodStr}.` : "";
     const styleInstruction = `${baseStyle}${moodStyle} Speak fluently in natural Hindi (India).`;
 
-    const fullPrompt = `Instructions: ${styleInstruction}\nLanguage / locale: Hindi (India)\nVoice: Kore\nText to speak: ${text}`;
+    const fullPrompt = `Instructions: ${styleInstruction}\nLanguage / locale: Hindi (India)\nVoice: Puck\nText to speak: ${text}`;
 
     const payload = {
         contents: [{
@@ -631,7 +631,7 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
             speechConfig: {
                 voiceConfig: {
                     prebuiltVoiceConfig: {
-                        voiceName: "Kore"
+                        voiceName: "Puck"
                     }
                 }
             }
@@ -640,7 +640,8 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
 
     const models = [
         "models/gemini-3.1-flash-tts-preview",
-        "models/gemini-2.5-flash-preview-tts"
+        "models/gemini-2.5-flash-preview-tts",
+        "models/gemini-2.0-flash-exp"
     ];
 
     const googleKeys = getRotatedKeys("google");

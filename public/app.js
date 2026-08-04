@@ -1023,8 +1023,8 @@ function speakWithFakeLipSync(text) {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'hi-IN';
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
+    utterance.rate = 1.05;
+    utterance.pitch = 1.25;
 
     const voices = window.speechSynthesis.getVoices();
     const femaleVoice = voices.find(v => 
