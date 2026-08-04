@@ -764,8 +764,24 @@ const server = http.createServer(async (req, res) => {
                 const userMessage = data.message || '';
                 const moodMode = data.moodMode || 'normal';
 
-                // 1. Get Response from Smart AI Router with Auto Key Rotation & Failover
-                const { replyText, imageUrl } = await fetchAIReply(userMessage, moodMode);
+                let replyText = '';
+                let imageUrl = null;
+
+                try {
+                    const aiRes = await fetchAIReply(userMessage, moodMode);
+                    if (aiRes && typeof aiRes === 'object') {
+                        replyText = aiRes.replyText || '';
+                        imageUrl = aiRes.imageUrl || null;
+                    } else if (typeof aiRes === 'string') {
+                        replyText = aiRes;
+                    }
+                } catch (aiErr) {
+                    console.error("fetchAIReply error:", aiErr);
+                }
+
+                if (!replyText) {
+                    replyText = generateFallbackAIResponse(userMessage);
+                }
 
                 // 2. Parse Mood and Gesture / Action tags
                 const moodMatch = replyText.match(/\[MOOD:([^\]]+)\]/i);
@@ -792,10 +808,14 @@ const server = http.createServer(async (req, res) => {
                     }
                 }
 
-                // 3. Synthesize Voice Audio (Google TTS with emotion config) unless image generated
+                // 3. Synthesize Voice Audio unless image generated
                 let audioContent = null;
                 if (!imageUrl) {
-                    audioContent = await fetchGoogleTTS(cleanText, mood);
+                    try {
+                        audioContent = await fetchGoogleTTS(cleanText, mood);
+                    } catch (ttsErr) {
+                        console.error("TTS error:", ttsErr);
+                    }
                 }
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -811,8 +831,18 @@ const server = http.createServer(async (req, res) => {
                 }));
             } catch (err) {
                 console.error("Error in /chat endpoint:", err);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Server internal error' }));
+                const fallbackReply = generateFallbackAIResponse(body || '');
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    reply: fallbackReply,
+                    cleanText: fallbackReply.replace(/\[MOOD:[^\]]+\]/gi, '').replace(/\[GESTURE:[^\]]+\]/gi, '').trim(),
+                    mood: 'relaxed',
+                    gesture: 'nod',
+                    action: 'nod',
+                    audioContent: null,
+                    audio: null,
+                    imageUrl: null
+                }));
             }
         });
         return;
