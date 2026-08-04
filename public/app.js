@@ -143,6 +143,7 @@ function init() {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(0.0, 1.05, 0.0);
     controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
     controls.screenSpacePanning = true;
     controls.minDistance = 0.5;
     controls.maxDistance = 6.0;
@@ -150,6 +151,7 @@ function init() {
 
     // LookAt Mouse target object
     lookAtTarget = new THREE.Object3D();
+    lookAtTarget.position.set(0, 1.15, 2.0);
     scene.add(lookAtTarget);
 
     // Build 3D Studio Environment
@@ -170,14 +172,13 @@ function init() {
     animate();
 }
 
+const targetMousePos = { x: 0, y: 1.15, z: 2.0 };
+
 function setupEyeTrackingOnly() {
     const updateTarget = (clientX, clientY) => {
         lastMouseMoveTime = performance.now();
-        if (lookAtTarget) {
-            const x = ((clientX / window.innerWidth) - 0.5) * 5.0;
-            const y = -((clientY / window.innerHeight) - 0.5) * 3.5 + 1.1;
-            lookAtTarget.position.set(x, y, 2.0);
-        }
+        targetMousePos.x = ((clientX / window.innerWidth) - 0.5) * 4.5;
+        targetMousePos.y = -((clientY / window.innerHeight) - 0.5) * 3.0 + 1.15;
     };
 
     window.addEventListener('pointermove', (e) => updateTarget(e.clientX, e.clientY));
@@ -355,42 +356,48 @@ function updateGesture(delta) {
     if (!activeGesture || !currentVrm || !currentVrm.humanoid) return;
 
     gestureTime += delta;
-    const t = gestureTime / gestureDuration;
+    const rawT = gestureTime / gestureDuration;
 
-    if (t >= 1.0) {
+    if (rawT >= 1.0) {
         activeGesture = null;
         setStatus('Ready', '#4ade80');
         applyNaturalHumanPose(currentVrm);
         return;
     }
 
+    // Smooth Ease-in Ease-out envelope (0 -> 1 -> 0)
+    const envelope = Math.sin(rawT * Math.PI);
+
     const h = currentVrm.humanoid;
-    const leftUpperArm = h.getNormalizedBoneNode('leftUpperArm');
-    const rightUpperArm = h.getNormalizedBoneNode('rightUpperArm');
     const head = h.getNormalizedBoneNode('head');
     const neck = h.getNormalizedBoneNode('neck');
     const spine = h.getNormalizedBoneNode('spine');
     const chest = h.getNormalizedBoneNode('chest');
-    const hips = h.getNormalizedBoneNode('hips');
+    const leftUpperArm = h.getNormalizedBoneNode('leftUpperArm');
+    const rightUpperArm = h.getNormalizedBoneNode('rightUpperArm');
+
+    const lerpRate = Math.min(1.0, delta * 12.0);
 
     switch (activeGesture) {
         case 'nod': {
-            const nodAngle = Math.sin(t * Math.PI * 4) * 0.22;
-            if (head) head.rotation.x = nodAngle;
-            if (neck) neck.rotation.x = nodAngle * 0.5;
+            const nodAngle = Math.sin(rawT * Math.PI * 3.5) * 0.20 * envelope;
+            if (head) head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, nodAngle, lerpRate);
+            if (neck) neck.rotation.x = THREE.MathUtils.lerp(neck.rotation.x, nodAngle * 0.45, lerpRate);
             break;
         }
         case 'shake': {
-            const shakeAngle = Math.sin(t * Math.PI * 4) * 0.28;
-            if (head) head.rotation.y = shakeAngle;
-            if (neck) neck.rotation.y = shakeAngle * 0.5;
+            const shakeAngle = Math.sin(rawT * Math.PI * 3.5) * 0.24 * envelope;
+            if (head) head.rotation.y = THREE.MathUtils.lerp(head.rotation.y, shakeAngle, lerpRate);
+            if (neck) neck.rotation.y = THREE.MathUtils.lerp(neck.rotation.y, shakeAngle * 0.45, lerpRate);
             break;
         }
         case 'bow': {
-            let bowProgress = Math.sin(t * Math.PI);
-            if (spine) spine.rotation.x = bowProgress * 0.35;
-            if (chest) chest.rotation.x = bowProgress * 0.2;
-            if (head) head.rotation.x = bowProgress * 0.25;
+            const bowProgress = Math.sin(rawT * Math.PI);
+            if (spine) spine.rotation.x = THREE.MathUtils.lerp(spine.rotation.x, bowProgress * 0.32, lerpRate);
+            if (chest) chest.rotation.x = THREE.MathUtils.lerp(chest.rotation.x, bowProgress * 0.18, lerpRate);
+            if (head) head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, bowProgress * 0.22, lerpRate);
+            if (leftUpperArm) leftUpperArm.rotation.x = THREE.MathUtils.lerp(leftUpperArm.rotation.x, 0.08 + bowProgress * 0.15, lerpRate);
+            if (rightUpperArm) rightUpperArm.rotation.x = THREE.MathUtils.lerp(rightUpperArm.rotation.x, 0.08 + bowProgress * 0.15, lerpRate);
             break;
         }
     }
@@ -454,17 +461,19 @@ function updateIdleBreathing(deltaTime) {
 
 function naturalBreathing(t, delta) {
     naturalBreathTimer += delta;
-    if (naturalBreathTimer > 8) {
-        targetBreathSpeed = 1.8 + Math.random() * 0.6;
+    if (naturalBreathTimer > 7) {
+        targetBreathSpeed = 1.8 + Math.random() * 0.5;
         naturalBreathTimer = 0;
     }
 
-    breathSpeed += (targetBreathSpeed - breathSpeed) * (delta * 0.8);
+    breathSpeed += (targetBreathSpeed - breathSpeed) * (delta * 0.9);
     breathPhase += delta * breathSpeed;
 
     if (currentVrm && currentVrm.scene) {
-        currentVrm.scene.position.y = modelBasePosY + Math.sin(breathPhase) * 0.024;
-        currentVrm.scene.position.x = Math.cos(breathPhase * 0.5) * 0.005;
+        const floatY = Math.sin(breathPhase) * 0.018 + Math.sin(breathPhase * 2.2) * 0.004;
+        const floatX = Math.cos(breathPhase * 0.4) * 0.004;
+        currentVrm.scene.position.y = modelBasePosY + floatY;
+        currentVrm.scene.position.x = floatX;
     }
 }
 
@@ -499,25 +508,24 @@ function updateExpressions(delta) {
     if (!currentVrm || !currentVrm.expressionManager) return;
     const manager = currentVrm.expressionManager;
 
+    const lerpFactor = 1.0 - Math.exp(-delta * 7.5);
+
     ['happy', 'angry', 'sad', 'relaxed', 'surprised'].forEach(exp => {
-        // Skip if model doesn't have this expression
         if (!manager.expressionMap || !manager.expressionMap[exp]) return;
 
         let target = targetExpressions[exp] || 0;
-        // Cap 'happy' and 'relaxed' expression intensity so eyes don't shut tight while speaking
         if ((exp === 'happy' || exp === 'relaxed') && target > 0.35) {
             target = 0.35;
         }
 
         const current = currentExpressions[exp] || 0;
-        const newVal = THREE.MathUtils.lerp(current, target, delta * 3.5);
+        const newVal = THREE.MathUtils.lerp(current, target, lerpFactor);
         currentExpressions[exp] = newVal;
         try {
             manager.setValue(exp, newVal);
         } catch (e) { }
     });
 
-    // CRITICAL: Force eyes to stay wide open while speaking & emoting (zero out blink blendshapes)
     try {
         if (manager.expressionMap) {
             if (manager.expressionMap['blink']) manager.setValue('blink', 0);
@@ -924,7 +932,7 @@ function resetVisemeTargets() {
     Object.keys(visemeTargets).forEach(v => visemeTargets[v] = 0);
 }
 
-function updateVisemeSmoothly() {
+function updateVisemeSmoothly(delta = 0.016) {
     if (!currentVrm) return;
     const manager = currentVrm.expressionManager;
     if (!manager) return;
@@ -942,15 +950,15 @@ function updateVisemeSmoothly() {
             sum += dataArray[i];
         }
         const average = sum / dataArray.length;
-        const volume = Math.min(1.0, (average / 120) * 1.5);
+        const volume = Math.min(1.0, (average / 110) * 1.6);
 
-        const time = clock.getElapsedTime() * 12;
-        visemeTargets.aa = Math.max(0, Math.sin(time) * volume * 0.9);
-        visemeTargets.ih = Math.max(0, Math.cos(time * 1.3) * volume * 0.6);
-        visemeTargets.oh = Math.max(0, Math.sin(time * 0.7) * volume * 0.7);
-        visemeTargets.ee = Math.max(0, Math.cos(time * 0.9) * volume * 0.5);
-    } else if (isSpeaking) {
         const time = clock.getElapsedTime() * 14;
+        visemeTargets.aa = Math.max(0, Math.sin(time) * volume * 0.85);
+        visemeTargets.ih = Math.max(0, Math.cos(time * 1.3) * volume * 0.55);
+        visemeTargets.oh = Math.max(0, Math.sin(time * 0.7) * volume * 0.65);
+        visemeTargets.ee = Math.max(0, Math.cos(time * 0.9) * volume * 0.45);
+    } else if (isSpeaking) {
+        const time = clock.getElapsedTime() * 15;
         const speechVolume = 0.65 + Math.sin(time * 0.5) * 0.25;
         visemeTargets.aa = Math.max(0, Math.sin(time) * speechVolume * 0.85);
         visemeTargets.ih = Math.max(0, Math.cos(time * 1.4) * speechVolume * 0.5);
@@ -960,10 +968,12 @@ function updateVisemeSmoothly() {
         resetVisemeTargets();
     }
 
+    const lipFactor = 1.0 - Math.exp(-delta * 20.0);
+
     Object.keys(visemeTargets).forEach(vowel => {
         const target = visemeTargets[vowel];
         const curr = visemeCurrent[vowel];
-        const next = curr + (target - curr) * 0.35;
+        const next = curr + (target - curr) * lipFactor;
         visemeCurrent[vowel] = next;
         try {
             manager.setValue(vowel, next);
@@ -1500,6 +1510,13 @@ function animate() {
     const deltaTime = Math.min(rawDelta, 0.066);
     const elapsedTime = clock.getElapsedTime();
 
+    if (lookAtTarget && targetMousePos) {
+        const eyeLerp = 1.0 - Math.exp(-deltaTime * 9.0);
+        lookAtTarget.position.x += (targetMousePos.x - lookAtTarget.position.x) * eyeLerp;
+        lookAtTarget.position.y += (targetMousePos.y - lookAtTarget.position.y) * eyeLerp;
+        lookAtTarget.position.z = 2.0;
+    }
+
     if (currentVrm) {
         if (activeGesture) {
             updateGesture(deltaTime);
@@ -1525,7 +1542,7 @@ function animate() {
     updateIdleBreathing(deltaTime);
 
     // 4. Lip Sync Visemes
-    updateVisemeSmoothly();
+    updateVisemeSmoothly(deltaTime);
 
     if (controls) controls.update();
     if (renderer && scene && camera) renderer.render(scene, camera);
