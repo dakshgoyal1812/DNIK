@@ -888,11 +888,13 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 
   /* ---------- clock ---------- */
   const timeEl = $("#footerTime");
-  const tick = () => {
-    timeEl.textContent = new Date().toLocaleTimeString([], { hour12: false }) + " LOCAL";
-  };
-  tick();
-  setInterval(tick, 1000);
+  if (timeEl) {
+    const tick = () => {
+      timeEl.textContent = new Date().toLocaleTimeString([], { hour12: false }) + " LOCAL";
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
 
   /* ---------- 3D Fibonacci Sphere with Color Cycle ---------- */
   (() => {

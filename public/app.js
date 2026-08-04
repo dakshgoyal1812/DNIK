@@ -687,8 +687,11 @@ function setupTransformControls() {
     transformControls = new TransformControls(camera, renderer.domElement);
     transformControls.setMode('rotate');
     transformControls.setSpace('local');
-    transformControls.setSize(0.4);
-    scene.add(transformControls);
+    if (transformControls.isObject3D) {
+        scene.add(transformControls);
+    } else if (transformControls.getHelper) {
+        scene.add(transformControls.getHelper());
+    }
 
     transformControls.addEventListener('dragging-changed', (e) => {
         if (controls) controls.enabled = !e.value;

@@ -645,7 +645,13 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     return await fetchGoogleTranslateTTS(text);
 }
 
-const fetchGoogleTTS = fetchGeminiTTS;
+async function fetchGoogleTTS(text, moodStr = 'relaxed') {
+    try {
+        return await fetchGeminiTTS(text, moodStr);
+    } catch (e) {
+        return await fetchGoogleTranslateTTS(text);
+    }
+}
 
 // Local Smart Fallback Generator with Devoted Roleplay Persona & System Tools
 function generateFallbackAIResponse(message) {
