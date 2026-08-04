@@ -130,7 +130,7 @@ body{
   min-height:100dvh;
   padding:var(--s-3);
   display:grid;
-  grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-rows:auto minmax(0,1fr);
   gap:var(--s-3);
   background:var(--ink-0);
   color:var(--text);
@@ -440,8 +440,8 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 /* ============================================================
    SCOPE / RADAR
    ============================================================ */
-.scope{ position:relative; display:grid; }
-#radar-canvas{ width:100%; height:100%; display:block; }
+.scope{ position:relative; display:grid; min-height:180px; overflow:hidden; }
+#radar-canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
 .scope-meta{
   position:absolute; inset:auto var(--s-3) var(--s-3) var(--s-3);
   display:flex; align-items:baseline; justify-content:space-between; gap:var(--s-2);
@@ -936,15 +936,21 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     const ease = k => k * k * (3 - 2 * k);
 
     let w = 0, h = 0, raf = 0, visible = true;
+    const parent = cv.parentElement || cv;
+
     const size = () => {
       const dpr = Math.min(devicePixelRatio || 1, 2);
-      w = cv.clientWidth || cv.parentElement?.clientWidth || 220;
-      h = cv.clientHeight || cv.parentElement?.clientHeight || 180;
+      const rect = parent.getBoundingClientRect();
+      w = rect.width > 0 ? rect.width : (cv.clientWidth || 240);
+      h = rect.height > 0 ? rect.height : (cv.clientHeight || 180);
+      if (w <= 0) w = 240;
+      if (h <= 0) h = 180;
       cv.width = Math.round(w * dpr);
       cv.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    new ResizeObserver(size).observe(cv);
+
+    new ResizeObserver(size).observe(parent);
     size();
 
     let spin = 0, last = 0;
@@ -1021,20 +1027,20 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
         (i / (data.length - 1)) * 100,
         24 - ((v - min) / span) * 21
       ]);
-      line.setAttribute("points", pts.map(p => p.join(",")).join(" "));
-      area.setAttribute("d", `M0,26 L${pts.map(p => p.join(",")).join(" L")} L100,26 Z`);
+      if (line) line.setAttribute("points", pts.map(p => p.join(",")).join(" "));
+      if (area) area.setAttribute("d", `M0,26 L${pts.map(p => p.join(",")).join(" L")} L100,26 Z`);
     };
     render();
 
     setInterval(() => {
       data = [...data.slice(1), Math.min(58, Math.max(32, data.at(-1) + (Math.random() - 0.5) * 7))];
       render();
-      tp.innerHTML = `${data.at(-1).toFixed(1)}<small>TB/s</small>`;
-      lat.innerHTML = `${String(Math.round(6 + Math.random() * 6)).padStart(2, "0")}<small>ms</small>`;
+      if (tp) tp.innerHTML = `${data.at(-1).toFixed(1)}<small>TB/s</small>`;
+      if (lat) lat.innerHTML = `${String(Math.round(6 + Math.random() * 6)).padStart(2, "0")}<small>ms</small>`;
       const integ = 96 + Math.round(Math.random() * 3);
-      iv.innerHTML = `${integ}<span>%</span>`;
-      ib.style.setProperty("--v", integ / 100);
-      ib.parentElement.setAttribute("aria-valuenow", integ);
+      if (iv) iv.innerHTML = `${integ}<span>%</span>`;
+      if (ib) ib.style.setProperty("--v", integ / 100);
+      if (ib && ib.parentElement) ib.parentElement.setAttribute("aria-valuenow", integ);
     }, 2200);
 
     /* real frame counter */
