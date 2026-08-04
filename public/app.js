@@ -1039,7 +1039,18 @@ function speakWithFakeLipSync(text) {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'hi-IN';
-    utterance.rate = 1.30;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice = voices.find(v => 
+        (v.lang.includes('hi') || v.lang.includes('HI') || v.lang.includes('en-IN')) && 
+        (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('swara') || v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('kalpana') || v.name.toLowerCase().includes('zira'))
+    ) || voices.find(v => v.lang.includes('hi'));
+
+    if (femaleVoice) {
+        utterance.voice = femaleVoice;
+    }
 
     utterance.onstart = () => {
         isSpeaking = true;
