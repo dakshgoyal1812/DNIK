@@ -171,16 +171,26 @@ function init() {
 }
 
 function setupEyeTrackingOnly() {
-    window.addEventListener('pointermove', (e) => {
+    const updateTarget = (clientX, clientY) => {
         lastMouseMoveTime = performance.now();
-
-        // Eye Cursor Tracker: Track mouse cursor in 3D camera space for vrm.lookAt
         if (lookAtTarget) {
-            const x = ((e.clientX / window.innerWidth) - 0.5) * 5.0;
-            const y = -((e.clientY / window.innerHeight) - 0.5) * 3.5 + 1.1;
+            const x = ((clientX / window.innerWidth) - 0.5) * 5.0;
+            const y = -((clientY / window.innerHeight) - 0.5) * 3.5 + 1.1;
             lookAtTarget.position.set(x, y, 2.0);
         }
-    });
+    };
+
+    window.addEventListener('pointermove', (e) => updateTarget(e.clientX, e.clientY));
+    window.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches[0]) {
+            updateTarget(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches[0]) {
+            updateTarget(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
 }
 
 function buildRealisticStudioEnvironment() {
@@ -1472,9 +1482,11 @@ window.stopAllAnimations = stopAllAnimations;
 // =====================================================================
 function animate() {
     requestAnimationFrame(animate);
+
+    const rawDelta = clock.getDelta();
     if (document.hidden) return;
 
-    const deltaTime = Math.min(clock.getDelta(), 0.05);
+    const deltaTime = Math.min(rawDelta, 0.066);
     const elapsedTime = clock.getElapsedTime();
 
     if (currentVrm) {
