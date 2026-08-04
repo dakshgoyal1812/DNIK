@@ -405,12 +405,22 @@ async function callGoogleGeminiAPI(userMessage, systemPrompt) {
 }
 
 // Main Smart AI Router (Auto task classifier, Key Rotation & Provider Failover)
-async function fetchAIReply(userMessage, moodMode = "normal") {
+async function fetchAIReply(userMessage, moodModeInput = 'normal') {
     if (isImageGenerationRequest(userMessage)) {
         return generatePollinationsImage(userMessage);
     }
 
-    const isCodingTask = moodMode === 'engineer' || /code|coding|function|script|python|javascript|html|css|bug|fix|sql|algorithm|write code|implement|debug|build|api|cpp|java|react|node|json|regex/i.test(userMessage);
+    const isCodingTask = isCodingOrTechnicalQuery(userMessage);
+
+    let moodMode = moodModeInput || 'normal';
+    const msgLower = userMessage.toLowerCase();
+    if (isCodingTask || msgLower.match(/(code|function|fix|bug|install|script|build|python|js|html|css|api|error|debug|stack|exception|compile)/)) {
+        moodMode = 'engineer';
+    } else if (msgLower.match(/(sad|depressed|upset|help me|lonely|stress|scared|worried|crying|pain|hurt|heavy|heart)/)) {
+        moodMode = 'therapy';
+    } else if (msgLower.match(/(chill|joke|bro|lol|meme|funny|haha|chillout|game|play|party)/)) {
+        moodMode = 'chill';
+    }
 
     const MOODS = {
         normal: "You are gentle, soft-spoken, incredibly polite, and deeply affectionate.",

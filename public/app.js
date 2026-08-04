@@ -634,7 +634,8 @@ async function loadVRM(url, displayName = 'Aria 2.0.vrm') {
 
                     // CRITICAL FIX: Rebuild UI panels now that model is loaded
                     buildPoseUI();
-                    buildFaceUI();
+                    const loader = document.getElementById('stageLoading');
+                    if (loader) loader.hidden = true;
 
                     setStatus(`Loaded: ${displayName} (Motion Ready)`, '#4ade80');
                     resolve(vrm);

@@ -683,15 +683,9 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   </div>
 
   <div class="topbar-mid">
-    <span class="label" id="moodLabel">Persona</span>
-    <div class="select">
-      <select id="roleplayMoodSelect" aria-labelledby="moodLabel">
-        <option value="normal">✨ Normal (Devoted)</option>
-        <option value="chill">😎 Chill</option>
-        <option value="engineer">💻 Engineer</option>
-        <option value="therapy">🌸 Therapy</option>
-      </select>
-    </div>
+    <span class="chip" style="background: oklch(84% 0.125 183 / 0.1); border: 1px solid oklch(84% 0.125 183 / 0.3); color: var(--aqua); font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.05em; padding: 5px 14px; border-radius: var(--r-pill);">
+      <i class="dot" style="width:6px; height:6px; background:var(--aqua); display:inline-block; border-radius:50%; margin-right:6px;"></i>Auto-Persona AI Active
+    </span>
   </div>
 
   <div class="topbar-end">
@@ -944,7 +938,8 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     let w = 0, h = 0, raf = 0, visible = true;
     const size = () => {
       const dpr = Math.min(devicePixelRatio || 1, 2);
-      w = cv.clientWidth; h = cv.clientHeight;
+      w = cv.clientWidth || cv.parentElement?.clientWidth || 220;
+      h = cv.clientHeight || cv.parentElement?.clientHeight || 180;
       cv.width = Math.round(w * dpr);
       cv.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1054,13 +1049,16 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 
   /* ---------- stage: hide loader once app.js mounts a canvas ---------- */
   (() => {
-    const host = $("#canvas-container"), loader = $("#stageLoading");
-    if (!host || !loader) return;
-    const done = () => { loader.hidden = true; obs.disconnect(); };
-    const obs = new MutationObserver(() => { if (host.querySelector("canvas")) done(); });
-    obs.observe(host, { childList: true, subtree: true });
-    if (host.querySelector("canvas")) done();
-    setTimeout(() => { if (!loader.hidden) done(); }, 20000);
+    const loader = $("#stageLoading");
+    if (!loader) return;
+    const hide = () => { loader.hidden = true; };
+    const host = $("#canvas-container");
+    if (host) {
+      const obs = new MutationObserver(() => { if (host.querySelector("canvas")) { hide(); obs.disconnect(); } });
+      obs.observe(host, { childList: true, subtree: true });
+      if (host.querySelector("canvas")) hide();
+    }
+    setTimeout(hide, 1200);
   })();
 
   /* ---------- drag & drop chrome (app.js still owns the file read) ---------- */
