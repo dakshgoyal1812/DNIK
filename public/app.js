@@ -543,23 +543,7 @@ function updateExpressions(delta) {
 // --- VRM MODEL LOADING & INSTANT CACHING ---
 // =====================================================================
 async function getCachedVRMUrl(url) {
-    if (!('caches' in window) || !url.startsWith('/')) return url;
-    try {
-        const cache = await caches.open('vrm-model-v1');
-        let response = await cache.match(url);
-        if (!response) {
-            response = await fetch(url);
-            if (response.ok) {
-                cache.put(url, response.clone());
-            }
-        }
-        if (response && response.ok) {
-            const blob = await response.blob();
-            return URL.createObjectURL(blob);
-        }
-    } catch (e) {
-        console.warn('VRM cache storage bypass:', e);
-    }
+    // Use direct HTTP resource path so browser HTTP cache handles caching with zero CSP blob restrictions
     return url;
 }
 
