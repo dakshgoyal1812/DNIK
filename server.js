@@ -764,10 +764,11 @@ function generateFallbackAIResponse(message) {
 }
 
 const server = http.createServer(async (req, res) => {
-    // Enable CORS
+    // Enable CORS & Content Security Policy (allows unsafe-eval for Three.js shaders & dynamic modules)
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' blob:; style-src * 'unsafe-inline' https:; img-src * data: blob: https:; media-src * data: blob:; connect-src *;");
 
     if (req.method === 'OPTIONS') {
         res.writeHead(204);
@@ -776,6 +777,13 @@ const server = http.createServer(async (req, res) => {
     }
 
     let reqUrl = req.url.split('?')[0];
+
+    // Silence browser favicon 404
+    if (reqUrl === '/favicon.ico') {
+        res.writeHead(204);
+        res.end();
+        return;
+    }
 
     // Health check endpoint for Render Free Tier uptime monitoring
     if (reqUrl === '/health' || reqUrl === '/ping') {
