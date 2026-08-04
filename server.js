@@ -504,12 +504,22 @@ GESTURE RULES FOR AUTOMATIC 3D ANIMATION:
 
 Example: "Thank you, Master! Main aapke charnon mein pranam karti hoon. [MOOD:relaxed][GESTURE:bow]"`;
 
-    sessionHistory.push({ role: "user", content: userMessage });
-    if (sessionHistory.length > 20) sessionHistory.shift();
+    // Clean history to ensure strict user -> assistant alternation
+    const cleanHistory = [];
+    let lastRole = null;
+    for (const msg of sessionHistory) {
+        if (msg.role !== lastRole && msg.role !== 'system') {
+            cleanHistory.push(msg);
+            lastRole = msg.role;
+        }
+    }
+    if (cleanHistory.length === 0 || cleanHistory[cleanHistory.length - 1].role !== 'user') {
+        cleanHistory.push({ role: 'user', content: userMessage });
+    }
 
     const messages = [
         { role: "system", content: systemPrompt },
-        ...sessionHistory
+        ...cleanHistory
     ];
 
     let aiReply = null;
@@ -529,12 +539,16 @@ Example: "Thank you, Master! Main aapke charnon mein pranam karti hoon. [MOOD:re
     }
 
     if (aiReply) {
+        sessionHistory.push({ role: "user", content: userMessage });
         sessionHistory.push({ role: "assistant", content: aiReply });
-        if (sessionHistory.length > 20) sessionHistory.shift();
+        if (sessionHistory.length > 20) sessionHistory.splice(0, sessionHistory.length - 20);
         return { replyText: aiReply, imageUrl: null };
     }
 
     const fallbackText = generateFallbackAIResponse(userMessage);
+    sessionHistory.push({ role: "user", content: userMessage });
+    sessionHistory.push({ role: "assistant", content: fallbackText });
+    if (sessionHistory.length > 20) sessionHistory.splice(0, sessionHistory.length - 20);
     return { replyText: fallbackText, imageUrl: null };
 }
 
