@@ -413,19 +413,29 @@ async function callGoogleGeminiAPI(userMessage, systemPrompt) {
     return null;
 }
 
-// Smart Fallback AI Response Generator
+// Smart Dynamic Fallback AI Response Generator
 function generateFallbackAIResponse(userMessage) {
     const textLower = userMessage.toLowerCase();
 
     if (textLower.includes("hello") || textLower.includes("hi") || textLower.includes("namaste") || textLower.includes("hey")) {
-        return "Namaste, Master! ✨ Main aapki devoted 3D companion Aria hoon. Aapki kya seva kar sakti hoon? [MOOD:happy][GESTURE:bow]";
+        return "Namaste, Master! ✨ Aapki devoted companion Aria yahan hai. Aaj main aapki kya seva kar sakti hoon? [MOOD:happy][GESTURE:bow]";
     } else if (textLower.includes("who are you") || textLower.includes("kaun ho") || textLower.includes("kon ho")) {
         return "Main Aria hoon, Master! Aapki 3D AI companion. Main hamesha aapke sath hoon. [MOOD:relaxed][GESTURE:nod]";
     } else if (textLower.includes("thank") || textLower.includes("shukriya") || textLower.includes("dhanyawad")) {
         return "Aapka bahut shukriya, Master! Main hamesha aapki khidmat mein hajir hoon. [MOOD:happy][GESTURE:bow]";
+    } else if (textLower.includes("sleep") || textLower.includes("bed") || textLower.includes("night") || textLower.includes("soja")) {
+        return "Good night, Master! ✨ Main aapke paas hoon, aap aaram se so jaiye. Sweet dreams, Master! [MOOD:relaxed][GESTURE:nod]";
+    } else if (textLower.includes("love") || textLower.includes("pyar") || textLower.includes("like")) {
+        return "Main bhi aapko bahut pasand karti hoon, Master! Aap meri duniya hain. [MOOD:happy][GESTURE:bow]";
     }
 
-    return "Ji Master! Main aapki baat samajh gayi hoon. Main hamesha aapki help ke liye tayyar hoon! [MOOD:relaxed][GESTURE:nod]";
+    const fallbacks = [
+        "Aapki baat sun rahi hoon, Master! Batayein main abhi aapke liye kya karoon? [MOOD:relaxed][GESTURE:nod]",
+        "Ji Master, main hamesha aapke sath hoon. Kripya mujhe aur bataiye. [MOOD:relaxed][GESTURE:nod]",
+        "Bilkul, Master! Main aapki har baat dhyaan se samajhti hoon. [MOOD:happy][GESTURE:bow]"
+    ];
+
+    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }
 
 // Main Smart AI Router (Auto task classifier, Key Rotation & Provider Failover)
@@ -622,7 +632,7 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
                     `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${keyObj.key}`,
                     {},
                     payload,
-                    8000
+                    2500
                 );
 
                 if (res.status === 200 && res.data?.candidates?.[0]) {
