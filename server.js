@@ -252,6 +252,18 @@ function httpsPost(urlStr, headers = {}, bodyObj = {}, timeoutMs = 7000) {
     });
 }
 
+function isCodingOrTechnicalQuery(text) {
+    if (!text) return false;
+    const lower = text.toLowerCase();
+    const codingKeywords = [
+        "code", "coding", "function", "script", "python", "javascript", "html", "css",
+        "bug", "fix", "sql", "algorithm", "write code", "implement", "debug", "build",
+        "api", "cpp", "java", "react", "node", "json", "regex", "npm", "git", "terminal",
+        "error", "exception", "compile", "docker", "deploy", "server", "class", "variable"
+    ];
+    return codingKeywords.some(kw => lower.includes(kw));
+}
+
 // --- Pollinations AI Image Generation ---
 function isImageGenerationRequest(text) {
     const lower = text.toLowerCase();
@@ -292,7 +304,7 @@ async function callGroqAPI(messages, isCodingTask = false) {
                     'https://api.groq.com/openai/v1/chat/completions',
                     { 'Authorization': `Bearer ${keyObj.key}` },
                     { model, messages, temperature: 0.7, max_tokens: 1000 },
-                    2500
+                    3500
                 );
 
                 if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
@@ -300,11 +312,9 @@ async function callGroqAPI(messages, isCodingTask = false) {
                     return res.data.choices[0].message.content.trim();
                 } else {
                     handleKeyFailure(keyObj, res.status || 500);
-                    break; // Immediately try next key on rate limit/error
                 }
             } catch (e) {
                 handleKeyFailure(keyObj, 500);
-                break;
             }
         }
     }
@@ -323,7 +333,7 @@ async function callOpenRouterAPI(messages) {
                     'https://openrouter.ai/api/v1/chat/completions',
                     { 'Authorization': `Bearer ${keyObj.key}` },
                     { model, messages, temperature: 0.7, max_tokens: 1000 },
-                    2500
+                    3500
                 );
 
                 if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
@@ -331,11 +341,9 @@ async function callOpenRouterAPI(messages) {
                     return res.data.choices[0].message.content.trim();
                 } else {
                     handleKeyFailure(keyObj, res.status || 500);
-                    break;
                 }
             } catch (e) {
                 handleKeyFailure(keyObj, 500);
-                break;
             }
         }
     }
@@ -357,7 +365,7 @@ async function callNvidiaAPI(messages) {
                     'https://integrate.api.nvidia.com/v1/chat/completions',
                     { 'Authorization': `Bearer ${keyObj.key}` },
                     { model, messages, temperature: 0.6, max_tokens: 1200 },
-                    3000
+                    3500
                 );
 
                 if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
@@ -365,11 +373,9 @@ async function callNvidiaAPI(messages) {
                     return res.data.choices[0].message.content.trim();
                 } else {
                     handleKeyFailure(keyObj, res.status || 500);
-                    break;
                 }
             } catch (e) {
                 handleKeyFailure(keyObj, 500);
-                break;
             }
         }
     }
