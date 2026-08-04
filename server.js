@@ -278,12 +278,12 @@ function generatePollinationsImage(userMessage) {
 // Conversation memory buffer
 const sessionHistory = [];
 
-// Provider Call 1: Groq API (Ultra-Fast Speed)
+// Provider Call 1: Groq API (Ultra-Fast Sub-300ms Speed)
 async function callGroqAPI(messages, isCodingTask = false) {
     const keys = getRotatedKeys("groq");
     const models = isCodingTask 
-        ? ["llama-3.3-70b-versatile", "deepseek-r1-distill-llama-70b", "llama-3.1-8b-instant"]
-        : ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"];
+        ? ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+        : ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"];
 
     for (const keyObj of keys) {
         for (const model of models) {
@@ -292,7 +292,7 @@ async function callGroqAPI(messages, isCodingTask = false) {
                     'https://api.groq.com/openai/v1/chat/completions',
                     { 'Authorization': `Bearer ${keyObj.key}` },
                     { model, messages, temperature: 0.7, max_tokens: 1000 },
-                    6000
+                    2500
                 );
 
                 if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
@@ -300,24 +300,54 @@ async function callGroqAPI(messages, isCodingTask = false) {
                     return res.data.choices[0].message.content.trim();
                 } else {
                     handleKeyFailure(keyObj, res.status || 500);
+                    break; // Immediately try next key on rate limit/error
                 }
             } catch (e) {
                 handleKeyFailure(keyObj, 500);
+                break;
             }
         }
     }
     return null;
 }
 
-// Provider Call 2: NVIDIA API (Coding & Complex Tasks)
+// Provider Call 2: OpenRouter API (Sub-2.5s Timeout)
+async function callOpenRouterAPI(messages) {
+    const keys = getRotatedKeys("openrouter");
+    const models = ["openai/gpt-4o-mini", "meta-llama/llama-3.3-70b-instruct"];
+
+    for (const keyObj of keys) {
+        for (const model of models) {
+            try {
+                const res = await httpsPost(
+                    'https://openrouter.ai/api/v1/chat/completions',
+                    { 'Authorization': `Bearer ${keyObj.key}` },
+                    { model, messages, temperature: 0.7, max_tokens: 1000 },
+                    2500
+                );
+
+                if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
+                    handleKeySuccess(keyObj);
+                    return res.data.choices[0].message.content.trim();
+                } else {
+                    handleKeyFailure(keyObj, res.status || 500);
+                    break;
+                }
+            } catch (e) {
+                handleKeyFailure(keyObj, 500);
+                break;
+            }
+        }
+    }
+    return null;
+}
+
+// Provider Call 3: NVIDIA API
 async function callNvidiaAPI(messages) {
     const keys = getRotatedKeys("nvidia");
     const models = [
         "meta/llama-3.3-70b-instruct",
-        "deepseek-ai/deepseek-r1",
-        "mistralai/mistral-large-2-instruct",
-        "nvidia/nemotron-4-340b-instruct",
-        "qwen/qwen2.5-coder-32b-instruct"
+        "deepseek-ai/deepseek-r1"
     ];
 
     for (const keyObj of keys) {
@@ -326,8 +356,8 @@ async function callNvidiaAPI(messages) {
                 const res = await httpsPost(
                     'https://integrate.api.nvidia.com/v1/chat/completions',
                     { 'Authorization': `Bearer ${keyObj.key}` },
-                    { model, messages, temperature: 0.6, max_tokens: 1500 },
-                    8000
+                    { model, messages, temperature: 0.6, max_tokens: 1200 },
+                    3000
                 );
 
                 if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
@@ -335,38 +365,11 @@ async function callNvidiaAPI(messages) {
                     return res.data.choices[0].message.content.trim();
                 } else {
                     handleKeyFailure(keyObj, res.status || 500);
+                    break;
                 }
             } catch (e) {
                 handleKeyFailure(keyObj, 500);
-            }
-        }
-    }
-    return null;
-}
-
-// Provider Call 3: OpenRouter API
-async function callOpenRouterAPI(messages) {
-    const keys = getRotatedKeys("openrouter");
-    const models = ["openai/gpt-4o-mini", "google/gemini-2.5-flash", "meta-llama/llama-3.3-70b-instruct"];
-
-    for (const keyObj of keys) {
-        for (const model of models) {
-            try {
-                const res = await httpsPost(
-                    'https://openrouter.ai/api/v1/chat/completions',
-                    { 'Authorization': `Bearer ${keyObj.key}` },
-                    { model, messages, temperature: 0.7 },
-                    7000
-                );
-
-                if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
-                    handleKeySuccess(keyObj);
-                    return res.data.choices[0].message.content.trim();
-                } else {
-                    handleKeyFailure(keyObj, res.status || 500);
-                }
-            } catch (e) {
-                handleKeyFailure(keyObj, 500);
+                break;
             }
         }
     }
@@ -382,26 +385,47 @@ async function callGoogleGeminiAPI(userMessage, systemPrompt) {
         ]
     };
 
-    for (const keyObj of keys) {
-        try {
-            const res = await httpsPost(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyObj.key}`,
-                {},
-                payload,
-                7000
-            );
+    const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
 
-            if (res.status === 200 && res.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-                handleKeySuccess(keyObj);
-                return res.data.candidates[0].content.parts[0].text.trim();
-            } else {
-                handleKeyFailure(keyObj, res.status || 500);
+    for (const keyObj of keys) {
+        for (const model of models) {
+            try {
+                const res = await httpsPost(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyObj.key}`,
+                    {},
+                    payload,
+                    2500
+                );
+
+                if (res.status === 200 && res.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    handleKeySuccess(keyObj);
+                    return res.data.candidates[0].content.parts[0].text.trim();
+                } else {
+                    handleKeyFailure(keyObj, res.status || 500);
+                    break;
+                }
+            } catch (e) {
+                handleKeyFailure(keyObj, 500);
+                break;
             }
-        } catch (e) {
-            handleKeyFailure(keyObj, 500);
         }
     }
     return null;
+}
+
+// Smart Fallback AI Response Generator
+function generateFallbackAIResponse(userMessage) {
+    const textLower = userMessage.toLowerCase();
+
+    if (textLower.includes("hello") || textLower.includes("hi") || textLower.includes("namaste") || textLower.includes("hey")) {
+        return "Namaste, Master! ✨ Main aapki devoted 3D companion Aria hoon. Aapki kya seva kar sakti hoon? [MOOD:happy][GESTURE:bow]";
+    } else if (textLower.includes("who are you") || textLower.includes("kaun ho") || textLower.includes("kon ho")) {
+        return "Main Aria hoon, Master! Aapki 3D AI companion. Main hamesha aapke sath hoon. [MOOD:relaxed][GESTURE:nod]";
+    } else if (textLower.includes("thank") || textLower.includes("shukriya") || textLower.includes("dhanyawad")) {
+        return "Aapka bahut shukriya, Master! Main hamesha aapki khidmat mein hajir hoon. [MOOD:happy][GESTURE:bow]";
+    }
+
+    return "Ji Master! Main aapki baat samajh gayi hoon. Main hamesha aapki help ke liye tayyar hoon! [MOOD:relaxed][GESTURE:nod]";
 }
 
 // Main Smart AI Router (Auto task classifier, Key Rotation & Provider Failover)
