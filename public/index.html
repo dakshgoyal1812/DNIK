@@ -295,8 +295,8 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   grid-template-columns:clamp(300px, 22vw, 356px) minmax(0,1fr) clamp(258px, 18.5vw, 310px);
   grid-template-rows:minmax(0,1fr) 200px;
   grid-template-areas:
-    "chat  stage tele"
-    "radar stage tele";
+    "chat stage tele"
+    "chat stage radar";
 }
 .comms { grid-area:chat;  min-height:0; display:flex; flex-direction:column; }
 .scope { grid-area:radar; min-height:0; overflow:hidden; }
@@ -759,16 +759,6 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     </div>
   </section>
 
-  <!-- ---------- SCOPE ---------- -->
-  <section class="panel panel--ticks scope rise" id="globe-container" style="--i:2" aria-label="3D Fibonacci Sphere">
-    <h2 class="label scope-title">3D Sphere</h2>
-    <canvas id="radar-canvas" role="img" aria-label="Rotating 3D Fibonacci sphere"></canvas>
-    <div class="scope-meta">
-      <span class="label">Points</span>
-      <span class="v mono" id="contactCount">460 active</span>
-    </div>
-  </section>
-
   <!-- ---------- STAGE ---------- -->
   <section class="stage rise" style="--i:3" aria-label="Aria 3D viewport">
     <div class="stage-tag">
@@ -840,11 +830,17 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
         </div>
       </dl>
     </div>
-
-    <div class="tele-foot">
-      <button class="btn-engine" type="button" id="engineBtn"><span>Aria 3D engine online</span></button>
-    </div>
   </aside>
+
+  <!-- ---------- SCOPE ---------- -->
+  <section class="panel panel--ticks scope rise" id="globe-container" style="--i:2" aria-label="3D Fibonacci Sphere">
+    <h2 class="label scope-title">3D Sphere</h2>
+    <canvas id="radar-canvas" role="img" aria-label="Rotating 3D Fibonacci sphere"></canvas>
+    <div class="scope-meta">
+      <span class="label">Points</span>
+      <span class="v mono" id="contactCount">460 active</span>
+    </div>
+  </section>
 </main>
 
 
