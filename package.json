@@ -2,6 +2,7 @@
   "name": "aria-3d-ai-companion",
   "version": "1.0.0",
   "description": "Aria 3D Avatar AI Voice Companion",
+  "license": "MIT",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
