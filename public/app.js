@@ -128,7 +128,7 @@ function init() {
         precision: 'mediump'
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.15));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.BasicShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -981,20 +981,23 @@ function updateVisemeSmoothly(delta = 0.016) {
     });
 }
 
+let globalAudioElement = null;
+let globalAudioSource = null;
+
 function playRealFemaleAudio(base64Audio) {
     if (!base64Audio) return false;
 
     try {
-        if (currentAudioElement) {
-            currentAudioElement.pause();
-            currentAudioElement = null;
+        if (!globalAudioElement) {
+            globalAudioElement = new Audio();
+        } else {
+            globalAudioElement.pause();
         }
 
         const mimeType = base64Audio.startsWith('UklGR') ? 'audio/wav' : 'audio/mp3';
-        const audioUrl = `data:${mimeType};base64,${base64Audio}`;
-        const audio = new Audio(audioUrl);
-        audio.playbackRate = 1.0;
-        currentAudioElement = audio;
+        globalAudioElement.src = `data:${mimeType};base64,${base64Audio}`;
+        globalAudioElement.playbackRate = 1.0;
+        currentAudioElement = globalAudioElement;
 
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1003,25 +1006,22 @@ function playRealFemaleAudio(base64Audio) {
             audioCtx.resume();
         }
 
-        const source = audioCtx.createMediaElementSource(audio);
-        audioAnalyser = audioCtx.createAnalyser();
-        audioAnalyser.fftSize = 256;
-        source.connect(audioAnalyser);
-        audioAnalyser.connect(audioCtx.destination);
+        if (!globalAudioSource) {
+            globalAudioSource = audioCtx.createMediaElementSource(globalAudioElement);
+            audioAnalyser = audioCtx.createAnalyser();
+            audioAnalyser.fftSize = 128;
+            globalAudioSource.connect(audioAnalyser);
+            audioAnalyser.connect(audioCtx.destination);
+        }
 
-        audio.onplay = () => { isAudioPlaying = true; };
-        audio.onended = audio.onerror = () => {
+        globalAudioElement.onplay = () => { isAudioPlaying = true; };
+        globalAudioElement.onended = globalAudioElement.onerror = () => {
             isAudioPlaying = false;
             resetVisemeTargets();
             scheduleMoodResetToNormal(1500);
-            try {
-                audio.pause();
-                audio.src = '';
-                if (currentAudioElement === audio) currentAudioElement = null;
-            } catch (e) {}
         };
 
-        audio.play();
+        globalAudioElement.play();
         return true;
     } catch (err) {
         console.error("Audio playback error:", err);
