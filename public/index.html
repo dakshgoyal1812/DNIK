@@ -44,31 +44,8 @@
         document.body.classList.add('artifact-editable');
     }
 
-    // Credit badge with idle-fade. Hover devices only.
-    function initChromeUI() {
-        if (!matchMedia('(hover: hover)').matches) return;
-
-        var credit = document.createElement('div');
-        credit.className = 'design-ui-credit';
-        credit.setAttribute('aria-hidden', 'true');
-        credit.innerHTML = '\u{1F49C} by ClickUp Brain';
-        document.body.appendChild(credit);
-
-        var timer = null;
-        var fade = function (out) { credit.style.opacity = out ? '0' : ''; };
-        fade(true);
-        var show = function () {
-            fade(false);
-            clearTimeout(timer);
-            timer = setTimeout(function () { fade(true); }, 3000);
-        };
-        document.addEventListener('mousemove', show);
-        show();
-    }
-
     function init() {
         markEditable();
-        initChromeUI();
     }
 
     if (document.readyState === 'loading') {
@@ -877,25 +854,7 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   </aside>
 </main>
 
-<!-- ============================ FOOTER ============================ -->
-<footer class="panel panel--ticks statusbar rise" style="--i:5">
-  <div style="display:flex;align-items:center;gap:2px;">
-    <button class="ibtn" type="button" id="gridBtn" aria-pressed="true" title="Toggle background grid" aria-label="Toggle background grid">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
-    </button>
-    <button class="ibtn" type="button" id="consoleBtn" title="Developer console" aria-label="Developer console">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 9 3 3-3 3"/><path d="M13 15h4"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
-    </button>
-  </div>
 
-  <div class="center">
-    <span>Secure link</span><i class="sep"></i>
-    <b>AES-256 / P2P</b><i class="sep"></i>
-    <span id="fpsReadout" class="mono">60 fps</span>
-  </div>
-
-  <div id="footerTime">--:--:--</div>
-</footer>
 
 <!-- ============================ DROP OVERLAY ============================ -->
 <div id="drop-overlay" aria-hidden="true">
@@ -1087,10 +1046,10 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     let frames = 0, last = performance.now();
     const loop = (t) => {
       frames++;
-      if (t - last >= 1000) { fps.textContent = `${frames} fps`; frames = 0; last = t; }
+      if (t - last >= 1000) { if (fps) fps.textContent = `${frames} fps`; frames = 0; last = t; }
       requestAnimationFrame(loop);
     };
-    requestAnimationFrame(loop);
+    if (fps) requestAnimationFrame(loop);
   })();
 
   /* ---------- stage: hide loader once app.js mounts a canvas ---------- */
@@ -1107,6 +1066,7 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   /* ---------- drag & drop chrome (app.js still owns the file read) ---------- */
   (() => {
     const ov = $("#drop-overlay");
+    if (!ov) return;
     let depth = 0;
     addEventListener("dragenter", (e) => { e.preventDefault(); if (++depth === 1) ov.classList.add("visible"); });
     addEventListener("dragover", (e) => e.preventDefault());
@@ -1118,9 +1078,11 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   const input = $("#chatInput");
   $$("#quickPrompts button").forEach(b => {
     b.addEventListener("click", () => {
-      input.value = b.dataset.prompt;
-      input.focus();
-      input.dispatchEvent(new Event("input", { bubbles: true }));
+      if (input) {
+        input.value = b.dataset.prompt;
+        input.focus();
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
     });
   });
 
@@ -1131,12 +1093,12 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     fn && fn(on);
   });
   toggle($("#muteBtn"), on => dispatchEvent(new CustomEvent("aria:mute", { detail: { muted: on } })));
-  toggle($("#gridBtn"), on => { $(".ambient").style.opacity = on ? "1" : ".35"; });
-  $("#gridBtn").setAttribute("aria-pressed", "true");
-  $("#fsBtn").addEventListener("click", () => {
+  toggle($("#gridBtn"), on => { const amb = $(".ambient"); if (amb) amb.style.opacity = on ? "1" : ".35"; });
+  if ($("#gridBtn")) $("#gridBtn").setAttribute("aria-pressed", "true");
+  if ($("#fsBtn")) $("#fsBtn").addEventListener("click", () => {
     document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
   });
-  $("#consoleBtn").addEventListener("click", () => dispatchEvent(new CustomEvent("aria:console")));
+  if ($("#consoleBtn")) $("#consoleBtn").addEventListener("click", () => dispatchEvent(new CustomEvent("aria:console")));
 
   /* ---------- message counter ---------- */
   (() => {
