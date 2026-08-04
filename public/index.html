@@ -1,584 +1,1181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aria 3D Avatar - AI Voice & Chat Studio</title>
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-            "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.3.0/lib/three-vrm.module.js",
-            "@pixiv/three-vrm-animation": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm-animation@3.3.0/lib/three-vrm-animation.module.js"
-        }
+<!-- skill:chrome -->
+<style>
+/* Credit line — bottom-right */
+.design-ui-credit {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  font: 11px/1 system-ui, sans-serif;
+  color: rgba(128,128,128,0.5);
+  pointer-events: none;
+  z-index: 2147483647;
+  transition: opacity 0.4s ease;
+  user-select: none;
+  letter-spacing: 0.02em;
+}
+
+/* Hide chrome on touch devices */
+@media (hover: none) {
+  .design-ui-credit { display: none; }
+}
+
+/* Print fixes */
+@media print {
+  * {
+    transition: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+  }
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .design-ui-credit { display: none !important; }
+}
+
+</style>
+<script>
+(function () {
+    // Design-ui pages are single compositions, so the whole body is editable.
+    function markEditable() {
+        document.body.classList.add('artifact-editable');
     }
-    </script>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --panel-bg: rgba(15, 23, 42, 0.85);
-            --border-color: rgba(255, 255, 255, 0.15);
-            --primary-grad: linear-gradient(135deg, #38bdf8, #818cf8);
-            --btn-grad: linear-gradient(145deg, #0284c7, #4f46e5);
-            --vrma-grad: linear-gradient(145deg, #10b981, #059669);
-            --mic-grad: linear-gradient(145deg, #ec4899, #8b5cf6);
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-        }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    // Credit badge with idle-fade. Hover devices only.
+    function initChromeUI() {
+        if (!matchMedia('(hover: hover)').matches) return;
 
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 35% 35%, #1e1b4b 0%, #0f172a 45%, #030712 100%);
-            color: var(--text-main);
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-        }
+        var credit = document.createElement('div');
+        credit.className = 'design-ui-credit';
+        credit.setAttribute('aria-hidden', 'true');
+        credit.innerHTML = '\u{1F49C} by ClickUp Brain';
+        document.body.appendChild(credit);
 
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        /* Top Panel Toggle Button - Hidden for Full 100% Automated Mode */
-        #panelToggleBtn {
-            display: none !important;
-        }
-
-        /* Control Panel - Hidden for Full 100% Automated Mode */
-        .controls-panel {
-            display: none !important;
-        }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .header-title h2 {
-            font-size: 1.3rem;
-            background: var(--primary-grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-        }
-        .model-name {
-            font-size: 0.8rem;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 10px;
-            border-radius: 20px;
-            color: #38bdf8;
-            max-width: 140px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        #status {
-            font-size: 0.82rem;
-            padding: 8px 12px;
-            border-radius: 8px;
-            background: rgba(56, 189, 248, 0.15);
-            color: #38bdf8;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            text-align: center;
-        }
-
-        /* Tabs */
-        .tab-bar {
-            display: flex;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 4px;
-            border-radius: 10px;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 8px 4px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            background: transparent;
-            color: var(--text-sub);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .tab-btn.active {
-            background: var(--btn-grad);
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Tab Content Panels */
-        .tab-content {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .tab-content[hidden] {
-            display: none;
-        }
-
-        .section-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        /* Buttons & Grid */
-        .btn-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-            gap: 8px;
-        }
-        button {
-            background: rgba(255, 255, 255, 0.08);
-            color: #e2e8f0;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 9px 12px;
-            font-size: 0.82rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        button:hover {
-            background: rgba(56, 189, 248, 0.2);
-            border-color: #38bdf8;
-            color: #ffffff;
-            transform: translateY(-1px);
-        }
-        button:active {
-            transform: translateY(0);
-        }
-        button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        button.vrma-btn {
-            background: var(--vrma-grad);
-            color: white;
-            border: none;
-        }
-        button.vrma-btn:hover {
-            background: linear-gradient(145deg, #059669, #047857);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        button.btn-primary {
-            background: var(--btn-grad);
-            border: none;
-            color: white;
-        }
-
-        .action-row {
-            display: flex;
-            gap: 8px;
-        }
-        .action-row button {
-            flex: 1;
-        }
-
-        /* Sliders Layout */
-        .slider-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .bone-group-title {
-            font-size: 0.8rem;
-            color: #38bdf8;
-            margin-top: 6px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .bone-row, .face-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            padding: 4px 6px;
-            border-radius: 6px;
-            background: rgba(0, 0, 0, 0.2);
-        }
-        .bone-row.selected {
-            background: rgba(252, 92, 125, 0.2);
-            border: 1px solid rgba(252, 92, 125, 0.5);
-        }
-        .bone-label {
-            width: 100px;
-            min-width: 100px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #cbd5e1;
-            font-weight: 500;
-        }
-        .bone-axis-wrap {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        input[type="range"] {
-            flex: 1;
-            accent-color: #38bdf8;
-            height: 4px;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-        .bone-readout {
-            width: 38px;
-            text-align: right;
-            font-size: 0.75rem;
-            font-family: monospace;
-            color: #94a3b8;
-        }
-
-        /* Toggle Checkbox Switch */
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-        }
-        .toggle-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #38bdf8;
-            cursor: pointer;
-        }
-
-        details {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 8px 12px;
-        }
-        summary {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #818cf8;
-            cursor: pointer;
-        }
-
-        /* --- Floating AI Chat Widget --- */
-        .chat-widget {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 360px;
-            max-width: 90vw;
-            height: 420px;
-            max-height: 60vh;
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-        }
-
-        /* Mobile & Smartphone Responsive Adjustments */
-        @media (max-width: 768px) {
-            .chat-widget {
-                bottom: 10px !important;
-                right: 10px !important;
-                left: 10px !important;
-                top: auto !important;
-                width: calc(100vw - 20px) !important;
-                max-width: 100vw !important;
-                height: 44vh !important;
-                max-height: 48vh !important;
-                border-radius: 16px;
-            }
-            .chat-input-bar input {
-                font-size: 16px !important; /* Prevents auto-zoom on mobile safari/chrome */
-            }
-        }
-
-        .chat-header {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .chat-header h3 {
-            font-size: 0.95rem;
-            background: var(--primary-grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .chat-log {
-            flex: 1;
-            padding: 14px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-        }
-
-        .msg-bubble {
-            max-width: 85%;
-            padding: 10px 14px;
-            border-radius: 14px;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-        .msg-user {
-            align-self: flex-end;
-            background: var(--btn-grad);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-        .msg-ai {
-            align-self: flex-start;
-            background: rgba(255, 255, 255, 0.1);
-            color: #f1f5f9;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom-left-radius: 4px;
-        }
-        .msg-tag {
-            display: inline-block;
-            font-size: 0.7rem;
-            background: rgba(56, 189, 248, 0.2);
-            color: #38bdf8;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-top: 4px;
-        }
-
-        .chat-input-bar {
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .chat-input-bar input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 10px 14px;
-            color: white;
-            font-size: 0.85rem;
-            outline: none;
-        }
-        .chat-input-bar input:focus {
-            border-color: #38bdf8;
-        }
-        #micBtn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--mic-grad);
-            border: none;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-        }
-        #micBtn.listening {
-            animation: pulse 1.2s infinite;
-            background: #ef4444;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        /* Drag Overlay */
-        #drop-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(15, 23, 42, 0.85);
-            border: 4px dashed #38bdf8;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #38bdf8;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        #drop-overlay.visible {
-            opacity: 1;
-        }
-    </style>
-
-    <!-- Import Map for Three.js, @pixiv/three-vrm, and @pixiv/three-vrm-animation -->
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-            "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.3.0/lib/three-vrm.module.js",
-            "@pixiv/three-vrm-animation": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm-animation@3.3.0/lib/three-vrm-animation.module.js"
-        }
+        var timer = null;
+        var fade = function (out) { credit.style.opacity = out ? '0' : ''; };
+        fade(true);
+        var show = function () {
+            fade(false);
+            clearTimeout(timer);
+            timer = setTimeout(function () { fade(true); }, 3000);
+        };
+        document.addEventListener('mousemove', show);
+        show();
     }
-    </script>
+
+    function init() {
+        markEditable();
+        initChromeUI();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
+</script>
+<!-- /skill:chrome -->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark" />
+<title>Aria 3D Studio · Cybernetic Command V3</title>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+    "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.3.0/lib/three-vrm.module.js"
+  }
+}
+</script>
+
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preload" href="/Aria%202.0.vrm" as="fetch" type="application/octet-stream" crossorigin="anonymous" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --dot   : #FFB02E;
+  /* surface scale: same hue + chroma, lightness carries depth */
+  --ink-0 : oklch(10%   0.012 218);
+  --ink-1 : oklch(13.5% 0.014 218);
+  --ink-2 : oklch(17%   0.015 218);
+  --ink-3 : oklch(21%   0.016 218);
+  --ink-4 : oklch(27%   0.018 218);
+
+  --line      : oklch(28% 0.02 212);
+  --line-soft : oklch(22% 0.015 212 / .6);
+
+  --text   : oklch(96% 0.008 200);
+  --text-2 : oklch(78% 0.018 202);
+  --text-3 : oklch(56% 0.020 206);
+
+  --aqua      : oklch(84% 0.125 183);
+  --aqua-mid  : oklch(72% 0.105 183);
+  --aqua-dim  : oklch(46% 0.070 183);
+  --violet    : oklch(77% 0.105 300);
+  --amber     : oklch(82% 0.130 78);
+  --red       : oklch(67% 0.190 25);
+
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px;
+
+  --r-sm: 4px; --r-md: 10px; --r-lg: 16px; --r-pill: 999px;
+
+  --ease-out : cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-io  : cubic-bezier(0.65, 0, 0.35, 1);
+
+  --font-ui  : "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --z-panel: 1; --z-float: 30; --z-overlay: 90;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  min-height:100dvh;
+  padding:var(--s-3);
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  gap:var(--s-3);
+  background:var(--ink-0);
+  color:var(--text);
+  font-family:var(--font-ui);
+  font-size:15px;
+  font-weight:400;
+  font-optical-sizing:auto;
+  line-height:1.55;
+  letter-spacing:0.005em;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+
+/* ============================================================
+   AMBIENT FIELD
+   ============================================================ */
+.ambient{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(100% 80% at 50% 0%, oklch(20% 0.025 210 / .45), transparent 65%),
+    radial-gradient(80% 60% at 50% 100%, oklch(17% 0.03 260 / .35), transparent 60%),
+    var(--ink-0);
+}
+.ambient::before{
+  content:""; position:absolute; inset:0; opacity:.18;
+  background-image:
+    linear-gradient(to right, oklch(70% 0.02 210 / .08) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(70% 0.02 210 / .08) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(100% 100% at 50% 40%, #000 30%, transparent 80%);
+}
+.ambient::after{
+  content:""; position:absolute; inset:-50% 0;
+  background:linear-gradient(to bottom, transparent, oklch(84% 0.125 183 / .03), transparent);
+  height:38%;
+  animation:drift 14s linear infinite;
+}
+@keyframes drift{ from{ transform:translateY(-40%);} to{ transform:translateY(320%);} }
+
+body > *:not(.ambient){ position:relative; z-index:var(--z-panel); }
+
+/* ============================================================
+   PANEL - SLEEK GLASSMORPHISM
+   ============================================================ */
+.panel{
+  position:relative;
+  background:oklch(13.5% 0.014 218 / 0.85);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid oklch(28% 0.018 212 / 0.6);
+  border-radius:var(--r-md);
+  box-shadow:0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 oklch(100% 0 0 / 0.04);
+}
+.panel--ticks::before,
+.panel--ticks::after{
+  content:""; position:absolute; width:10px; height:10px;
+  border:1px solid var(--aqua); opacity:.28; pointer-events:none;
+}
+.panel--ticks::before{ top:-1px; left:-1px; border-right:0; border-bottom:0; border-radius:var(--r-md) 0 0 0; }
+.panel--ticks::after{ bottom:-1px; right:-1px; border-left:0; border-top:0; border-radius:0 0 var(--r-md) 0; }
+
+/* ============================================================
+   TYPE UTILITIES
+   ============================================================ */
+.label{
+  font-size:.6875rem; font-weight:600; line-height:1.2;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--text-3);
+}
+.mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+h1,h2,h3{ margin:0; text-wrap:balance; }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.topbar{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:var(--s-4);
+  padding:var(--s-2) var(--s-4);
+  min-height:54px;
+}
+.brand{ display:flex; align-items:center; gap:var(--s-3); }
+.sigil{
+  width:36px; height:36px; display:grid; place-items:center; flex:none;
+  color:var(--aqua);
+  background:linear-gradient(160deg, oklch(84% 0.125 183 / .14), transparent 70%);
+  border:1px solid oklch(84% 0.125 183 / .3);
+  border-radius:var(--r-sm);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+}
+.brand h1{
+  font-size:1rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase;
+  line-height:1;
+}
+.brand .sub{
+  margin-top:3px; font-size:.65rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--text-3); font-family:var(--font-mono);
+}
+.topbar-mid{ display:flex; align-items:center; gap:var(--s-3); justify-content:center; }
+.topbar-end{ display:flex; align-items:center; gap:var(--s-2); }
+
+/* mood select */
+.select{ position:relative; display:inline-flex; align-items:center; }
+.select select{
+  appearance:none; -webkit-appearance:none;
+  font-family:var(--font-ui); font-size:.8125rem; font-weight:500; color:var(--text);
+  background:var(--ink-2); border:1px solid var(--line);
+  border-radius:var(--r-pill); padding:6px 32px 6px 14px; cursor:pointer;
+  transition:border-color .18s var(--ease-quart), background-color .18s var(--ease-quart);
+}
+.select select:hover{ border-color:var(--aqua-dim); background:var(--ink-3); }
+.select::after{
+  content:""; position:absolute; right:12px; width:5px; height:5px;
+  border-right:1.5px solid var(--text-3); border-bottom:1.5px solid var(--text-3);
+  transform:translateY(-2px) rotate(45deg); pointer-events:none;
+}
+.select select option{ background:var(--ink-2); color:var(--text); }
+
+/* status chip */
+.chip{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:5px 12px; border-radius:var(--r-pill);
+  border:1px solid var(--line); background:var(--ink-2);
+  font-family:var(--font-mono); font-size:.6875rem;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--text-2);
+  white-space:nowrap;
+}
+.chip .dot{ width:6px; height:6px; border-radius:50%; background:var(--text-3); flex:none; }
+.chip[data-state="online"]{ color:var(--aqua); border-color:oklch(84% 0.125 183 / .35); }
+.chip[data-state="online"] .dot{ background:var(--aqua); box-shadow:0 0 0 0 oklch(84% 0.125 183 / .55); animation:ping 2.4s var(--ease-out) infinite; }
+.chip[data-state="busy"]{ color:var(--amber); border-color:oklch(82% 0.13 78 / .35); }
+.chip[data-state="busy"] .dot{ background:var(--amber); }
+.chip[data-state="offline"]{ color:var(--text-3); }
+@keyframes ping{ 0%{box-shadow:0 0 0 0 oklch(84% 0.125 183 / .5);} 70%,100%{box-shadow:0 0 0 7px oklch(84% 0.125 183 / 0);} }
+
+/* icon buttons */
+.ibtn{
+  width:32px; height:32px; display:grid; place-items:center;
+  color:var(--text-3); background:transparent;
+  border:1px solid transparent; border-radius:var(--r-md);
+  cursor:pointer; transition:color .16s var(--ease-quart), background-color .16s var(--ease-quart), border-color .16s var(--ease-quart);
+}
+.ibtn:hover{ color:var(--aqua); background:var(--ink-2); border-color:var(--line); }
+.ibtn:active{ transform:translateY(1px); }
+.ibtn[aria-pressed="true"]{ color:var(--aqua); background:oklch(84% 0.125 183 / .1); border-color:oklch(84% 0.125 183 / .3); }
+.ibtn svg{ width:16px; height:16px; }
+
+:where(button,select,input,a,[tabindex]):focus-visible{
+  outline:2px solid var(--aqua);
+  outline-offset:2px;
+  border-radius:var(--r-sm);
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.hud{
+  display:grid;
+  min-height:0;
+  gap:var(--s-3);
+  grid-template-columns:clamp(300px, 22vw, 356px) minmax(0,1fr) clamp(258px, 18.5vw, 310px);
+  grid-template-rows:minmax(0,1fr) 200px;
+  grid-template-areas:
+    "chat  stage tele"
+    "radar stage tele";
+}
+.comms { grid-area:chat;  min-height:0; display:flex; flex-direction:column; }
+.scope { grid-area:radar; min-height:0; overflow:hidden; }
+.stage { grid-area:stage; min-height:0; }
+.tele  { grid-area:tele;  min-height:0; display:flex; flex-direction:column; }
+
+/* entrance */
+.rise{ opacity:0; transform:translateY(14px); animation:rise .7s var(--ease-out) forwards; animation-delay:calc(var(--i,0) * 70ms); }
+@keyframes rise{ to{ opacity:1; transform:none; } }
+
+/* ============================================================
+   COMMS / CHAT
+   ============================================================ */
+.panel-head{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--s-3);
+  padding:var(--s-3) var(--s-4) var(--s-2);
+  border-bottom:1px solid var(--line-soft);
+}
+.panel-head .count{ font-family:var(--font-mono); font-size:.6875rem; color:var(--text-3); }
+
+#chatLog{
+  flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  display:flex; flex-direction:column; gap:var(--s-3);
+  padding:var(--s-4) var(--s-4) var(--s-3);
+  scroll-behavior:smooth;
+}
+.msg-bubble{
+  max-width:88%; padding:10px 14px;
+  font-size:.875rem; line-height:1.6; letter-spacing:.01em;
+  word-break:break-word;
+  animation:msgIn .34s var(--ease-out) both;
+}
+@keyframes msgIn{ from{ opacity:0; transform:translateY(6px); } }
+.msg-ai{
+  margin-right:auto;
+  background:oklch(18% 0.016 218 / 0.9);
+  border:1px solid oklch(84% 0.125 183 / .22);
+  border-radius:4px 14px 14px 14px;
+  color:var(--text);
+  box-shadow:0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.msg-user{
+  margin-left:auto;
+  background:oklch(26% 0.045 300 / .6);
+  border:1px solid oklch(77% 0.105 300 / .32);
+  border-radius:14px 4px 14px 14px;
+  color:var(--text);
+  box-shadow:0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.msg-bubble .who{
+  display:block; margin-bottom:4px;
+  font-size:.625rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+}
+.msg-ai .who{ color:var(--aqua-mid); }
+.msg-user .who{ color:var(--violet); }
+.msg-tag{
+  display:block; margin-top:5px;
+  font-family:var(--font-mono); font-size:.65rem; color:var(--text-3); font-style:normal; opacity:.85;
+}
+
+/* typing indicator */
+.typing{ display:none; align-items:center; gap:7px; padding:0 var(--s-4) var(--s-2); }
+.typing[data-on="true"]{ display:flex; }
+.typing span{ width:5px; height:5px; border-radius:50%; background:var(--aqua-mid); animation:blink 1.2s var(--ease-io) infinite; }
+.typing span:nth-child(2){ animation-delay:.15s; }
+.typing span:nth-child(3){ animation-delay:.3s; }
+.typing em{ font-style:normal; font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3); margin-left:4px; }
+@keyframes blink{ 0%,100%{ opacity:.25; transform:translateY(0);} 50%{ opacity:1; transform:translateY(-3px);} }
+
+/* quick prompts */
+.chips{ display:flex; gap:6px; flex-wrap:wrap; padding:0 var(--s-4) var(--s-3); }
+.chips button{
+  font-family:var(--font-mono); font-size:.6875rem; color:var(--text-2);
+  background:transparent; border:1px dashed var(--line); border-radius:var(--r-pill);
+  padding:4px 11px; cursor:pointer;
+  transition:color .16s var(--ease-quart), border-color .16s var(--ease-quart), background-color .16s var(--ease-quart);
+}
+.chips button:hover{ color:var(--aqua); border-color:var(--aqua-dim); border-style:solid; background:oklch(84% 0.125 183 / .07); }
+
+/* input */
+.chat-input-bar{
+  display:flex; flex-direction:column; gap:var(--s-2);
+  padding:var(--s-3); border-top:1px solid var(--line-soft);
+  background:oklch(13% 0.014 218 / .7);
+  border-radius:0 0 var(--r-md) var(--r-md);
+}
+.input-wrapper{
+  display:flex; align-items:center; gap:var(--s-2);
+  background:var(--ink-2); border:1px solid var(--line);
+  border-radius:var(--r-pill); padding:5px 6px 5px 16px;
+  transition:border-color .2s var(--ease-quart), box-shadow .2s var(--ease-quart);
+}
+.input-wrapper:focus-within{
+  border-color:var(--aqua-mid);
+  box-shadow:0 0 0 3px oklch(84% 0.125 183 / .12);
+}
+.input-wrapper input{
+  flex:1; min-width:0; background:transparent; border:0; outline:0; box-shadow:none;
+  color:var(--text); font-family:var(--font-mono); font-size:.875rem; padding:8px 0;
+}
+.input-wrapper input::placeholder{ color:var(--text-3); }
+.input-actions{ display:flex; align-items:center; gap:6px; }
+
+.btn-voice{
+  position:relative; width:36px; height:36px; border-radius:50%;
+  display:grid; place-items:center; cursor:pointer;
+  color:var(--aqua); background:oklch(84% 0.125 183 / .1);
+  border:1px solid oklch(84% 0.125 183 / .42);
+  transition:transform .18s var(--ease-quart), background-color .18s var(--ease-quart), color .18s var(--ease-quart), border-color .18s var(--ease-quart);
+}
+.btn-voice:hover{ background:oklch(84% 0.125 183 / .2); transform:scale(1.06); }
+.btn-voice:active{ transform:scale(.95); }
+.btn-voice.listening{ color:var(--ink-0); background:var(--red); border-color:var(--red); }
+.voice-pulse{ position:absolute; inset:-5px; border-radius:50%; border:1.5px solid var(--red); opacity:0; pointer-events:none; }
+.btn-voice.listening .voice-pulse{ animation:voicePulse 1.5s var(--ease-out) infinite; }
+@keyframes voicePulse{ 0%{ transform:scale(.82); opacity:.85; } 100%{ transform:scale(1.45); opacity:0; } }
+
+.btn-send{
+  width:36px; height:36px; border-radius:50%;
+  display:grid; place-items:center; cursor:pointer;
+  color:var(--ink-0); background:var(--aqua); border:0;
+  transition:transform .16s var(--ease-quart), filter .16s var(--ease-quart);
+}
+.btn-send:hover{ filter:brightness(1.1); transform:scale(1.06); }
+.btn-send:active{ transform:scale(.94); }
+.btn-send svg{ transform:translateX(-1px); }
+
+.voice-indicator{ display:none; align-items:center; justify-content:center; gap:10px; padding:2px 0 4px; }
+.voice-indicator.active{ display:flex; }
+.voice-bars{ display:flex; gap:3px; align-items:flex-end; height:16px; }
+.voice-bars span{ width:3px; height:5px; background:var(--aqua); border-radius:2px; animation:voiceBar .9s var(--ease-io) infinite alternate; }
+.voice-bars span:nth-child(1){ animation-delay:.05s; }
+.voice-bars span:nth-child(2){ animation-delay:.24s; }
+.voice-bars span:nth-child(3){ animation-delay:.12s; }
+.voice-bars span:nth-child(4){ animation-delay:.32s; }
+.voice-bars span:nth-child(5){ animation-delay:.18s; }
+@keyframes voiceBar{ to{ height:16px; } }
+.voice-text{ font-family:var(--font-mono); font-size:.6875rem; letter-spacing:.08em; color:var(--aqua-mid); }
+
+/* ============================================================
+   SCOPE / RADAR
+   ============================================================ */
+.scope{ position:relative; display:grid; }
+#radar-canvas{ width:100%; height:100%; display:block; }
+.scope-meta{
+  position:absolute; inset:auto var(--s-3) var(--s-3) var(--s-3);
+  display:flex; align-items:baseline; justify-content:space-between; gap:var(--s-2);
+  pointer-events:none;
+}
+.scope-meta .v{ font-family:var(--font-mono); font-size:.75rem; color:var(--aqua-mid); }
+.scope-title{ position:absolute; top:var(--s-3); left:var(--s-3); pointer-events:none; }
+
+/* ============================================================
+   STAGE / 3D
+   ============================================================ */
+.stage{
+  position:relative; overflow:hidden;
+  border:1px solid var(--line-soft); border-radius:var(--r-lg);
+  background:
+    radial-gradient(85% 70% at 50% 8%, oklch(24% 0.035 232 / .9), transparent 70%),
+    var(--ink-1);
+}
+#canvas-container{ position:absolute; inset:0; }
+#canvas-container canvas{ display:block; width:100%; height:100%; }
+
+.stage-tag{
+  position:absolute; top:var(--s-4); left:var(--s-4); z-index:var(--z-float);
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 13px; border-radius:var(--r-pill);
+  background:var(--ink-1); border:1px solid var(--line);
+  font-family:var(--font-mono); font-size:.6875rem; letter-spacing:.06em; color:var(--text-2);
+}
+.stage-tag .dot{ width:6px; height:6px; border-radius:50%; background:var(--aqua); }
+
+.stage-hint{
+  position:absolute; bottom:var(--s-4); left:50%; transform:translateX(-50%);
+  z-index:var(--z-float); display:flex; gap:var(--s-4);
+  font-family:var(--font-mono); font-size:.6875rem; color:var(--text-3);
+  opacity:0; transition:opacity .3s var(--ease-quart); pointer-events:none;
+}
+.stage:hover .stage-hint{ opacity:1; }
+.stage-hint kbd{
+  font-family:inherit; font-size:.625rem; color:var(--text-2);
+  border:1px solid var(--line); border-radius:var(--r-sm); padding:1px 5px; margin-right:5px;
+}
+
+/* loading state */
+.stage-loading{
+  position:absolute; inset:0; z-index:calc(var(--z-float) + 1);
+  display:grid; place-content:center; justify-items:center; gap:var(--s-4);
+  background:var(--ink-1);
+  transition:opacity .5s var(--ease-quart), visibility .5s;
+}
+.stage-loading[hidden]{ display:grid; opacity:0; visibility:hidden; }
+.loader-frame{
+  width:112px; height:132px; position:relative;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:linear-gradient(180deg, oklch(84% 0.125 183 / .1), transparent);
+  border:1px solid oklch(84% 0.125 183 / .2);
+}
+.loader-frame::after{
+  content:""; position:absolute; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--aqua), transparent);
+  animation:scan 1.8s var(--ease-io) infinite;
+}
+@keyframes scan{ 0%{ top:4%; opacity:0;} 20%,80%{ opacity:1;} 100%{ top:96%; opacity:0;} }
+.loader-copy{ text-align:center; }
+.loader-copy p{ margin:0; font-family:var(--font-mono); font-size:.75rem; color:var(--text-3); letter-spacing:.08em; }
+.loader-bar{ width:180px; height:2px; margin-top:var(--s-3); background:var(--ink-3); overflow:hidden; }
+.loader-bar i{ display:block; height:100%; width:38%; background:var(--aqua); animation:indet 1.5s var(--ease-io) infinite; }
+@keyframes indet{ 0%{ transform:translateX(-100%);} 100%{ transform:translateX(320%);} }
+
+/* ============================================================
+   TELEMETRY
+   ============================================================ */
+.tele-body{ flex:1; min-height:0; overflow-y:auto; padding:var(--s-4); display:flex; flex-direction:column; gap:var(--s-5); }
+
+.integrity .top{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--s-2); margin-bottom:9px; }
+.integrity .val{
+  font-family:var(--font-ui); font-size:1.75rem; font-weight:700; font-stretch:108%;
+  line-height:1; color:var(--aqua); font-variant-numeric:tabular-nums;
+}
+.integrity .val span{ font-size:.875rem; font-weight:500; color:var(--aqua-mid); margin-left:2px; }
+.meter{
+  height:12px; background:var(--ink-3); border-radius:2px; overflow:hidden;
+  -webkit-mask-image:repeating-linear-gradient(90deg, #000 0 5px, transparent 5px 8px);
+  mask-image:repeating-linear-gradient(90deg, #000 0 5px, transparent 5px 8px);
+}
+.meter i{
+  display:block; height:100%; background:var(--aqua);
+  transform-origin:left center; transform:scaleX(var(--v,.5));
+  transition:transform .6s var(--ease-out);
+}
+
+.readouts{ display:flex; flex-direction:column; gap:var(--s-3); }
+.readout{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:var(--s-3); padding-bottom:var(--s-3); border-bottom:1px solid var(--line-soft); }
+.readout:last-child{ border-bottom:0; padding-bottom:0; }
+.readout dt{ font-size:.6875rem; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:var(--text-3); }
+.readout dd{ margin:0; font-family:var(--font-mono); font-size:.9375rem; color:var(--text); font-variant-numeric:tabular-nums; }
+.readout dd small{ font-size:.6875rem; color:var(--text-3); margin-left:3px; }
+.spark{ grid-column:1 / -1; width:100%; height:26px; display:block; }
+.spark polyline{ fill:none; stroke:var(--aqua-mid); stroke-width:1.25; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+.spark path{ fill:oklch(84% 0.125 183 / .1); stroke:none; }
+
+.ladder{ display:flex; gap:3px; align-items:flex-end; }
+.ladder i{ width:9px; border-radius:1px; background:var(--ink-4); }
+.ladder i:nth-child(1){ height:8px; }
+.ladder i:nth-child(2){ height:12px; }
+.ladder i:nth-child(3){ height:16px; }
+.ladder i:nth-child(4){ height:20px; }
+.ladder[data-level="1"] i:nth-child(-n+1),
+.ladder[data-level="2"] i:nth-child(-n+2){ background:var(--aqua); }
+.ladder[data-level="3"] i:nth-child(-n+3){ background:var(--amber); }
+.ladder[data-level="4"] i{ background:var(--red); }
+
+.tele-foot{ padding:var(--s-3) var(--s-4) var(--s-4); }
+.btn-engine{
+  position:relative; width:100%; overflow:hidden; cursor:pointer;
+  padding:11px 14px; border-radius:var(--r-md);
+  background:var(--ink-2); border:1px solid oklch(84% 0.125 183 / .35);
+  color:var(--aqua); font-family:var(--font-ui); font-size:.6875rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase;
+  transition:color .22s var(--ease-quart), border-color .22s var(--ease-quart);
+}
+.btn-engine span{ position:relative; z-index:2; }
+.btn-engine::before{
+  content:""; position:absolute; inset:0; z-index:1;
+  background:var(--aqua); transform:translateX(-101%);
+  transition:transform .38s var(--ease-out);
+}
+.btn-engine:hover{ color:var(--ink-0); border-color:var(--aqua); }
+.btn-engine:hover::before{ transform:none; }
+.btn-engine:active{ transform:translateY(1px); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.statusbar{
+  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:var(--s-4);
+  padding:var(--s-1) var(--s-3); min-height:42px;
+}
+.statusbar .center{
+  justify-self:center; display:flex; align-items:center; gap:var(--s-3);
+  font-family:var(--font-mono); font-size:.6875rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--text-3);
+}
+.statusbar .center b{ color:var(--aqua-mid); font-weight:500; }
+.statusbar .sep{ width:1px; height:12px; background:var(--line); }
+#footerTime{ font-family:var(--font-mono); font-size:.75rem; color:var(--text-2); font-variant-numeric:tabular-nums; letter-spacing:.04em; }
+
+/* ============================================================
+   DROP OVERLAY
+   ============================================================ */
+#drop-overlay{
+  position:fixed; inset:0; z-index:var(--z-overlay);
+  display:grid; place-items:center;
+  background:oklch(11.5% 0.013 218 / .84);
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .2s var(--ease-quart), visibility .2s;
+}
+#drop-overlay.visible{ opacity:1; visibility:visible; }
+.drop-card{
+  display:grid; justify-items:center; gap:var(--s-3);
+  padding:var(--s-7) calc(var(--s-7) + var(--s-4));
+  border:1px dashed var(--aqua-mid); border-radius:var(--r-lg);
+  background:var(--ink-1);
+  transform:scale(.97); transition:transform .24s var(--ease-out);
+}
+#drop-overlay.visible .drop-card{ transform:none; }
+.drop-card strong{ font-size:1.125rem; font-weight:700; letter-spacing:.04em; color:var(--text); }
+.drop-card p{ margin:0; font-family:var(--font-mono); font-size:.75rem; color:var(--text-3); letter-spacing:.06em; }
+.drop-card svg{ width:34px; height:34px; color:var(--aqua); }
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+*{ scrollbar-width:thin; scrollbar-color:var(--ink-4) transparent; }
+::-webkit-scrollbar{ width:6px; height:6px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:var(--ink-4); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--aqua-dim); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:1180px){
+  .hud{
+    grid-template-columns:minmax(0,1fr) 286px;
+    grid-template-rows:minmax(0,1fr) minmax(240px,38%);
+    grid-template-areas:
+      "stage tele"
+      "chat  tele";
+  }
+  .scope{ display:none; }
+  .brand .sub{ display:none; }
+}
+
+@media (max-width:820px){
+  body{ overflow:auto; padding:var(--s-2); gap:var(--s-2); grid-template-rows:auto auto auto; }
+  .topbar{ grid-template-columns:1fr auto; row-gap:var(--s-2); }
+  .topbar-mid{ grid-column:1 / -1; justify-content:flex-start; }
+  .hud{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto auto auto;
+    grid-template-areas:"stage" "tele" "chat";
+  }
+  .stage{ aspect-ratio:4 / 5; }
+  .comms{ height:min(70dvh, 560px); }
+  .tele-body{
+    flex-direction:row; overflow-x:auto; gap:var(--s-5);
+    scroll-snap-type:x proximity; padding:var(--s-3) var(--s-4);
+  }
+  .tele-body > *{ flex:0 0 210px; scroll-snap-align:start; }
+  .tele-foot{ display:none; }
+  .stage-hint{ display:none; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important; scroll-behavior:auto !important;
+  }
+  .rise{ opacity:1; transform:none; }
+}
+</style>
 </head>
+
 <body>
+<div class="ambient" aria-hidden="true"></div>
+
+<!-- ============================ HEADER ============================ -->
+<header class="panel panel--ticks topbar rise" style="--i:0">
+  <div class="brand">
+    <div class="sigil" aria-hidden="true">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3 4.5 20h3l1.6-4h5.8l1.6 4h3L12 3Z"/><path d="M10.1 13h3.8"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Aria&nbsp;·&nbsp;Cybernetic Command</h1>
+      <div class="sub">Build V3.0.4 / 3D Studio</div>
+    </div>
+  </div>
+
+  <div class="topbar-mid">
+    <span class="label" id="moodLabel">Persona</span>
+    <div class="select">
+      <select id="roleplayMoodSelect" aria-labelledby="moodLabel">
+        <option value="normal">✨ Normal (Devoted)</option>
+        <option value="chill">😎 Chill</option>
+        <option value="engineer">💻 Engineer</option>
+        <option value="therapy">🌸 Therapy</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="topbar-end">
+    <span class="chip" id="status" data-state="online" role="status"><i class="dot"></i>Online</span>
+    <button class="ibtn" id="muteBtn" type="button" aria-pressed="false" title="Mute Aria's voice" aria-label="Mute Aria's voice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/>
+      </svg>
+    </button>
+    <button class="ibtn" id="fsBtn" type="button" title="Toggle fullscreen" aria-label="Toggle fullscreen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============================ MAIN ============================ -->
+<main class="hud">
+
+  <!-- ---------- COMMS ---------- -->
+  <section class="panel panel--ticks comms rise" style="--i:1" aria-label="Conversation with Aria">
+    <div class="panel-head">
+      <h2 class="label">Comms Relay</h2>
+      <span class="count mono" id="msgCount">01 msg</span>
+    </div>
+
+    <div id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
+      <div class="msg-bubble msg-ai">
+        <b class="who">Aria</b>
+        Welcome back, Master! ✨ Main Aria hoon, aapki devoted AI companion. Cybernetic Command V3 HUD online hai. 👋
+        <span class="msg-tag">boot sequence complete</span>
+      </div>
+    </div>
+
+    <div class="typing" id="typingIndicator" data-on="false" aria-hidden="true">
+      <span></span><span></span><span></span><em>Aria is thinking</em>
+    </div>
+
+    <div class="chips" id="quickPrompts">
+      <button type="button" data-prompt="Run a full system diagnostic.">System diagnostic</button>
+      <button type="button" data-prompt="Switch to a happy expression.">Change expression</button>
+      <button type="button" data-prompt="What can you do?">Capabilities</button>
+    </div>
+
+    <div class="chat-input-bar">
+      <div class="input-wrapper">
+        <label class="sr-only" for="chatInput" hidden>Message Aria</label>
+        <input type="text" id="chatInput" placeholder="Message Aria…" autocomplete="off" autofocus />
+        <div class="input-actions">
+          <button id="micBtn" class="btn-voice" type="button" title="Voice input" aria-label="Voice input">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="2" width="6" height="11" rx="3"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+              <line x1="12" y1="18" x2="12" y2="22"/>
+              <line x1="8" y1="22" x2="16" y2="22"/>
+            </svg>
+            <span class="voice-pulse"></span>
+          </button>
+          <button id="sendBtn" class="btn-send" type="button" title="Send message" aria-label="Send message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="voice-indicator" id="voiceIndicator">
+        <div class="voice-bars"><span></span><span></span><span></span><span></span><span></span></div>
+        <span class="voice-text">Listening… speak now</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- SCOPE ---------- -->
+  <section class="panel panel--ticks scope rise" id="globe-container" style="--i:2" aria-label="3D Fibonacci Sphere">
+    <h2 class="label scope-title">3D Sphere</h2>
+    <canvas id="radar-canvas" role="img" aria-label="Rotating 3D Fibonacci sphere"></canvas>
+    <div class="scope-meta">
+      <span class="label">Points</span>
+      <span class="v mono" id="contactCount">460 active</span>
+    </div>
+  </section>
+
+  <!-- ---------- STAGE ---------- -->
+  <section class="stage rise" style="--i:3" aria-label="Aria 3D viewport">
+    <div class="stage-tag">
+      <i class="dot"></i><span id="modelName">Aria 2.0.vrm</span>
+    </div>
+
     <div id="canvas-container"></div>
 
-    <button id="panelToggleBtn" title="Toggle Controls">☰</button>
-
-    <div class="controls-panel" id="controlsPanel">
-        <div class="header-title">
-            <h2>Aria VRM Studio</h2>
-            <span class="model-name" id="modelName">Aria.vrm</span>
-        </div>
-
-        <div id="status">Initializing 3D Viewer...</div>
-
-        <!-- Load External VRM / VRMA File Button -->
-        <div style="display: flex; gap: 8px;">
-            <button id="openFileBtn" class="btn-primary" style="width: 100%;">📂 Load .vrm / .vrma File</button>
-            <input type="file" id="filePicker" accept=".vrm,.vrma" multiple style="display: none;">
-        </div>
-
-        <!-- Navigation Tabs -->
-        <div class="tab-bar">
-            <button class="tab-btn active" id="tabAnimationBtn">🎬 Motion</button>
-            <button class="tab-btn" id="tabPoseBtn">🦴 Pose</button>
-            <button class="tab-btn" id="tabFaceBtn">😊 Face</button>
-            <button class="tab-btn" id="tabCustomBtn">💬 Actions</button>
-        </div>
-
-        <!-- TAB 1: ANIMATIONS -->
-        <div class="tab-content" id="animationPanel">
-            <div class="section-title">Playback Controls</div>
-            <div class="action-row">
-                <button id="playBtn" class="btn-primary">▶ Play</button>
-                <button id="pauseBtn">⏸ Pause</button>
-                <button id="stopBtn">⏹ Stop</button>
-            </div>
-
-            <div class="section-title">VRMA Motion Library</div>
-            <div class="btn-grid" id="vrmaButtonsContainer"></div>
-        </div>
-
-        <!-- TAB 2: POSE EDITING -->
-        <div class="tab-content" id="posePanel" hidden>
-            <div class="toggle-row">
-                <span>3D Viewport Handles</span>
-                <input type="checkbox" id="handlesToggle" checked>
-            </div>
-
-            <div class="action-row">
-                <button id="resetPoseBtn" class="btn-primary">🔄 Reset Pose</button>
-            </div>
-
-            <div class="slider-group" id="poseSlidersContainer"></div>
-
-            <details>
-                <summary>Fingers & Detail Joints</summary>
-                <div class="slider-group" id="poseSlidersDetailContainer" style="margin-top: 10px;"></div>
-            </details>
-        </div>
-
-        <!-- TAB 3: FACE & GAZE EDITING -->
-        <div class="tab-content" id="facePanel" hidden>
-            <div class="toggle-row">
-                <span>👀 Follow Mouse (Gaze)</span>
-                <input type="checkbox" id="followMouseToggle">
-            </div>
-
-            <div class="section-title">Manual Eye Gaze</div>
-            <div class="slider-group" id="lookAtSlidersContainer"></div>
-
-            <div class="action-row">
-                <button id="resetFaceBtn" class="btn-primary">🔄 Reset Face & Gaze</button>
-            </div>
-
-            <div class="section-title">Facial Expressions</div>
-            <div class="slider-group" id="expressionSlidersContainer"></div>
-        </div>
-
-        <!-- TAB 4: QUICK TEST & MOODS -->
-        <div class="tab-content" id="customPanel" hidden>
-            <div class="section-title">Hand Gestures</div>
-            <div class="action-row">
-                <button class="btn-primary" onclick="waveHand()">👋 Wave Hand</button>
-                <button onclick="speak('Namaste! Main Aria hoon!')">🗣️ Speak Test</button>
-            </div>
-
-            <div class="section-title">Preset Moods</div>
-            <div class="btn-grid">
-                <button onclick="setMood('happy')">😊 Happy</button>
-                <button onclick="setMood('angry')">😡 Angry</button>
-                <button onclick="setMood('sad')">😢 Sad</button>
-                <button onclick="setMood('relaxed')">😌 Relaxed</button>
-                <button onclick="setMood('surprised')">😲 Surprised</button>
-                <button onclick="setMood(null)">😐 Reset Mood</button>
-            </div>
-        </div>
+    <div class="stage-hint">
+      <span><kbd>Drag</kbd>orbit</span>
+      <span><kbd>Scroll</kbd>zoom</span>
+      <span><kbd>Drop</kbd>load .vrm</span>
     </div>
 
-    <!-- Floating AI Chat & Voice Assistant Widget -->
-    <div class="chat-widget">
-        <div class="chat-header">
-            <h3>🤖 Aria AI Companion</h3>
-            <span style="font-size: 0.75rem; color: #4ade80;">● Online</span>
-        </div>
-        <div class="chat-log" id="chatLog">
-            <div class="msg-bubble msg-ai">
-                Namaste! Main Aria hoon. Aap mujhse bol kar ya type karke baat kar sakte hain! 👋
-            </div>
-        </div>
-        <div class="chat-input-bar">
-            <button id="micBtn" title="Speak with Mic">🎤</button>
-            <input type="text" id="chatInput" placeholder="Talk to Aria...">
-            <button id="sendBtn" class="btn-primary" style="padding: 10px 16px;">Send</button>
-        </div>
+    <div class="stage-loading" id="stageLoading">
+      <div class="loader-frame"></div>
+      <div class="loader-copy">
+        <p>Rigging avatar</p>
+        <div class="loader-bar"><i></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- TELEMETRY ---------- -->
+  <aside class="panel panel--ticks tele rise" style="--i:4" aria-label="System telemetry">
+    <div class="panel-head">
+      <h2 class="label">Telemetry</h2>
+      <span class="count mono">live</span>
     </div>
 
-    <!-- Drag & Drop Visual Overlay -->
-    <div id="drop-overlay">📁 Drop .vrm or .vrma file here to load!</div>
+    <div class="tele-body">
+      <div class="integrity">
+        <div class="top">
+          <span class="label">System integrity</span>
+          <span class="val" id="integrityVal">98<span>%</span></span>
+        </div>
+        <div class="meter" role="meter" aria-valuenow="98" aria-valuemin="0" aria-valuemax="100" aria-label="System integrity">
+          <i id="integrityBar" style="--v:.98"></i>
+        </div>
+      </div>
 
-    <!-- Load Main Studio Module -->
-    <script type="module" src="/app.js"></script>
+      <dl class="readouts">
+        <div class="readout">
+          <dt>Data throughput</dt>
+          <dd id="throughput">45.2<small>TB/s</small></dd>
+          <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true">
+            <path id="sparkArea" d=""></path>
+            <polyline id="sparkLine" points=""></polyline>
+          </svg>
+        </div>
+        <div class="readout">
+          <dt>Threat level</dt>
+          <dd style="display:flex;align-items:center;gap:10px;">
+            <span class="ladder" data-level="1" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span style="font-size:.8125rem;color:var(--aqua)">LOW</span>
+          </dd>
+        </div>
+        <div class="readout">
+          <dt>Active nodes</dt>
+          <dd id="nodes">1024<small>/ 1024</small></dd>
+        </div>
+        <div class="readout">
+          <dt>Round trip</dt>
+          <dd id="latency">08<small>ms</small></dd>
+        </div>
+        <div class="readout">
+          <dt>AI core</dt>
+          <dd style="font-size:.8125rem;color:var(--aqua)">STABLE</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="tele-foot">
+      <button class="btn-engine" type="button" id="engineBtn"><span>Aria 3D engine online</span></button>
+    </div>
+  </aside>
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="panel panel--ticks statusbar rise" style="--i:5">
+  <div style="display:flex;align-items:center;gap:2px;">
+    <button class="ibtn" type="button" id="gridBtn" aria-pressed="true" title="Toggle background grid" aria-label="Toggle background grid">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+    </button>
+    <button class="ibtn" type="button" id="consoleBtn" title="Developer console" aria-label="Developer console">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 9 3 3-3 3"/><path d="M13 15h4"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+    </button>
+  </div>
+
+  <div class="center">
+    <span>Secure link</span><i class="sep"></i>
+    <b>AES-256 / P2P</b><i class="sep"></i>
+    <span id="fpsReadout" class="mono">60 fps</span>
+  </div>
+
+  <div id="footerTime">--:--:--</div>
+</footer>
+
+<!-- ============================ DROP OVERLAY ============================ -->
+<div id="drop-overlay" aria-hidden="true">
+  <div class="drop-card">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+    </svg>
+    <strong>Release to load avatar</strong>
+    <p>.vrm files only</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- pointer glow (single rAF, not one per panel per event) ---------- */
+  const panels = $$(".panel");
+  let px = 0, py = 0, glowQueued = false;
+  addEventListener("pointermove", (e) => {
+    px = e.clientX; py = e.clientY;
+    if (glowQueued) return;
+    glowQueued = true;
+    requestAnimationFrame(() => {
+      glowQueued = false;
+      for (const p of panels) {
+        const r = p.getBoundingClientRect();
+        if (px < r.left - 200 || px > r.right + 200 || py < r.top - 200 || py > r.bottom + 200) continue;
+        p.style.setProperty("--mx", (px - r.left) + "px");
+        p.style.setProperty("--my", (py - r.top) + "px");
+      }
+    });
+  }, { passive: true });
+
+  /* ---------- clock ---------- */
+  const timeEl = $("#footerTime");
+  const tick = () => {
+    timeEl.textContent = new Date().toLocaleTimeString([], { hour12: false }) + " LOCAL";
+  };
+  tick();
+  setInterval(tick, 1000);
+
+  /* ---------- 3D Fibonacci Sphere with Color Cycle ---------- */
+  (() => {
+    const cv = $("#radar-canvas");
+    if (!cv) return;
+    const ctx = cv.getContext("2d");
+
+    /* ---- tuning ---- */
+    const SPIN       = 1.20;   // rad/sec → one rotation ≈ 5.2s
+    const ROTS_PER   = 2;      // rotations each color is held for → ≈10.5s per color
+    const FADE       = 0.14;   // last 14% of the hold is a crossfade
+    const PALETTE = [
+      "#FFB02E", // amber
+      "#D94436", // vermilion
+      "#B87BD9", // orchid
+      "#5B7FA6", // steel blue
+      "#52A87F", // jade
+      "#E0655B", // coral
+      "#8FB43D", // moss
+      "#4FA8C7"  // cyan-slate
+    ];
+
+    /* Fibonacci sphere — evenly spaced points, no clumping at the poles */
+    const N = 460, pts = [];
+    for (let i = 0; i < N; i++) {
+      const y  = 1 - (i / (N - 1)) * 2;
+      const r  = Math.sqrt(Math.max(0, 1 - y * y));
+      const th = i * Math.PI * (3 - Math.sqrt(5));
+      pts.push([Math.cos(th) * r, y, Math.sin(th) * r]);
+    }
+
+    /* color helpers */
+    const rgb = PALETTE.map(h => {
+      const n = parseInt(h.slice(1), 16);
+      return [n >> 16 & 255, n >> 8 & 255, n & 255];
+    });
+    const mix = (a, b, k) => `rgb(${
+      Math.round(a[0] + (b[0] - a[0]) * k)},${
+      Math.round(a[1] + (b[1] - a[1]) * k)},${
+      Math.round(a[2] + (b[2] - a[2]) * k)})`;
+    const ease = k => k * k * (3 - 2 * k);
+
+    let w = 0, h = 0, raf = 0, visible = true;
+    const size = () => {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      w = cv.clientWidth; h = cv.clientHeight;
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    new ResizeObserver(size).observe(cv);
+    size();
+
+    let spin = 0, last = 0;
+
+    const frame = (now) => {
+      if (!visible) return;
+      const t = now / 1000;
+      const dt = last ? Math.min(t - last, 0.05) : 0;
+      last = t;
+
+      spin += SPIN * dt;
+
+      const turns = spin / (Math.PI * 2);
+      const slot  = Math.floor(turns / ROTS_PER);
+      const local = turns / ROTS_PER - slot;          // 0 → 1 across the hold
+
+      const from = rgb[slot % rgb.length];
+      const to   = rgb[(slot + 1) % rgb.length];
+      const hue  = local < 1 - FADE
+        ? mix(from, from, 0)
+        : mix(from, to, ease((local - (1 - FADE)) / FADE));
+
+      ctx.clearRect(0, 0, w, h);
+
+      const breathe = reduced ? 1 : 1 + Math.sin(t * 1.1) * 0.012;
+      const yaw     = reduced ? 0 : spin;
+      const pitch   = 0;
+      const R       = Math.min(w, h) * 0.36 * breathe;
+      const cx      = w / 2, cy = h / 2;
+
+      const cyw = Math.cos(yaw),   syw = Math.sin(yaw);
+      const cp  = Math.cos(pitch), sp  = Math.sin(pitch);
+
+      ctx.fillStyle = hue;
+
+      for (const [x0, y0, z0] of pts) {
+        let x = x0 * cyw + z0 * syw;
+        let z = -x0 * syw + z0 * cyw;
+        let y = y0 * cp - z * sp;
+        z     = y0 * sp + z * cp;
+
+        const depth = (z + 1) / 2;              // 0 back → 1 front
+        const persp = 1 / (1.9 - z * 0.55);
+
+        ctx.globalAlpha = 0.1 + depth * 0.68;     // far dots fade out
+        ctx.beginPath();
+        ctx.arc(cx + x * R * persp, cy + y * R * persp, 0.7 + depth * 1.5, 0, 6.283);
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+
+    /* stop burning GPU when the tab is hidden */
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden && visible) { cancelAnimationFrame(raf); visible = false; }
+      else if (!document.hidden && !visible) { visible = true; last = 0; raf = requestAnimationFrame(frame); }
+    });
+  })();
+
+  /* ---------- telemetry drift + sparkline ---------- */
+  (() => {
+    const line = $("#sparkLine"), area = $("#sparkArea");
+    const tp = $("#throughput"), lat = $("#latency"), fps = $("#fpsReadout");
+    const iv = $("#integrityVal"), ib = $("#integrityBar");
+    let data = Array.from({ length: 24 }, () => 40 + Math.random() * 12);
+
+    const render = () => {
+      const max = Math.max(...data), min = Math.min(...data);
+      const span = Math.max(max - min, 1);
+      const pts = data.map((v, i) => [
+        (i / (data.length - 1)) * 100,
+        24 - ((v - min) / span) * 21
+      ]);
+      line.setAttribute("points", pts.map(p => p.join(",")).join(" "));
+      area.setAttribute("d", `M0,26 L${pts.map(p => p.join(",")).join(" L")} L100,26 Z`);
+    };
+    render();
+
+    setInterval(() => {
+      data = [...data.slice(1), Math.min(58, Math.max(32, data.at(-1) + (Math.random() - 0.5) * 7))];
+      render();
+      tp.innerHTML = `${data.at(-1).toFixed(1)}<small>TB/s</small>`;
+      lat.innerHTML = `${String(Math.round(6 + Math.random() * 6)).padStart(2, "0")}<small>ms</small>`;
+      const integ = 96 + Math.round(Math.random() * 3);
+      iv.innerHTML = `${integ}<span>%</span>`;
+      ib.style.setProperty("--v", integ / 100);
+      ib.parentElement.setAttribute("aria-valuenow", integ);
+    }, 2200);
+
+    /* real frame counter */
+    let frames = 0, last = performance.now();
+    const loop = (t) => {
+      frames++;
+      if (t - last >= 1000) { fps.textContent = `${frames} fps`; frames = 0; last = t; }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  })();
+
+  /* ---------- stage: hide loader once app.js mounts a canvas ---------- */
+  (() => {
+    const host = $("#canvas-container"), loader = $("#stageLoading");
+    if (!host || !loader) return;
+    const done = () => { loader.hidden = true; obs.disconnect(); };
+    const obs = new MutationObserver(() => { if (host.querySelector("canvas")) done(); });
+    obs.observe(host, { childList: true, subtree: true });
+    if (host.querySelector("canvas")) done();
+    setTimeout(() => { if (!loader.hidden) done(); }, 20000);
+  })();
+
+  /* ---------- drag & drop chrome (app.js still owns the file read) ---------- */
+  (() => {
+    const ov = $("#drop-overlay");
+    let depth = 0;
+    addEventListener("dragenter", (e) => { e.preventDefault(); if (++depth === 1) ov.classList.add("visible"); });
+    addEventListener("dragover", (e) => e.preventDefault());
+    addEventListener("dragleave", () => { if (--depth <= 0) { depth = 0; ov.classList.remove("visible"); } });
+    addEventListener("drop", () => { depth = 0; ov.classList.remove("visible"); });
+  })();
+
+  /* ---------- quick prompts ---------- */
+  const input = $("#chatInput");
+  $$("#quickPrompts button").forEach(b => {
+    b.addEventListener("click", () => {
+      input.value = b.dataset.prompt;
+      input.focus();
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  });
+
+  /* ---------- footer / header toggles ---------- */
+  const toggle = (el, fn) => el && el.addEventListener("click", () => {
+    const on = el.getAttribute("aria-pressed") !== "true";
+    el.setAttribute("aria-pressed", String(on));
+    fn && fn(on);
+  });
+  toggle($("#muteBtn"), on => dispatchEvent(new CustomEvent("aria:mute", { detail: { muted: on } })));
+  toggle($("#gridBtn"), on => { $(".ambient").style.opacity = on ? "1" : ".35"; });
+  $("#gridBtn").setAttribute("aria-pressed", "true");
+  $("#fsBtn").addEventListener("click", () => {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+  });
+  $("#consoleBtn").addEventListener("click", () => dispatchEvent(new CustomEvent("aria:console")));
+
+  /* ---------- message counter ---------- */
+  (() => {
+    const log = $("#chatLog"), out = $("#msgCount");
+    const upd = () => {
+      const n = log.querySelectorAll(".msg-bubble").length;
+      out.textContent = `${String(n).padStart(2, "0")} msg${n === 1 ? "" : "s"}`;
+      log.scrollTop = log.scrollHeight;
+    };
+    new MutationObserver(upd).observe(log, { childList: true });
+    upd();
+  })();
+
+  /* ---------- small API surface for app.js ---------- */
+  window.AriaHUD = {
+    typing: (on) => $("#typingIndicator").dataset.on = String(!!on),
+    status: (state, text) => {
+      const c = $("#status");
+      c.dataset.state = state;
+      c.innerHTML = `<i class="dot"></i>${text || state}`;
+    },
+    model: (name) => $("#modelName").textContent = name,
+    loading: (on) => $("#stageLoading").hidden = !on,
+    log: (role, text, tag) => {
+      const el = document.createElement("div");
+      el.className = `msg-bubble msg-${role === "user" ? "user" : "ai"}`;
+      el.innerHTML = `<b class="who">${role === "user" ? "You" : "Aria"}</b>`;
+      el.append(text);
+      if (tag) {
+        const t = document.createElement("span");
+        t.className = "msg-tag"; t.textContent = tag; el.append(t);
+      }
+      $("#chatLog").append(el);
+      return el;
+    }
+  };
+})();
+</script>
+
+<script type="module" src="/app.js"></script>
 </body>
 </html>

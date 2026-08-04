@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: aria-3d-ai-companion
+    env: node
+    plan: free
+    buildCommand: echo "Build complete"
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+
