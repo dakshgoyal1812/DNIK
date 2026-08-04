@@ -473,8 +473,8 @@ const server = http.createServer(async (req, res) => {
 
     // Health check endpoint for Render Free Tier uptime monitoring
     if (reqUrl === '/health' || reqUrl === '/ping') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'ok', uptime: Math.round(process.uptime()) }));
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('OK');
         return;
     }
 
