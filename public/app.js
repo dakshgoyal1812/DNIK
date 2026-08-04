@@ -402,15 +402,18 @@ function updateIdleBreathing(deltaTime) {
     if (activeTab !== 'pose' && !activeGesture) {
         applyNaturalHumanPose(currentVrm);
 
-        if (chest) chest.rotation.x = breathCycle * 0.02;
-        if (upperChest) upperChest.rotation.x = breathCycle * 0.015;
-        if (spine) spine.rotation.x = breathCycle * 0.01;
-        if (head) head.rotation.x = breathCycle * 0.008;
+        if (chest) chest.rotation.x = breathCycle * 0.035;
+        if (upperChest) upperChest.rotation.x = breathCycle * 0.025;
+        if (spine) spine.rotation.x = breathCycle * 0.018;
+        if (head) {
+            head.rotation.x = breathCycle * 0.012;
+            head.rotation.y = Math.sin(breathPhase * 0.4) * 0.015;
+        }
 
         const leftUpperArm = currentVrm.humanoid.getNormalizedBoneNode('leftUpperArm');
         const rightUpperArm = currentVrm.humanoid.getNormalizedBoneNode('rightUpperArm');
-        if (leftUpperArm) leftUpperArm.rotation.z = -1.22 - breathCycle * 0.006;
-        if (rightUpperArm) rightUpperArm.rotation.z = 1.22 + breathCycle * 0.006;
+        if (leftUpperArm) leftUpperArm.rotation.z = -1.22 - breathCycle * 0.012;
+        if (rightUpperArm) rightUpperArm.rotation.z = 1.22 + breathCycle * 0.012;
     }
 
     // Automatic Eye Blinking System (3-5s random interval)
@@ -450,7 +453,8 @@ function naturalBreathing(t, delta) {
     breathPhase += delta * breathSpeed;
 
     if (currentVrm && currentVrm.scene) {
-        currentVrm.scene.position.y = modelBasePosY + Math.sin(breathPhase) * 0.015;
+        currentVrm.scene.position.y = modelBasePosY + Math.sin(breathPhase) * 0.024;
+        currentVrm.scene.position.x = Math.cos(breathPhase * 0.5) * 0.005;
     }
 }
 
