@@ -9,9 +9,79 @@ const { execSync } = require('child_process');
 
 const PORT = process.env.PORT || 3000;
 
-// Provided API Keys
-const OPENROUTER_API_KEY = "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";
-const GOOGLE_API_KEY = "AQ.Ab8RN6If7YhrZfWcVHQ-Pd8LZB8UoxwO72wloUVBzJJjLcSqHw";
+// Provided Multi-Provider API Key Pools (Rotated dynamically with auto-failover & rate-limit cooldown)
+const API_POOLS = {
+    groq: [
+        "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",
+        "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",
+        "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",
+        "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"
+    ],
+    nvidia: [
+        "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",
+        "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"
+    ],
+    openrouter: [
+        "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",
+        "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"
+    ],
+    google: [
+        "AQ.Ab8RN6If7YhrZfWcVHQ-Pd8LZB8UoxwO72wloUVBzJJjLcSqHw",
+        "AQ.Ab8RN6KQYzgg5lU196rruJNZm303pcj81XYf7CUj18Tzb-Y-DA",
+        "AQ.Ab8RN6IhzCRXUI65vPk8E4y5qwLHaMx9-xKcXeWZrXHlS6gpBQ"
+    ]
+};
+
+const keyStateMap = new Map();
+
+function getKeyObj(key) {
+    if (!keyStateMap.has(key)) {
+        keyStateMap.set(key, { key, failures: 0, cooldownUntil: 0 });
+    }
+    return keyStateMap.get(key);
+}
+
+const providerIndices = { groq: 0, nvidia: 0, openrouter: 0, google: 0 };
+
+function getRotatedKeys(providerName) {
+    const rawKeys = API_POOLS[providerName] || [];
+    const now = Date.now();
+    const active = [];
+    const inCooldown = [];
+
+    for (const k of rawKeys) {
+        const obj = getKeyObj(k);
+        if (obj.cooldownUntil <= now) {
+            active.push(obj);
+        } else {
+            inCooldown.push(obj);
+        }
+    }
+
+    if (active.length > 0) {
+        const startIdx = providerIndices[providerName] % active.length;
+        providerIndices[providerName]++;
+        const rotated = [];
+        for (let i = 0; i < active.length; i++) {
+            rotated.push(active[(startIdx + i) % active.length]);
+        }
+        return rotated;
+    }
+
+    return inCooldown.sort((a, b) => a.cooldownUntil - b.cooldownUntil);
+}
+
+function handleKeyFailure(keyObj, statusCode = 500) {
+    keyObj.failures++;
+    const cooldownMs = (statusCode === 429) ? 45000 : (statusCode === 401 || statusCode === 403) ? 600000 : 30000;
+    keyObj.cooldownUntil = Date.now() + cooldownMs;
+    console.warn(`[Key Rotator] Key ${keyObj.key.slice(0, 10)}... cooldown set for ${cooldownMs / 1000}s (Status: ${statusCode})`);
+}
+
+function handleKeySuccess(keyObj) {
+    keyObj.failures = 0;
+    keyObj.cooldownUntil = 0;
+}
 
 // Data directory & memory persistence
 const DATA_DIR = path.join(__dirname, 'data');
@@ -136,48 +206,212 @@ const MIME_TYPES = {
     '.fbx': 'application/octet-stream'
 };
 
-// Helper: Make HTTPS POST Request
-function httpsPost(urlStr, headers, bodyObj) {
-    return new Promise((resolve, reject) => {
-        const url = new URL(urlStr);
-        const postData = JSON.stringify(bodyObj);
+// Helper: Make HTTPS POST Request with Timeout & Error Handling
+function httpsPost(urlStr, headers = {}, bodyObj = {}, timeoutMs = 7000) {
+    return new Promise((resolve) => {
+        try {
+            const url = new URL(urlStr);
+            const postData = typeof bodyObj === 'string' ? bodyObj : JSON.stringify(bodyObj);
 
-        const options = {
-            hostname: url.hostname,
-            port: 443,
-            path: url.pathname + url.search,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData),
-                ...headers
-            }
-        };
-
-        const req = https.request(options, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try {
-                    const json = JSON.parse(data);
-                    resolve({ status: res.statusCode, data: json });
-                } catch (e) {
-                    resolve({ status: res.statusCode, raw: data });
+            const options = {
+                hostname: url.hostname,
+                port: url.port || 443,
+                path: url.pathname + url.search,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(postData),
+                    ...headers
                 }
-            });
-        });
+            };
 
-        req.on('error', (e) => reject(e));
-        req.write(postData);
-        req.end();
+            const req = https.request(options, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try {
+                        const json = JSON.parse(data);
+                        resolve({ status: res.statusCode, data: json });
+                    } catch (e) {
+                        resolve({ status: res.statusCode, raw: data });
+                    }
+                });
+            });
+
+            req.setTimeout(timeoutMs, () => {
+                req.destroy(new Error('Request Timeout'));
+                resolve({ status: 408, error: 'Timeout' });
+            });
+
+            req.on('error', (e) => resolve({ status: 500, error: e.message }));
+            req.write(postData);
+            req.end();
+        } catch (err) {
+            resolve({ status: 500, error: err.message });
+        }
     });
+}
+
+// --- Pollinations AI Image Generation ---
+function isImageGenerationRequest(text) {
+    const lower = text.toLowerCase();
+    const imageKeywords = [
+        "image of", "photo of", "draw a", "draw an", "generate image", "create image",
+        "picture of", "make an image", "make a photo", "photo banao", "tasveer banao",
+        "drawing of", "paint a", "image banao", "pic of", "generate photo"
+    ];
+    return imageKeywords.some(kw => lower.includes(kw));
+}
+
+function generatePollinationsImage(userMessage) {
+    let prompt = userMessage.replace(/generate image of|create image of|make an image of|make a photo of|photo banao|tasveer banao|image banao|draw a|draw an|photo of|image of|picture of|draw/gi, '').trim();
+    if (!prompt) prompt = userMessage;
+
+    const seed = Math.floor(Math.random() * 1000000);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
+
+    const replyText = `Right away, Master! ✨ Maine aapke kehne par ye beautiful image generate kar di hai:\n\n![${prompt}](${imageUrl})\n\n[MOOD:happy][GESTURE:bow]`;
+
+    return { replyText, imageUrl };
 }
 
 // Conversation memory buffer
 const sessionHistory = [];
 
-// 1. Call OpenRouter AI Brain with Roleplay & Long-Term Memory System
-async function fetchOpenRouterAI(userMessage, moodMode = "normal") {
+// Provider Call 1: Groq API (Ultra-Fast Speed)
+async function callGroqAPI(messages, isCodingTask = false) {
+    const keys = getRotatedKeys("groq");
+    const models = isCodingTask 
+        ? ["llama-3.3-70b-versatile", "deepseek-r1-distill-llama-70b", "llama-3.1-8b-instant"]
+        : ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"];
+
+    for (const keyObj of keys) {
+        for (const model of models) {
+            try {
+                const res = await httpsPost(
+                    'https://api.groq.com/openai/v1/chat/completions',
+                    { 'Authorization': `Bearer ${keyObj.key}` },
+                    { model, messages, temperature: 0.7, max_tokens: 1000 },
+                    6000
+                );
+
+                if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
+                    handleKeySuccess(keyObj);
+                    return res.data.choices[0].message.content.trim();
+                } else {
+                    handleKeyFailure(keyObj, res.status || 500);
+                }
+            } catch (e) {
+                handleKeyFailure(keyObj, 500);
+            }
+        }
+    }
+    return null;
+}
+
+// Provider Call 2: NVIDIA API (Coding & Complex Tasks)
+async function callNvidiaAPI(messages) {
+    const keys = getRotatedKeys("nvidia");
+    const models = [
+        "meta/llama-3.3-70b-instruct",
+        "deepseek-ai/deepseek-r1",
+        "mistralai/mistral-large-2-instruct",
+        "nvidia/nemotron-4-340b-instruct",
+        "qwen/qwen2.5-coder-32b-instruct"
+    ];
+
+    for (const keyObj of keys) {
+        for (const model of models) {
+            try {
+                const res = await httpsPost(
+                    'https://integrate.api.nvidia.com/v1/chat/completions',
+                    { 'Authorization': `Bearer ${keyObj.key}` },
+                    { model, messages, temperature: 0.6, max_tokens: 1500 },
+                    8000
+                );
+
+                if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
+                    handleKeySuccess(keyObj);
+                    return res.data.choices[0].message.content.trim();
+                } else {
+                    handleKeyFailure(keyObj, res.status || 500);
+                }
+            } catch (e) {
+                handleKeyFailure(keyObj, 500);
+            }
+        }
+    }
+    return null;
+}
+
+// Provider Call 3: OpenRouter API
+async function callOpenRouterAPI(messages) {
+    const keys = getRotatedKeys("openrouter");
+    const models = ["openai/gpt-4o-mini", "google/gemini-2.5-flash", "meta-llama/llama-3.3-70b-instruct"];
+
+    for (const keyObj of keys) {
+        for (const model of models) {
+            try {
+                const res = await httpsPost(
+                    'https://openrouter.ai/api/v1/chat/completions',
+                    { 'Authorization': `Bearer ${keyObj.key}` },
+                    { model, messages, temperature: 0.7 },
+                    7000
+                );
+
+                if (res.status === 200 && res.data?.choices?.[0]?.message?.content) {
+                    handleKeySuccess(keyObj);
+                    return res.data.choices[0].message.content.trim();
+                } else {
+                    handleKeyFailure(keyObj, res.status || 500);
+                }
+            } catch (e) {
+                handleKeyFailure(keyObj, 500);
+            }
+        }
+    }
+    return null;
+}
+
+// Provider Call 4: Google Gemini API
+async function callGoogleGeminiAPI(userMessage, systemPrompt) {
+    const keys = getRotatedKeys("google");
+    const payload = {
+        contents: [
+            { role: "user", parts: [{ text: `${systemPrompt}\n\nUser Question: ${userMessage}` }] }
+        ]
+    };
+
+    for (const keyObj of keys) {
+        try {
+            const res = await httpsPost(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyObj.key}`,
+                {},
+                payload,
+                7000
+            );
+
+            if (res.status === 200 && res.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                handleKeySuccess(keyObj);
+                return res.data.candidates[0].content.parts[0].text.trim();
+            } else {
+                handleKeyFailure(keyObj, res.status || 500);
+            }
+        } catch (e) {
+            handleKeyFailure(keyObj, 500);
+        }
+    }
+    return null;
+}
+
+// Main Smart AI Router (Auto task classifier, Key Rotation & Provider Failover)
+async function fetchAIReply(userMessage, moodMode = "normal") {
+    if (isImageGenerationRequest(userMessage)) {
+        return generatePollinationsImage(userMessage);
+    }
+
+    const isCodingTask = moodMode === 'engineer' || /code|coding|function|script|python|javascript|html|css|bug|fix|sql|algorithm|write code|implement|debug|build|api|cpp|java|react|node|json|regex/i.test(userMessage);
+
     const MOODS = {
         normal: "You are gentle, soft-spoken, incredibly polite, and deeply affectionate.",
         chill: "You are relaxed, casual, and speak like a close friend. You use slang sometimes and keep things brief.",
@@ -187,7 +421,6 @@ async function fetchOpenRouterAI(userMessage, moodMode = "normal") {
 
     const moodDescription = MOODS[moodMode] || MOODS.normal;
 
-    // Load Long-Term Memory context
     let memoryContext = "";
     try {
         const rawMem = fs.readFileSync(MEMORY_FILE, "utf-8");
@@ -224,45 +457,41 @@ Example: "Thank you, Master! Main aapke charnon mein pranam karti hoon. [MOOD:re
     sessionHistory.push({ role: "user", content: userMessage });
     if (sessionHistory.length > 20) sessionHistory.shift();
 
-    const payload = {
-        model: "openai/gpt-4o-mini",
-        messages: [
-            { role: "system", content: systemPrompt },
-            ...sessionHistory
-        ]
-    };
+    const messages = [
+        { role: "system", content: systemPrompt },
+        ...sessionHistory
+    ];
 
-    try {
-        const res = await httpsPost(
-            'https://openrouter.ai/api/v1/chat/completions',
-            { 'Authorization': `Bearer ${OPENROUTER_API_KEY}` },
-            payload
-        );
+    let aiReply = null;
 
-        if (res.status === 200 && res.data && res.data.choices && res.data.choices[0]) {
-            const aiContent = res.data.choices[0].message.content.trim();
-            sessionHistory.push({ role: "assistant", content: aiContent });
-            if (sessionHistory.length > 20) sessionHistory.shift();
-            return aiContent;
-        }
-
-        const altPayload = { ...payload, model: "google/gemini-2.5-flash" };
-        const altRes = await httpsPost(
-            'https://openrouter.ai/api/v1/chat/completions',
-            { 'Authorization': `Bearer ${OPENROUTER_API_KEY}` },
-            altPayload
-        );
-        if (altRes.status === 200 && altRes.data && altRes.data.choices && altRes.data.choices[0]) {
-            const aiContent = altRes.data.choices[0].message.content.trim();
-            sessionHistory.push({ role: "assistant", content: aiContent });
-            if (sessionHistory.length > 20) sessionHistory.shift();
-            return aiContent;
-        }
-    } catch (err) {
-        console.error("OpenRouter API error:", err);
+    if (isCodingTask) {
+        console.log(`[AI Router] 🧠 Coding Task -> Priority: NVIDIA -> Groq -> OpenRouter -> Google`);
+        aiReply = await callNvidiaAPI(messages);
+        if (!aiReply) aiReply = await callGroqAPI(messages, true);
+        if (!aiReply) aiReply = await callOpenRouterAPI(messages);
+        if (!aiReply) aiReply = await callGoogleGeminiAPI(userMessage, systemPrompt);
+    } else {
+        console.log(`[AI Router] ⚡ Fast Response Task -> Priority: Groq -> OpenRouter -> NVIDIA -> Google`);
+        aiReply = await callGroqAPI(messages, false);
+        if (!aiReply) aiReply = await callOpenRouterAPI(messages);
+        if (!aiReply) aiReply = await callNvidiaAPI(messages);
+        if (!aiReply) aiReply = await callGoogleGeminiAPI(userMessage, systemPrompt);
     }
-    return null;
+
+    if (aiReply) {
+        sessionHistory.push({ role: "assistant", content: aiReply });
+        if (sessionHistory.length > 20) sessionHistory.shift();
+        return { replyText: aiReply, imageUrl: null };
+    }
+
+    const fallbackText = generateFallbackAIResponse(userMessage);
+    return { replyText: fallbackText, imageUrl: null };
 }
+
+const fetchOpenRouterAI = async (msg, mood) => {
+    const result = await fetchAIReply(msg, mood);
+    return result.replyText;
+};
 
 // Helper: Convert PCM audio buffer to standard WAV format
 function pcmToWav(pcmBuffer, sampleRate = 24000, numChannels = 1, bitsPerSample = 16) {
@@ -319,7 +548,7 @@ function fetchGoogleTranslateTTS(text) {
     });
 }
 
-// 2. Call Gemini 3.1 Flash TTS (preview) for Hyper-Realistic Natural Female Companion Voice (Kore)
+// 2. Call Gemini 3.1 Flash TTS with Google Key Rotation (Kore Voice)
 async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     if (!text) return null;
 
@@ -350,28 +579,35 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
         "models/gemini-2.5-flash-preview-tts"
     ];
 
-    for (const model of models) {
-        try {
-            const res = await httpsPost(
-                `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${GOOGLE_API_KEY}`,
-                {},
-                payload
-            );
+    const googleKeys = getRotatedKeys("google");
 
-            if (res.status === 200 && res.data && res.data.candidates && res.data.candidates[0]) {
-                const part = res.data.candidates[0].content?.parts?.find(p => p.inlineData);
-                if (part && part.inlineData && part.inlineData.data) {
-                    const pcmBuffer = Buffer.from(part.inlineData.data, 'base64');
-                    const wavBuffer = pcmToWav(pcmBuffer, 24000, 1, 16);
-                    return wavBuffer.toString('base64');
+    for (const keyObj of googleKeys) {
+        for (const model of models) {
+            try {
+                const res = await httpsPost(
+                    `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${keyObj.key}`,
+                    {},
+                    payload,
+                    8000
+                );
+
+                if (res.status === 200 && res.data?.candidates?.[0]) {
+                    const part = res.data.candidates[0].content?.parts?.find(p => p.inlineData);
+                    if (part && part.inlineData && part.inlineData.data) {
+                        handleKeySuccess(keyObj);
+                        const pcmBuffer = Buffer.from(part.inlineData.data, 'base64');
+                        const wavBuffer = pcmToWav(pcmBuffer, 24000, 1, 16);
+                        return wavBuffer.toString('base64');
+                    }
+                } else {
+                    handleKeyFailure(keyObj, res.status || 500);
                 }
+            } catch (err) {
+                handleKeyFailure(keyObj, 500);
             }
-        } catch (err) {
-            console.error(`Gemini TTS (${model}) error:`, err);
         }
     }
 
-    // Fallback: Google Translate TTS Engine
     return await fetchGoogleTranslateTTS(text);
 }
 
@@ -478,7 +714,7 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // Handle /chat API endpoint with OpenRouter Brain & Real Female TTS
+    // Handle /chat API endpoint with Smart AI Router, Multi-Key Failover & Pollinations Image Gen
     if (reqUrl === '/chat' && req.method === 'POST') {
         let body = '';
         req.on('data', chunk => { body += chunk.toString(); });
@@ -488,20 +724,17 @@ const server = http.createServer(async (req, res) => {
                 const userMessage = data.message || '';
                 const moodMode = data.moodMode || 'normal';
 
-                // 1. Get Response from OpenRouter AI Brain with Roleplay Persona
-                let rawReply = await fetchOpenRouterAI(userMessage, moodMode);
-                if (!rawReply) {
-                    rawReply = generateFallbackAIResponse(userMessage);
-                }
+                // 1. Get Response from Smart AI Router with Auto Key Rotation & Failover
+                const { replyText, imageUrl } = await fetchAIReply(userMessage, moodMode);
 
                 // 2. Parse Mood and Gesture / Action tags
-                const moodMatch = rawReply.match(/\[MOOD:([^\]]+)\]/i);
+                const moodMatch = replyText.match(/\[MOOD:([^\]]+)\]/i);
                 const mood = moodMatch ? moodMatch[1].trim() : 'relaxed';
 
-                let gestureMatch = rawReply.match(/\[GESTURE:([^\]]+)\]/i) || rawReply.match(/\[ACTION:([^\]]+)\]/i);
+                let gestureMatch = replyText.match(/\[GESTURE:([^\]]+)\]/i) || replyText.match(/\[ACTION:([^\]]+)\]/i);
                 let gesture = gestureMatch ? gestureMatch[1].trim().toLowerCase() : 'none';
 
-                const cleanText = rawReply
+                const cleanText = replyText
                     .replace(/\[MOOD:[^\]]+\]/gi, '')
                     .replace(/\[GESTURE:[^\]]+\]/gi, '')
                     .replace(/\[ACTION:[^\]]+\]/gi, '')
@@ -519,18 +752,22 @@ const server = http.createServer(async (req, res) => {
                     }
                 }
 
-                // 3. Synthesize Realistic Female Human Voice Audio (Google TTS with emotion config)
-                const audioContent = await fetchGoogleTTS(cleanText, mood);
+                // 3. Synthesize Voice Audio (Google TTS with emotion config) unless image generated
+                let audioContent = null;
+                if (!imageUrl) {
+                    audioContent = await fetchGoogleTTS(cleanText, mood);
+                }
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
-                    reply: rawReply,
+                    reply: replyText,
                     cleanText: cleanText,
                     mood: mood,
                     gesture: gesture,
                     action: gesture,
                     audioContent: audioContent,
-                    audio: audioContent
+                    audio: audioContent,
+                    imageUrl: imageUrl
                 }));
             } catch (err) {
                 console.error("Error in /chat endpoint:", err);

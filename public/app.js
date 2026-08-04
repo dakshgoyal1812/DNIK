@@ -1083,11 +1083,22 @@ function autoReact(replyText, audioContent = null) {
     return cleanText;
 }
 
-function addToLog(sender, text, moodTag = null) {
+function addToLog(sender, text, moodTag = null, imageUrl = null) {
     if (!chatLog) return;
     const bubble = document.createElement('div');
     bubble.className = `msg-bubble ${sender === 'You' ? 'msg-user' : 'msg-ai'}`;
-    bubble.textContent = text;
+
+    let hasImage = false;
+    let contentHtml = text.replace(/!\[([^\]]*)\]\((https?:\/\/[^\)]+)\)/g, (match, alt, url) => {
+        hasImage = true;
+        return `<div style="margin-top:8px;"><img src="${url}" alt="${alt}" style="max-width:100%; border-radius:12px; display:block; box-shadow:0 4px 14px rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15);" loading="lazy" /></div>`;
+    });
+
+    if (imageUrl && !hasImage) {
+        contentHtml += `<div style="margin-top:8px;"><img src="${imageUrl}" alt="Generated Image" style="max-width:100%; border-radius:12px; display:block; box-shadow:0 4px 14px rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15);" loading="lazy" /></div>`;
+    }
+
+    bubble.innerHTML = contentHtml;
 
     if (moodTag && sender !== 'You') {
         const tag = document.createElement('div');
@@ -1151,7 +1162,7 @@ async function sendChatMessage(userText) {
 
         setStatus(`Speaking: "${cleanReply.substring(0, 30)}..."`, '#4ade80');
 
-        addToLog('AI', cleanReply, moodTag);
+        addToLog('AI', cleanReply, moodTag, data.imageUrl);
     } catch (err) {
         console.error('Chat error:', err);
         addToLog('AI', 'Sorry, server error occurred!');
