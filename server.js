@@ -644,32 +644,19 @@ function fetchGoogleTranslateTTS(text) {
     });
 }
 
-// 2. Call Gemini 3.1 Flash TTS with Google Key Rotation (Puck Voice - Anime Style)
-async function fetchGeminiTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
+// 2. Call Gemini 3.1 Flash TTS with Google Key Rotation (Gemini 3.1 Flash - Zephyr Voice)
+async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     if (!text) return null;
 
-    const chosenVoice = voiceName || 'Zephyr';
+    const prebuiltVoice = 'Puck'; // Prebuilt voice for Zephyr (Playful Anime Female)
 
-    // Map custom/display voice name to valid Gemini prebuilt voice enum (Puck, Aoede, Kore, Fenrir, Charon)
-    const validPrebuiltVoices = {
-        'Zephyr': 'Puck',
-        'Puck': 'Puck',
-        'Aoede': 'Aoede',
-        'Kore': 'Kore',
-        'Fenrir': 'Fenrir',
-        'Charon': 'Charon'
-    };
-    const prebuiltVoice = validPrebuiltVoices[chosenVoice] || 'Puck';
-
-    const baseStyle = "A high-pitched and playful young female voice with a soft, expressive quality, suited for anime-style character performances.";
-    const moodStyle = moodStr ? ` Express emotion: ${moodStr}.` : "";
+    const styleInstruction = "A high-pitched and playful young female voice with a soft, expressive quality, suited for anime-style character performances.";
     let langLocale = "English (United States)";
     if (/[\u0900-\u097F]/.test(text)) {
         langLocale = "Hindi (India)";
     }
-    const styleInstruction = `${baseStyle}${moodStyle}`;
 
-    const fullPrompt = `Instructions: ${styleInstruction}\nLanguage / locale: ${langLocale}\nVoice: ${chosenVoice}\nText to speak: ${text}`;
+    const fullPrompt = `Instructions: ${styleInstruction}\nLanguage / locale: ${langLocale}\nVoice: Zephyr\nText to speak: ${text}`;
 
     const payload = {
         contents: [{
@@ -688,9 +675,9 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
     };
 
     const models = [
-        "models/gemini-2.0-flash-exp",
-        "models/gemini-1.5-flash",
-        "models/gemini-2.5-flash-preview-tts"
+        "models/gemini-3.1-flash-tts-preview",
+        "models/gemini-2.5-flash-preview-tts",
+        "models/gemini-2.0-flash-exp"
     ];
 
     const googleKeys = getRotatedKeys("google");
