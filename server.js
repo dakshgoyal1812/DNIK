@@ -638,11 +638,15 @@ function fetchGoogleTranslateTTS(text) {
 async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     if (!text) return null;
 
-    const baseStyle = "A high-pitched and playful young female voice, expressive quality, suited for anime-style character performances.";
+    const baseStyle = "A high-pitched and playful young female voice with a soft, expressive quality, suited for anime-style character performances.";
     const moodStyle = moodStr ? ` Express emotion: ${moodStr}.` : "";
-    const styleInstruction = `${baseStyle}${moodStyle} Speak fluently in natural Hindi (India).`;
+    let langLocale = "English (United States)";
+    if (/[\u0900-\u097F]/.test(text)) {
+        langLocale = "Hindi (India)";
+    }
+    const styleInstruction = `${baseStyle}${moodStyle}`;
 
-    const fullPrompt = `Instructions: ${styleInstruction}\nLanguage / locale: Hindi (India)\nVoice: Puck\nText to speak: ${text}`;
+    const fullPrompt = `Instructions: ${styleInstruction}\nLanguage / locale: ${langLocale}\nVoice: Zephyr\nText to speak: ${text}`;
 
     const payload = {
         contents: [{
@@ -653,7 +657,7 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
             speechConfig: {
                 voiceConfig: {
                     prebuiltVoiceConfig: {
-                        voiceName: "Puck"
+                        voiceName: "Zephyr"
                     }
                 }
             }
