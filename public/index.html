@@ -2,10 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' data: blob: https: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' data: blob: https: http: https://cdn.jsdelivr.net; script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' data: blob: https: http: https://cdn.jsdelivr.net; script-src-attr 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; worker-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; child-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; style-src 'self' 'unsafe-inline' https: http: https://fonts.googleapis.com; img-src 'self' data: blob: https: http: https://image.pollinations.ai; media-src 'self' data: blob: https: http:; connect-src 'self' data: blob: https: http: https://cdn.jsdelivr.net https://generativelanguage.googleapis.com https://api.telegram.org; font-src 'self' data: https: http: https://fonts.gstatic.com;" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="dark" />
 <title>Aria 3D Studio</title>
+<script>
+document.addEventListener('securitypolicyviolation', function(e) {
+  console.warn('CSP VIOLATION DETECTED', {
+    directive: e.effectiveDirective,
+    blockedURI: e.blockedURI,
+    sourceFile: e.sourceFile,
+    line: e.lineNumber,
+    column: e.columnNumber,
+    sample: e.sample,
+    policy: e.originalPolicy
+  });
+});
+</script>
 <!-- skill:chrome -->
 <style>
 /* Credit line — bottom-right */
