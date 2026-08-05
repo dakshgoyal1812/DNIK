@@ -1336,6 +1336,22 @@ function setupChatSystem() {
             }
         };
     }
+    const pdfPicker = document.getElementById('pdfPicker');
+    if (pdfBtn && pdfPicker) {
+        pdfBtn.onclick = () => pdfPicker.click();
+        pdfPicker.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            setStatus(`Reading document: ${file.name}...`, '#c084fc');
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const textContent = evt.target.result;
+                const docSnippet = typeof textContent === 'string' ? textContent.substring(0, 3000) : 'Document uploaded successfully';
+                sendChatMessage(`📄 Master, maine ek PDF document upload kiya hai: "${file.name}". Kripya isey summarize karein:\n\n${docSnippet}`);
+            };
+            reader.readAsText(file);
+        };
+    }
 
     let isListening = false;
     let autoSendTimer = null;
