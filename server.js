@@ -24,11 +24,7 @@ const API_POOLS = {
         "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",
         "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"
     ],
-    google: process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(Boolean) : [
-        "AQ.Ab8RN6If7YhrZfWcVHQ-Pd8LZB8UoxwO72wloUVBzJJjLcSqHw",
-        "AQ.Ab8RN6KQYzgg5lU196rruJNZm303pcj81XYf7CUj18Tzb-Y-DA",
-        "AQ.Ab8RN6IhzCRXUI65vPk8E4y5qwLHaMx9-xKcXeWZrXHlS6gpBQ"
-    ]
+    google: process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(Boolean) : []
 };
 
 const keyStateMap = new Map();
@@ -605,24 +601,37 @@ function pcmToWav(pcmBuffer, sampleRate = 24000, numChannels = 1, bitsPerSample 
     return Buffer.concat([header, pcmBuffer]);
 }
 
-// Helper: Google Translate High Quality Female Voice TTS Fallback
+// Helper: Google Translate High Quality Female Voice TTS Engine
 function fetchGoogleTranslateTTS(text) {
     return new Promise((resolve) => {
         if (!text) return resolve(null);
+        
+        const cleanText = text
+            .replace(/!\[.*?\]\(.*?\)/gi, '')
+            .replace(/\[MOOD:[^\]]+\]/gi, '')
+            .replace(/\[GESTURE:[^\]]+\]/gi, '')
+            .replace(/\[ACTION:[^\]]+\]/gi, '')
+            .replace(/[*_~#`]/g, '')
+            .trim();
+
+        if (!cleanText) return resolve(null);
+
         let targetLang = 'hi';
-        if (/[\u0900-\u097F]/.test(text)) {
+        if (/[\u0900-\u097F]/.test(cleanText)) {
             targetLang = 'hi';
-        } else if (/^[a-zA-Z0-9\s.,!?'"#-]+$/.test(text) && !/(main|aap|kaise|kya|hoon|hai|rahi|samajh|ji|thik|kar|karti|raho)/i.test(text)) {
+        } else if (/^[a-zA-Z0-9\s.,!?'"#-]+$/.test(cleanText) && !/(main|aap|kaise|kya|hoon|hai|rahi|samajh|ji|thik|kar|karti|raho)/i.test(cleanText)) {
             targetLang = 'en';
         } else {
             targetLang = 'hi';
         }
-        const cleanStr = encodeURIComponent(text.substring(0, 200));
+
+        const cleanStr = encodeURIComponent(cleanText.substring(0, 300));
         const urlStr = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanStr}&tl=${targetLang}&client=tw-ob`;
 
         const options = {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Referer': 'https://translate.google.com/'
             }
         };
 
@@ -638,7 +647,7 @@ function fetchGoogleTranslateTTS(text) {
                 resolve(buffer.toString('base64'));
             });
         }).on('error', (err) => {
-            console.error("Google Translate TTS fallback error:", err);
+            console.error("Google Translate TTS error:", err);
             resolve(null);
         });
     });

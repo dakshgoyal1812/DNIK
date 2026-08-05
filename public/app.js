@@ -1051,16 +1051,26 @@ function speakWithFakeLipSync(text) {
     if (!text || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'hi-IN';
-    utterance.rate = 1.05;
-    utterance.pitch = 1.25;
+    const cleanText = text
+        .replace(/!\[.*?\]\(.*?\)/gi, '')
+        .replace(/\[MOOD:[^\]]+\]/gi, '')
+        .replace(/\[GESTURE:[^\]]+\]/gi, '')
+        .replace(/\[ACTION:[^\]]+\]/gi, '')
+        .replace(/[*_~#`]/g, '')
+        .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = /[\u0900-\u097F]/.test(cleanText) ? 'hi-IN' : 'en-US';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.15;
 
     const voices = window.speechSynthesis.getVoices();
     const femaleVoice = voices.find(v => 
-        (v.lang.includes('hi') || v.lang.includes('HI') || v.lang.includes('en-IN')) && 
-        (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('swara') || v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('kalpana') || v.name.toLowerCase().includes('zira'))
-    ) || voices.find(v => v.lang.includes('hi'));
+        (v.lang.includes('hi') || v.lang.includes('en')) && 
+        (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('swara') || v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('kalpana') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('samantha') || v.name.toLowerCase().includes('victoria'))
+    ) || voices.find(v => v.lang.includes('hi')) || voices[0];
 
     if (femaleVoice) {
         utterance.voice = femaleVoice;
