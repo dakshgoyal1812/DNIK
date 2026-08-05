@@ -1075,7 +1075,7 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
-    res.setHeader('Content-Security-Policy', "default-src 'self' * 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' data: blob: https: http:; script-src 'self' * 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' data: blob: https: http:; worker-src 'self' * 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; child-src 'self' * 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; style-src 'self' * 'unsafe-inline' https: http:; img-src 'self' * data: blob: https: http:; media-src 'self' * data: blob: https: http:; connect-src 'self' * data: blob: https: http:; font-src 'self' * data: https: http:;");
+
 
     if (req.method === 'OPTIONS') {
         res.writeHead(204);
