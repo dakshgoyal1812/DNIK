@@ -639,6 +639,18 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
     if (!text) return null;
 
     const chosenVoice = voiceName || 'Zephyr';
+
+    // Map custom/display voice name to valid Gemini prebuilt voice enum (Puck, Aoede, Kore, Fenrir, Charon)
+    const validPrebuiltVoices = {
+        'Zephyr': 'Puck',
+        'Puck': 'Puck',
+        'Aoede': 'Aoede',
+        'Kore': 'Kore',
+        'Fenrir': 'Fenrir',
+        'Charon': 'Charon'
+    };
+    const prebuiltVoice = validPrebuiltVoices[chosenVoice] || 'Puck';
+
     const baseStyle = "A high-pitched and playful young female voice with a soft, expressive quality, suited for anime-style character performances.";
     const moodStyle = moodStr ? ` Express emotion: ${moodStr}.` : "";
     let langLocale = "English (United States)";
@@ -658,7 +670,7 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
             speechConfig: {
                 voiceConfig: {
                     prebuiltVoiceConfig: {
-                        voiceName: chosenVoice
+                        voiceName: prebuiltVoice
                     }
                 }
             }
@@ -666,9 +678,9 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
     };
 
     const models = [
-        "models/gemini-3.1-flash-tts-preview",
-        "models/gemini-2.5-flash-preview-tts",
-        "models/gemini-2.0-flash-exp"
+        "models/gemini-2.0-flash-exp",
+        "models/gemini-1.5-flash",
+        "models/gemini-2.5-flash-preview-tts"
     ];
 
     const googleKeys = getRotatedKeys("google");
@@ -680,7 +692,7 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
                     `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${keyObj.key}`,
                     {},
                     payload,
-                    2500
+                    3500
                 );
 
                 if (res.status === 200 && res.data?.candidates?.[0]) {
@@ -691,11 +703,11 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
                         const wavBuffer = pcmToWav(pcmBuffer, 24000, 1, 16);
                         return wavBuffer.toString('base64');
                     }
-                } else {
-                    handleKeyFailure(keyObj, res.status || 500);
+                } else if (res.status === 429 || res.status === 401 || res.status === 403) {
+                    handleKeyFailure(keyObj, res.status);
                 }
             } catch (err) {
-                handleKeyFailure(keyObj, 500);
+                // Ignore transient errors
             }
         }
     }
@@ -1063,7 +1075,7 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
-    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' blob: data:; style-src * 'unsafe-inline' https:; img-src * data: blob: https:; media-src * data: blob:; connect-src * blob: data:;");
+    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; style-src * 'unsafe-inline' https: http:; img-src * data: blob: https: http:; media-src * data: blob: https: http:; connect-src * data: blob: https: http:;");
 
     if (req.method === 'OPTIONS') {
         res.writeHead(204);
