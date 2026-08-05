@@ -1073,7 +1073,7 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://image.pollinations.ai; media-src 'self' data: blob:; connect-src 'self' data: blob: https://cdn.jsdelivr.net https://generativelanguage.googleapis.com https://api.telegram.org; worker-src 'self' blob:; child-src 'self' blob:;");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://image.pollinations.ai; media-src 'self' data: blob:; connect-src 'self' data: blob: https://cdn.jsdelivr.net https://generativelanguage.googleapis.com https://api.telegram.org; worker-src 'self' blob:; child-src 'self' blob:;");
 
 
     if (req.method === 'OPTIONS') {
