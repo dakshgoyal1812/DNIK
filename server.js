@@ -594,7 +594,40 @@ function pcmToWav(pcmBuffer, sampleRate = 24000, numChannels = 1, bitsPerSample 
     return Buffer.concat([header, pcmBuffer]);
 }
 
-// Helper: Ultra-Reliable High Quality Female Voice TTS Engine (StreamElements + Google)
+// Helper: ElevenLabs Hyper-Realistic Female Voice Synthesis (Bella - Original Alya Voice)
+async function fetchElevenLabsTTS(text) {
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (!apiKey) return null;
+    const voiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL";
+
+    try {
+        const payload = {
+            text: text,
+            model_id: "eleven_multilingual_v2",
+            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+        };
+
+        const res = await httpsPost(
+            `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+            {
+                'Accept': 'audio/mpeg',
+                'xi-api-key': apiKey,
+                'Content-Type': 'application/json'
+            },
+            payload,
+            5000
+        );
+
+        if (res.status === 200 && res.raw) {
+            return Buffer.from(res.raw, 'binary').toString('base64');
+        }
+    } catch (e) {
+        console.warn("ElevenLabs TTS warning:", e.message);
+    }
+    return null;
+}
+
+// Helper: Ultra-Reliable High Quality Female Voice TTS Engine (StreamElements Polly + Google)
 function fetchGoogleTranslateTTS(text) {
     return new Promise((resolve) => {
         if (!text) return resolve(null);
@@ -609,10 +642,15 @@ function fetchGoogleTranslateTTS(text) {
 
         if (!cleanText) return resolve(null);
 
+        let chosenVoice = "Aditi"; // Indian / Hindi Female
+        if (/^[a-zA-Z0-9\s.,!?'"#-]+$/.test(cleanText) && !/(main|aap|kaise|kya|hoon|hai|rahi|samajh|ji|thik|kar|karti|raho|master)/i.test(cleanText)) {
+            chosenVoice = "Joanna"; // Pure English Natural Female
+        }
+
         const cleanStr = encodeURIComponent(cleanText.substring(0, 300));
         
-        // Primary: StreamElements Voice API (Amazon Polly Aditi - High Quality Natural Female Voice)
-        const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Aditi&text=${cleanStr}`;
+        // Primary: StreamElements Amazon Polly Voice API (Aditi / Joanna Natural Female)
+        const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${chosenVoice}&text=${cleanStr}`;
 
         https.get(streamElementsUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } }, (res) => {
             if (res.statusCode === 200) {
@@ -740,7 +778,13 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
 
 async function fetchGoogleTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
     try {
-        return await fetchGeminiTTS(text, moodStr, voiceName);
+        const elevenLabsAudio = await fetchElevenLabsTTS(text);
+        if (elevenLabsAudio) return elevenLabsAudio;
+
+        const geminiAudio = await fetchGeminiTTS(text, moodStr);
+        if (geminiAudio) return geminiAudio;
+
+        return await fetchGoogleTranslateTTS(text);
     } catch (e) {
         return await fetchGoogleTranslateTTS(text);
     }
