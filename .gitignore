@@ -3,3 +3,7 @@ node_modules/
 *.log
 data/temp/
 data/backups/
+.env
+.env.*
+*.env
+
