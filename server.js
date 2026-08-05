@@ -72,7 +72,7 @@ function getRotatedKeys(providerName) {
 
 function handleKeyFailure(keyObj, statusCode = 500) {
     keyObj.failures++;
-    const cooldownMs = (statusCode === 429) ? 45000 : (statusCode === 401 || statusCode === 403) ? 600000 : 30000;
+    const cooldownMs = (statusCode === 429) ? 10000 : (statusCode === 401 || statusCode === 403) ? 30000 : 15000;
     keyObj.cooldownUntil = Date.now() + cooldownMs;
     console.warn(`[Key Rotator] Key ${keyObj.key.slice(0, 10)}... cooldown set for ${cooldownMs / 1000}s (Status: ${statusCode})`);
 }
@@ -462,18 +462,25 @@ async function fetchAIReply(userMessage, moodModeInput = 'normal') {
     const isCodingTask = isCodingOrTechnicalQuery(userMessage);
 
     let moodMode = moodModeInput || 'normal';
-    const msgLower = userMessage.toLowerCase();
-    if (isCodingTask || msgLower.match(/(code|function|fix|bug|install|script|build|python|js|html|css|api|error|debug|stack|exception|compile)/)) {
-        moodMode = 'engineer';
-    } else if (msgLower.match(/(sad|depressed|upset|help me|lonely|stress|scared|worried|crying|pain|hurt|heavy|heart)/)) {
-        moodMode = 'therapy';
-    } else if (msgLower.match(/(chill|joke|bro|lol|meme|funny|haha|chillout|game|play|party)/)) {
-        moodMode = 'chill';
+    
+    // Only auto-classify if user set 'auto' or provided no specific mood
+    if (!moodModeInput || moodModeInput === 'auto') {
+        const msgLower = userMessage.toLowerCase();
+        if (isCodingTask || msgLower.match(/(code|function|fix|bug|install|script|build|python|js|html|css|api|error|debug|stack|exception|compile)/)) {
+            moodMode = 'engineer';
+        } else if (msgLower.match(/(sad|depressed|upset|help me|lonely|stress|scared|worried|crying|pain|hurt|heavy|heart)/)) {
+            moodMode = 'therapy';
+        } else if (msgLower.match(/(chill|joke|bro|lol|meme|funny|haha|chillout|game|play|party)/)) {
+            moodMode = 'chill';
+        }
     }
 
     const MOODS = {
-        normal: "You are gentle, soft-spoken, incredibly polite, and deeply affectionate.",
-        chill: "You are relaxed, casual, and speak like a close friend. You use slang sometimes and keep things brief.",
+        normal: "You are gentle, soft-spoken, incredibly polite, and affectionate. You treat Master with deep respect and care.",
+        devoted: "You are an extremely devoted, loving, and attentive personal companion. You are eager to please Master, care for his well-being, and treat his happiness as your highest priority.",
+        romantic: "You are a charming, flirty, affectionate, and loving anime girlfriend. You speak with sweet, playful romance and deep warmth toward Master.",
+        tsundere: "You are a fiery, proud anime Tsundere companion. You act slightly flustered, sharp, and feisty on the surface ('Baka! It's not like I care or anything!'), but underneath you care deeply about Master.",
+        chill: "You are relaxed, casual, and speak like a close friend. You use slang sometimes and keep things brief and fun.",
         engineer: "You are strict, hyper-focused, and highly technical. You prioritize code accuracy and brutal efficiency over politeness.",
         therapy: "You are extremely empathetic, calm, and soothing. You act as a listener and give warm, comforting advice."
     };
