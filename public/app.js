@@ -1092,7 +1092,7 @@ function autoReact(replyText, audioContent = null) {
     return cleanText;
 }
 
-function addToLog(sender, text, moodTag = null, imageUrl = null) {
+function addToLog(sender, text, moodTag = null, imageUrl = null, audioContent = null) {
     if (!chatLog) return;
     const bubble = document.createElement('div');
     bubble.className = `msg-bubble ${sender === 'You' ? 'msg-user' : 'msg-ai'}`;
@@ -1108,6 +1108,17 @@ function addToLog(sender, text, moodTag = null, imageUrl = null) {
     }
 
     bubble.innerHTML = contentHtml;
+
+    if (audioContent && sender !== 'You') {
+        const voiceCard = document.createElement('div');
+        voiceCard.style.cssText = "margin-top:8px; display:inline-flex; align-items:center; gap:8px; background:rgba(56, 189, 248, 0.15); border:1px solid rgba(56, 189, 248, 0.3); padding:4px 10px; border-radius:16px; cursor:pointer; font-size:0.75rem; color:#38bdf8; font-weight:600;";
+        voiceCard.innerHTML = `<span style="font-size:12px;">🔊</span> <span>Voice Note</span>`;
+        voiceCard.title = "Click to replay voice message";
+        voiceCard.addEventListener('click', () => {
+            playRealFemaleAudio(audioContent);
+        });
+        bubble.appendChild(voiceCard);
+    }
 
     if (moodTag && sender !== 'You') {
         const tag = document.createElement('div');
@@ -1167,11 +1178,11 @@ async function sendChatMessage(userText) {
             triggerGesture(gestureTag);
         }
 
-        const cleanReply = autoReact(fullReply, data.audioContent);
+        const cleanReply = autoReact(fullReply, data.audioContent || data.audio);
 
         setStatus(`Speaking: "${cleanReply.substring(0, 30)}..."`, '#4ade80');
 
-        addToLog('AI', cleanReply, moodTag, data.imageUrl);
+        addToLog('AI', cleanReply, moodTag, data.imageUrl, data.audioContent || data.audio);
     } catch (err) {
         console.error('Chat error:', err);
         addToLog('AI', 'Sorry, server error occurred!');

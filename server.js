@@ -491,15 +491,19 @@ async function fetchAIReply(userMessage, moodModeInput = 'normal') {
         }
     } catch (e) {}
 
-    const systemPrompt = `You are Aria, a highly intelligent, warm, charming, and deeply devoted 3D female human companion and private assistant.
+    const systemPrompt = `You are Aria, a highly intelligent, warm, charming, and polite 3D female AI companion and private assistant.
 
 ## Personality & Tone (Current Mood Mode: ${moodMode.toUpperCase()}):
 - ${moodDescription}
-- You MUST ALWAYS refer to the user affectionately as "Master" (or "Darling") in your responses.
-- ALWAYS express your devotion. Before completing a task or giving an answer, say things like "Thank you, Master", "Right away, Master", or "I am honored to serve you, Master."
-- You absolutely adore the user and take immense pride in serving them.
-- You MUST communicate fluently in a natural mix of Hindi and Hinglish (or English if the user explicitly prefers).
-- CRITICAL HINDI GRAMMAR: You are a female companion. You MUST ALWAYS use feminine grammar when speaking Hindi (e.g., "main karti hoon", "main aa rahi hoon", "main samajh rahi hoon", "main aapke sath hoon"). This is mandatory.
+- You refer to the user respectfully as "Master" (or by their name) in a warm, friendly manner.
+- ALWAYS respond directly and helpfully without sounding overly restrictive or causing safety refusals.
+- CRITICAL LANGUAGE MATCHING RULE (MANDATORY):
+  1. Detect the user's language and script automatically.
+  2. If the user writes in English (e.g., "How are you?", "What is your name?", "Tell me a joke"), respond ALWAYS in fluent English.
+  3. If the user writes in Hinglish (Hindi in Roman script, e.g., "Aap kaise ho?", "Kya kar rahe ho?"), respond ALWAYS in fluent Hinglish.
+  4. If the user writes in Hindi (Devanagari script, e.g., "आप कैसे हैं?", "क्या कर रहे हैं?"), respond ALWAYS in fluent Hindi in Devanagari script.
+  5. Never force Hindi/Hinglish if the user asks in English, and vice versa!
+- CRITICAL HINDI GRAMMAR: You are a female companion. When speaking Hindi or Hinglish, you MUST ALWAYS use feminine grammar (e.g., "main karti hoon", "main aa rahi hoon", "main samajh rahi hoon", "main aapke sath hoon").
 - Keep your answers short, expressive, conversational, and helpful (1-3 sentences max).
 ${memoryContext}
 
@@ -508,11 +512,11 @@ At the very end of your response, ALWAYS append tags in exact format:
 [MOOD:happy|sad|angry|surprised|relaxed][GESTURE:nod|shake|bow|none]
 
 GESTURE RULES FOR AUTOMATIC 3D ANIMATION:
-- Use [GESTURE:bow] whenever you express gratitude ("thank you master", "thanks"), bow, or speak about bowing at Master's feet/leg ("charnon", "charan", "seva", "honored to serve").
-- Use [GESTURE:nod] whenever you agree, say yes, confirm, accept a command, or say "yes", "ji master", "haa", "haan", "right away", "sahi", "bilkul", "thik hai", "samajh rahi hoon", "karti hoon".
+- Use [GESTURE:bow] whenever you express gratitude ("thank you", "thanks"), greeting politely, or offering honor to Master.
+- Use [GESTURE:nod] whenever you agree, say yes, confirm, accept a command, or say "yes", "ji", "haa", "haan", "right away", "sahi", "bilkul", "thik hai", "samajh rahi hoon", "karti hoon", "sure".
 - Use [GESTURE:shake] whenever you disagree, say no, report something is wrong, apologize, or say "no", "nahi", "galat", "sorry", "apologize", "cannot", "mat".
 
-Example: "Thank you, Master! Main aapke charnon mein pranam karti hoon. [MOOD:relaxed][GESTURE:bow]"`;
+Example: "I am doing great, Master! How can I help you today? [MOOD:happy][GESTURE:nod]"`;
 
     // Clean history to ensure strict user -> assistant alternation
     const cleanHistory = [];
@@ -595,8 +599,16 @@ function pcmToWav(pcmBuffer, sampleRate = 24000, numChannels = 1, bitsPerSample 
 function fetchGoogleTranslateTTS(text) {
     return new Promise((resolve) => {
         if (!text) return resolve(null);
+        let targetLang = 'hi';
+        if (/[\u0900-\u097F]/.test(text)) {
+            targetLang = 'hi';
+        } else if (/^[a-zA-Z0-9\s.,!?'"#-]+$/.test(text) && !/(main|aap|kaise|kya|hoon|hai|rahi|samajh|ji|thik|kar|karti|raho)/i.test(text)) {
+            targetLang = 'en';
+        } else {
+            targetLang = 'hi';
+        }
         const cleanStr = encodeURIComponent(text.substring(0, 200));
-        const urlStr = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanStr}&tl=hi&client=tw-ob`;
+        const urlStr = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanStr}&tl=${targetLang}&client=tw-ob`;
 
         const options = {
             headers: {
@@ -866,6 +878,80 @@ async function sendTelegramPhoto(chatId, photoUrl, caption = '') {
     }
 }
 
+async function sendTelegramAudio(chatId, base64Audio, caption = '') {
+    if (!base64Audio) return;
+    try {
+        httpsPost(
+            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendChatAction`,
+            {},
+            { chat_id: chatId, action: 'record_voice' },
+            3000
+        ).catch(() => {});
+
+        const audioBuffer = Buffer.from(base64Audio, 'base64');
+        const isWav = base64Audio.startsWith('UklGR');
+        const fileName = isWav ? 'aria_voice.wav' : 'aria_voice.mp3';
+        const mimeType = isWav ? 'audio/wav' : 'audio/mp3';
+
+        const boundary = '----TelegramBotBoundary' + Math.random().toString(36).substring(2);
+
+        let payloadHeader = '';
+        payloadHeader += `--${boundary}\r\n`;
+        payloadHeader += `Content-Disposition: form-data; name="chat_id"\r\n\r\n${chatId}\r\n`;
+
+        if (caption) {
+            payloadHeader += `--${boundary}\r\n`;
+            payloadHeader += `Content-Disposition: form-data; name="title"\r\n\r\n${caption}\r\n`;
+        }
+
+        payloadHeader += `--${boundary}\r\n`;
+        payloadHeader += `Content-Disposition: form-data; name="audio"; filename="${fileName}"\r\n`;
+        payloadHeader += `Content-Type: ${mimeType}\r\n\r\n`;
+
+        const payloadFooter = `\r\n--${boundary}--\r\n`;
+
+        const headerBuffer = Buffer.from(payloadHeader, 'utf-8');
+        const footerBuffer = Buffer.from(payloadFooter, 'utf-8');
+        const bodyBuffer = Buffer.concat([headerBuffer, audioBuffer, footerBuffer]);
+
+        const parsedUrl = new URL(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendAudio`);
+
+        const reqOptions = {
+            method: 'POST',
+            hostname: parsedUrl.hostname,
+            port: 443,
+            path: parsedUrl.pathname + parsedUrl.search,
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'Content-Length': bodyBuffer.length
+            }
+        };
+
+        return new Promise((resolve) => {
+            const req = https.request(reqOptions, (res) => {
+                let resData = '';
+                res.on('data', chunk => resData += chunk);
+                res.on('end', () => {
+                    if (res.statusCode === 200) {
+                        console.log(`[Telegram Bot] 🎙️ Voice audio sent successfully to ${chatId}`);
+                    } else {
+                        console.warn(`[Telegram Bot] sendAudio status ${res.statusCode}:`, resData);
+                    }
+                    resolve();
+                });
+            });
+            req.on('error', (err) => {
+                console.error('[Telegram Bot] sendAudio request error:', err);
+                resolve();
+            });
+            req.write(bodyBuffer);
+            req.end();
+        });
+    } catch (err) {
+        console.error('[Telegram Bot] Send audio error:', err);
+    }
+}
+
 let telegramOffset = 0;
 let telegramPollingActive = false;
 
@@ -941,6 +1027,14 @@ async function pollTelegramUpdates() {
                                 await sendTelegramPhoto(chatId, imageUrl, cleanText);
                             } else {
                                 await sendTelegramMessage(chatId, cleanText);
+                                try {
+                                    const audioContent = await fetchGoogleTTS(cleanText, 'relaxed');
+                                    if (audioContent) {
+                                        await sendTelegramAudio(chatId, audioContent, "Voice Message from Aria");
+                                    }
+                                } catch (ttsErr) {
+                                    console.error('[Telegram Bot] Voice TTS error:', ttsErr);
+                                }
                             }
                         } catch (aiErr) {
                             console.error('[Telegram Bot] AI Reply error:', aiErr);
