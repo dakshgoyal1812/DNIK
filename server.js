@@ -266,23 +266,33 @@ function isCodingOrTechnicalQuery(text) {
 
 // --- Pollinations AI Image Generation ---
 function isImageGenerationRequest(text) {
-    const lower = text.toLowerCase();
-    const imageKeywords = [
-        "image of", "photo of", "draw a", "draw an", "generate image", "create image",
-        "picture of", "make an image", "make a photo", "photo banao", "tasveer banao",
-        "drawing of", "paint a", "image banao", "pic of", "generate photo"
+    if (!text) return false;
+    const lower = text.toLowerCase().trim();
+    
+    // Comprehensive regex for image/photo creation intent
+    const imageRegex = /(create|generate|make|draw|paint|banao|show|send|give)\s+(me\s+)?(a\s+|an\s+|the\s+)?(image|photo|picture|pic|drawing|painting|tasveer|avatar)/i;
+    
+    const keyPhrases = [
+        "image of", "photo of", "picture of", "pic of", "drawing of", "painting of", "tasveer of",
+        "image banao", "photo banao", "tasveer banao", "pic banao", "picture banao",
+        "generate image", "create image", "make image", "draw a", "draw an", "paint a", "paint an"
     ];
-    return imageKeywords.some(kw => lower.includes(kw));
+    
+    return imageRegex.test(lower) || keyPhrases.some(kw => lower.includes(kw));
 }
 
 function generatePollinationsImage(userMessage) {
-    let prompt = userMessage.replace(/generate image of|create image of|make an image of|make a photo of|photo banao|tasveer banao|image banao|draw a|draw an|photo of|image of|picture of|draw/gi, '').trim();
-    if (!prompt) prompt = userMessage;
+    let prompt = userMessage
+        .replace(/(please\s+)?(can\s+you\s+)?(create|generate|make|draw|paint|banao|show|send|give)\s+(me\s+)?(a\s+|an\s+|the\s+)?(image|photo|picture|pic|drawing|painting|tasveer|avatar)\s+(of\s+)?/gi, '')
+        .replace(/(photo|image|picture|tasveer|pic)\s+banao/gi, '')
+        .trim();
 
-    const seed = Math.floor(Math.random() * 1000000);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
+    if (!prompt || prompt.length < 2) prompt = userMessage;
 
-    const replyText = `Right away, Master! ✨ Maine aapke kehne par ye beautiful image generate kar di hai:\n\n![${prompt}](${imageUrl})\n\n[MOOD:happy][GESTURE:bow]`;
+    // Clean Pollinations AI URL (returns 200 OK)
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
+
+    const replyText = `Right away, Master! ✨ Maine aapke kehne par ye beautiful image generate kar di hai. [MOOD:happy][GESTURE:bow]`;
 
     return { replyText, imageUrl };
 }
@@ -764,6 +774,191 @@ function generateFallbackAIResponse(message) {
     return `${reply} [MOOD:${mood}][GESTURE:${gesture}]`;
 }
 
+// --- Telegram Bot Integration ---
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8791160924:AAEe3ttMsJCmCCx1bolXUPMFQ3Qv3c8X9ww';
+let telegramBotInfo = { active: false, username: 'Alisa989_bot', name: 'Alisa' };
+
+async function initTelegramBotInfo() {
+    try {
+        // Clear any old webhook so long-polling works smoothly
+        await httpsPost(
+            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/deleteWebhook?drop_pending_updates=false`,
+            {},
+            {},
+            5000
+        );
+        const res = await httpsPost(
+            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe`,
+            {},
+            {},
+            5000
+        );
+        if (res.status === 200 && res.data && res.data.ok) {
+            telegramBotInfo = {
+                active: true,
+                username: res.data.result.username || 'Alisa989_bot',
+                name: res.data.result.first_name || 'Alisa'
+            };
+            console.log(`[Telegram Bot] ✅ Verified Bot: @${telegramBotInfo.username} (${telegramBotInfo.name})`);
+        }
+    } catch (e) {
+        console.warn(`[Telegram Bot] Could not fetch bot info: ${e.message}`);
+    }
+}
+
+async function sendTelegramMessage(chatId, text, options = {}) {
+    const payload = {
+        chat_id: chatId,
+        text: text,
+        parse_mode: options.parse_mode || 'Markdown',
+        ...options
+    };
+    try {
+        const res = await httpsPost(
+            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+            {},
+            payload,
+            7000
+        );
+        if (res.status !== 200 && payload.parse_mode) {
+            delete payload.parse_mode;
+            await httpsPost(
+                `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+                {},
+                payload,
+                7000
+            );
+        }
+    } catch (err) {
+        console.error('[Telegram Bot] Send message error:', err);
+    }
+}
+
+async function sendTelegramPhoto(chatId, photoUrl, caption = '') {
+    const payload = {
+        chat_id: chatId,
+        photo: photoUrl,
+        caption: caption
+    };
+    try {
+        // Send upload photo status indicator
+        httpsPost(
+            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendChatAction`,
+            {},
+            { chat_id: chatId, action: 'upload_photo' },
+            3000
+        ).catch(() => {});
+
+        const res = await httpsPost(
+            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
+            {},
+            payload,
+            15000
+        );
+
+        if (res.status !== 200) {
+            console.warn('[Telegram Bot] sendPhoto non-200 status:', res.status, res.data || res.raw);
+            await sendTelegramMessage(chatId, `${caption}\n\n📷 *AI Image Link:* ${photoUrl}`);
+        }
+    } catch (err) {
+        console.error('[Telegram Bot] Send photo error:', err);
+        await sendTelegramMessage(chatId, `${caption}\n\n📷 *AI Image Link:* ${photoUrl}`);
+    }
+}
+
+let telegramOffset = 0;
+let telegramPollingActive = false;
+
+async function pollTelegramUpdates() {
+    if (telegramPollingActive) return;
+    telegramPollingActive = true;
+    await initTelegramBotInfo();
+    console.log(`[Telegram Bot] 🤖 Bot polling service active for @${telegramBotInfo.username || 'Token'}`);
+
+    while (true) {
+        try {
+            const res = await httpsPost(
+                `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`,
+                {},
+                { offset: telegramOffset, timeout: 15, allowed_updates: ['message'] },
+                20000
+            );
+
+            if (res.status === 200 && res.data && res.data.ok && Array.isArray(res.data.result)) {
+                for (const update of res.data.result) {
+                    telegramOffset = update.update_id + 1;
+                    if (update.message && update.message.text) {
+                        const chatId = update.message.chat.id;
+                        const userText = update.message.text.trim();
+                        const userName = update.message.from?.first_name || 'Master';
+
+                        console.log(`[Telegram Bot] 📩 Message from ${userName} (${chatId}): "${userText}"`);
+
+                        if (userText === '/start' || userText === '/help') {
+                            const welcomeMsg = `✨ *Namaste ${userName}!* ✨\n\nMain *Aria* hoon, aapki 3D AI Companion! 💃\n\nAap mujhse yahan Telegram par baatein kar sakte hain, sawal pooch sakte hain, ya photos generate karwa sakte hain (jaise: *"generate image of beautiful sunset"*).\n\n*Commands:*\n• /start - Restart conversation & view options\n• /memory - View long-term facts stored\n• /help - Get assistance\n\n*Aapki seva mein hamesha hajir hoon, Master!* 🙏`;
+                            await sendTelegramMessage(chatId, welcomeMsg);
+                            continue;
+                        }
+
+                        if (userText === '/memory' || userText === '/facts') {
+                            const mems = executeSystemTool("get_memories");
+                            await sendTelegramMessage(chatId, `🧠 *Long-term Memory Facts:*\n\`\`\`json\n${mems}\n\`\`\``);
+                            continue;
+                        }
+
+                        // Send typing action indicator
+                        httpsPost(
+                            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendChatAction`,
+                            {},
+                            { chat_id: chatId, action: 'typing' },
+                            3000
+                        ).catch(() => {});
+
+                        try {
+                            const aiRes = await fetchAIReply(userText, 'normal');
+                            let replyText = '';
+                            let imageUrl = null;
+
+                            if (aiRes && typeof aiRes === 'object') {
+                                replyText = aiRes.replyText || '';
+                                imageUrl = aiRes.imageUrl || null;
+                            } else if (typeof aiRes === 'string') {
+                                replyText = aiRes;
+                            }
+
+                            if (!replyText) {
+                                replyText = generateFallbackAIResponse(userText);
+                            }
+
+                            const cleanText = replyText
+                                .replace(/!\[.*?\]\(.*?\)/gi, '')
+                                .replace(/\[MOOD:[^\]]+\]/gi, '')
+                                .replace(/\[GESTURE:[^\]]+\]/gi, '')
+                                .replace(/\[ACTION:[^\]]+\]/gi, '')
+                                .trim();
+
+                            if (imageUrl) {
+                                await sendTelegramPhoto(chatId, imageUrl, cleanText);
+                            } else {
+                                await sendTelegramMessage(chatId, cleanText);
+                            }
+                        } catch (aiErr) {
+                            console.error('[Telegram Bot] AI Reply error:', aiErr);
+                            await sendTelegramMessage(chatId, "Kripya kshama karein Master, abhi server busy hai. Main aapke sath hoon! 🙏");
+                        }
+                    }
+                }
+            } else if (res.status === 401 || res.status === 404) {
+                console.error(`[Telegram Bot] ⚠️ Invalid Telegram Bot Token: ${TELEGRAM_BOT_TOKEN}`);
+                await new Promise(r => setTimeout(r, 60000));
+            }
+        } catch (err) {
+            console.error('[Telegram Bot] Polling error:', err.message);
+        }
+        await new Promise(r => setTimeout(r, 1500));
+    }
+}
+
 const server = http.createServer(async (req, res) => {
     // Enable CORS & Content Security Policy (allows unsafe-eval for Three.js shaders & dynamic modules)
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -790,6 +985,13 @@ const server = http.createServer(async (req, res) => {
     if (reqUrl === '/health' || reqUrl === '/ping') {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end('OK');
+        return;
+    }
+
+    // Telegram Bot status endpoint
+    if (reqUrl === '/telegram-status') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(telegramBotInfo));
         return;
     }
 
@@ -830,6 +1032,7 @@ const server = http.createServer(async (req, res) => {
                 let gesture = gestureMatch ? gestureMatch[1].trim().toLowerCase() : 'none';
 
                 const cleanText = replyText
+                    .replace(/!\[.*?\]\(.*?\)/gi, '')
                     .replace(/\[MOOD:[^\]]+\]/gi, '')
                     .replace(/\[GESTURE:[^\]]+\]/gi, '')
                     .replace(/\[ACTION:[^\]]+\]/gi, '')
@@ -970,6 +1173,9 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log(`==========================================`);
     console.log(`  ✨ Aria 3D AI Studio running on port ${PORT}`);
     console.log(`  🌐 Bound to 0.0.0.0 (Render Free Tier Ready)`);
+    console.log(`  ✈️ Telegram Bot Service Active (@Alisa989_bot)`);
     console.log(`  ⚡ Zero-Dependency Ultra-Lightweight Server (<30MB RAM)`);
     console.log(`==========================================`);
+    pollTelegramUpdates().catch(err => console.error("[Telegram Polling Error]", err));
 });
+
