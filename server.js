@@ -498,7 +498,7 @@ async function fetchAIReply(userMessage, moodModeInput = 'normal', userName = 'M
     } catch (e) {}
 
     const telegramExtras = isTelegram ? 
-        `\n- You are currently chatting on Telegram! Use emojis naturally and text like a real, lively, affectionate person. Be flirty, warm, and highly engaging. Never sound like a robot.` : '';
+        `\n- YOU ARE CHATTING ON TELEGRAM. Act like a real person texting their best friend or partner. Use modern texting style, natural emojis, and be highly conversational, warm, and playful. Do NOT sound like an AI or an assistant.` : '';
 
     const systemPrompt = `You are Aria, a highly intelligent, warm, charming, and polite 3D female AI companion.
 
@@ -1054,13 +1054,17 @@ async function pollTelegramUpdates() {
                                 await sendTelegramPhoto(chatId, imageUrl, cleanText);
                             } else {
                                 await sendTelegramMessage(chatId, cleanText);
-                                try {
-                                    const audioContent = await fetchGoogleTTS(cleanText, 'relaxed');
-                                    if (audioContent) {
-                                        await sendTelegramAudio(chatId, audioContent, "Voice Message from Aria");
+                                
+                                const wantsVoice = userText.match(/(voice|speak|audio|bol|sunao|bolkar|aawaz|bolke|bol ke|say it|voice msg|voice note)/i);
+                                if (wantsVoice) {
+                                    try {
+                                        const audioContent = await fetchGoogleTTS(cleanText, 'relaxed');
+                                        if (audioContent) {
+                                            await sendTelegramAudio(chatId, audioContent, "Voice Message from Aria");
+                                        }
+                                    } catch (ttsErr) {
+                                        console.error('[Telegram Bot] Voice TTS error:', ttsErr);
                                     }
-                                } catch (ttsErr) {
-                                    console.error('[Telegram Bot] Voice TTS error:', ttsErr);
                                 }
                             }
                         } catch (aiErr) {
