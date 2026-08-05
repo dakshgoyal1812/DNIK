@@ -635,9 +635,10 @@ function fetchGoogleTranslateTTS(text) {
 }
 
 // 2. Call Gemini 3.1 Flash TTS with Google Key Rotation (Puck Voice - Anime Style)
-async function fetchGeminiTTS(text, moodStr = 'relaxed') {
+async function fetchGeminiTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
     if (!text) return null;
 
+    const chosenVoice = voiceName || 'Zephyr';
     const baseStyle = "A high-pitched and playful young female voice with a soft, expressive quality, suited for anime-style character performances.";
     const moodStyle = moodStr ? ` Express emotion: ${moodStr}.` : "";
     let langLocale = "English (United States)";
@@ -646,7 +647,7 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     }
     const styleInstruction = `${baseStyle}${moodStyle}`;
 
-    const fullPrompt = `Instructions: ${styleInstruction}\nLanguage / locale: ${langLocale}\nVoice: Zephyr\nText to speak: ${text}`;
+    const fullPrompt = `Instructions: ${styleInstruction}\nLanguage / locale: ${langLocale}\nVoice: ${chosenVoice}\nText to speak: ${text}`;
 
     const payload = {
         contents: [{
@@ -657,7 +658,7 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
             speechConfig: {
                 voiceConfig: {
                     prebuiltVoiceConfig: {
-                        voiceName: "Zephyr"
+                        voiceName: chosenVoice
                     }
                 }
             }
@@ -702,9 +703,9 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     return await fetchGoogleTranslateTTS(text);
 }
 
-async function fetchGoogleTTS(text, moodStr = 'relaxed') {
+async function fetchGoogleTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
     try {
-        return await fetchGeminiTTS(text, moodStr);
+        return await fetchGeminiTTS(text, moodStr, voiceName);
     } catch (e) {
         return await fetchGoogleTranslateTTS(text);
     }
@@ -1102,6 +1103,7 @@ const server = http.createServer(async (req, res) => {
                 const data = JSON.parse(body || '{}');
                 const userMessage = data.message || '';
                 const moodMode = data.moodMode || 'normal';
+                const voiceName = data.voiceName || 'Zephyr';
 
                 let replyText = '';
                 let imageUrl = null;
@@ -1152,7 +1154,7 @@ const server = http.createServer(async (req, res) => {
                 let audioContent = null;
                 if (!imageUrl) {
                     try {
-                        audioContent = await fetchGoogleTTS(cleanText, mood);
+                        audioContent = await fetchGoogleTTS(cleanText, mood, voiceName);
                     } catch (ttsErr) {
                         console.error("TTS error:", ttsErr);
                     }

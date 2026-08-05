@@ -1144,11 +1144,13 @@ async function sendChatMessage(userText) {
 
         const moodSelect = document.getElementById('roleplayMoodSelect');
         const moodMode = moodSelect ? moodSelect.value : 'normal';
+        const voiceSelect = document.getElementById('voiceSelect');
+        const voiceName = voiceSelect ? voiceSelect.value : 'Zephyr';
 
         const res = await fetch('/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text, moodMode: moodMode })
+            body: JSON.stringify({ message: text, moodMode: moodMode, voiceName: voiceName })
         });
         const data = await res.json();
         const fullReply = data.reply || '';
@@ -1265,6 +1267,33 @@ function setupChatSystem() {
     if (chatInput) {
         chatInput.onkeydown = (e) => {
             if (e.key === 'Enter') sendChatMessage();
+        };
+    }
+
+    const testVoiceBtn = document.getElementById('testVoiceBtn');
+    if (testVoiceBtn) {
+        testVoiceBtn.onclick = async () => {
+            const voiceSelect = document.getElementById('voiceSelect');
+            const selectedVoice = voiceSelect ? voiceSelect.value : 'Zephyr';
+            setStatus(`Testing voice (${selectedVoice})...`, '#38bdf8');
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: "Namaste Master! Voice test sequence initiated.", moodMode: 'normal', voiceName: selectedVoice })
+                });
+                const data = await res.json();
+                const audio = data.audioContent || data.audio;
+                if (audio) {
+                    playRealFemaleAudio(audio);
+                    setStatus(`Playing voice test (${selectedVoice})`, '#4ade80');
+                } else {
+                    setStatus(`Voice test ready (${selectedVoice})`, '#4ade80');
+                }
+            } catch (e) {
+                console.error("Voice test error:", e);
+                setStatus('Voice test failed', '#f87171');
+            }
         };
     }
 

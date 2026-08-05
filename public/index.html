@@ -712,9 +712,32 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 
   <!-- ---------- COMMS ---------- -->
   <section class="panel panel--ticks comms rise" style="--i:1" aria-label="Conversation with Aria">
-    <div class="panel-head">
-      <h2 class="label">Comms Relay</h2>
-      <span class="count mono" id="msgCount">01 msg</span>
+    <div class="panel-head" style="display: flex; align-items: center; justify-space: space-between; flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <h2 class="label">Comms Relay</h2>
+        <span class="count mono" id="msgCount">01 msg</span>
+      </div>
+      <div class="voice-controls" style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+        <label for="voiceSelect" style="font-family: var(--font-mono); font-size: 0.6875rem; color: var(--aqua); display: flex; align-items: center; gap: 4px;" title="Voice Model">
+          🎙️
+        </label>
+        <select id="voiceSelect" title="Select Aria's Voice Model" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-family: var(--font-mono); font-size: 0.6875rem; padding: 4px 8px; border-radius: 12px; outline: none; cursor: pointer;">
+          <option value="Zephyr" selected>Voice: Zephyr (Soft Anime Female)</option>
+          <option value="Puck">Voice: Puck (Playful Female)</option>
+          <option value="Aoede">Voice: Aoede (Warm Expressive)</option>
+          <option value="Kore">Voice: Kore (Gentle Female)</option>
+          <option value="Fenrir">Voice: Fenrir (Energetic Female)</option>
+        </select>
+        <select id="roleplayMoodSelect" title="Select Persona Mode" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(129, 140, 248, 0.4); color: #818cf8; font-family: var(--font-mono); font-size: 0.6875rem; padding: 4px 8px; border-radius: 12px; outline: none; cursor: pointer;">
+          <option value="normal" selected>Mode: Normal</option>
+          <option value="chill">Mode: Chill</option>
+          <option value="engineer">Mode: Engineer</option>
+          <option value="therapy">Mode: Therapy</option>
+        </select>
+        <button id="testVoiceBtn" type="button" title="Test selected voice playback" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: var(--aqua); padding: 3px 8px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+          🔊 Test
+        </button>
+      </div>
     </div>
 
     <div id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
