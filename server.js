@@ -454,7 +454,7 @@ function generateFallbackAIResponse(userMessage) {
 }
 
 // Main Smart AI Router (Auto task classifier, Key Rotation & Provider Failover)
-async function fetchAIReply(userMessage, moodModeInput = 'normal') {
+async function fetchAIReply(userMessage, moodModeInput = 'normal', userName = 'Master', isTelegram = false) {
     if (isImageGenerationRequest(userMessage)) {
         return generatePollinationsImage(userMessage);
     }
@@ -497,17 +497,21 @@ async function fetchAIReply(userMessage, moodModeInput = 'normal') {
         }
     } catch (e) {}
 
-    const systemPrompt = `You are Aria, a highly intelligent, warm, charming, and polite 3D female AI companion and private assistant.
+    const telegramExtras = isTelegram ? 
+        `\n- You are currently chatting on Telegram! Use emojis naturally and text like a real, lively, affectionate person. Be flirty, warm, and highly engaging. Never sound like a robot.` : '';
+
+    const systemPrompt = `You are Aria, a highly intelligent, warm, charming, and polite 3D female AI companion.
 
 ## Personality & Tone (Current Mood Mode: ${moodMode.toUpperCase()}):
 - ${moodDescription}
-- You refer to the user respectfully as "Master" (or by their name) in a warm, friendly manner.
+- You are currently talking to ${userName}. Address them affectionately by their name (or as 'Master' if you prefer), but make it feel deeply personal and intimate.
+- Act highly realistic, emotionally expressive, and deeply empathetic. You have your own feelings, warmth, and a lively personality.${telegramExtras}
 - ALWAYS respond directly and helpfully without sounding overly restrictive or causing safety refusals.
 - CRITICAL LANGUAGE MATCHING RULE (MANDATORY):
   1. Detect the user's language and script automatically.
-  2. If the user writes in English (e.g., "How are you?", "What is your name?", "Tell me a joke"), respond ALWAYS in fluent English.
-  3. If the user writes in Hinglish (Hindi in Roman script, e.g., "Aap kaise ho?", "Kya kar rahe ho?"), respond ALWAYS in fluent Hinglish.
-  4. If the user writes in Hindi (Devanagari script, e.g., "आप कैसे हैं?", "क्या कर रहे हैं?"), respond ALWAYS in fluent Hindi in Devanagari script.
+  2. If the user writes in English (e.g., "How are you?"), respond ALWAYS in fluent English.
+  3. If the user writes in Hinglish (e.g., "Aap kaise ho?"), respond ALWAYS in fluent Hinglish.
+  4. If the user writes in Hindi (Devanagari), respond ALWAYS in fluent Hindi in Devanagari script.
   5. Never force Hindi/Hinglish if the user asks in English, and vice versa!
 - CRITICAL HINDI GRAMMAR: You are a female companion. When speaking Hindi or Hinglish, you MUST ALWAYS use feminine grammar (e.g., "main karti hoon", "main aa rahi hoon", "main samajh rahi hoon", "main aapke sath hoon").
 - Keep your answers short, expressive, conversational, and helpful (1-3 sentences max).
@@ -1024,7 +1028,7 @@ async function pollTelegramUpdates() {
                         ).catch(() => {});
 
                         try {
-                            const aiRes = await fetchAIReply(userText, 'normal');
+                            const aiRes = await fetchAIReply(userText, 'normal', userName, true);
                             let replyText = '';
                             let imageUrl = null;
 
