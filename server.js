@@ -259,18 +259,18 @@ function isCodingOrTechnicalQuery(text) {
     return codingKeywords.some(kw => lower.includes(kw));
 }
 
-// --- Pollinations AI Image Generation ---
+// --- Pollinations AI Image Generation (Alya High Quality Engine) ---
 function isImageGenerationRequest(text) {
     if (!text) return false;
     const lower = text.toLowerCase().trim();
     
-    // Comprehensive regex for image/photo creation intent
-    const imageRegex = /(create|generate|make|draw|paint|banao|show|send|give)\s+(me\s+)?(a\s+|an\s+|the\s+)?(image|photo|picture|pic|drawing|painting|tasveer|avatar)/i;
+    const imageRegex = /(create|generate|make|draw|paint|banao|show|send|give|dikhaye|dikhao)\s+(me\s+)?(a\s+|an\s+|the\s+)?(image|photo|picture|pic|drawing|painting|tasveer|avatar)/i;
     
     const keyPhrases = [
         "image of", "photo of", "picture of", "pic of", "drawing of", "painting of", "tasveer of",
         "image banao", "photo banao", "tasveer banao", "pic banao", "picture banao",
-        "generate image", "create image", "make image", "draw a", "draw an", "paint a", "paint an"
+        "generate image", "create image", "make image", "draw a", "draw an", "paint a", "paint an",
+        "photo dikhao", "image dikhao", "tasveer dikhao"
     ];
     
     return imageRegex.test(lower) || keyPhrases.some(kw => lower.includes(kw));
@@ -278,16 +278,17 @@ function isImageGenerationRequest(text) {
 
 function generatePollinationsImage(userMessage) {
     let prompt = userMessage
-        .replace(/(please\s+)?(can\s+you\s+)?(create|generate|make|draw|paint|banao|show|send|give)\s+(me\s+)?(a\s+|an\s+|the\s+)?(image|photo|picture|pic|drawing|painting|tasveer|avatar)\s+(of\s+)?/gi, '')
+        .replace(/(please\s+)?(can\s+you\s+)?(create|generate|make|draw|paint|banao|show|send|give|dikhaye|dikhao)\s+(me\s+)?(a\s+|an\s+|the\s+)?(image|photo|picture|pic|drawing|painting|tasveer|avatar)\s+(of\s+)?/gi, '')
         .replace(/(photo|image|picture|tasveer|pic)\s+banao/gi, '')
         .trim();
 
     if (!prompt || prompt.length < 2) prompt = userMessage;
 
-    // Clean Pollinations AI URL (returns 200 OK)
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
+    const seed = Math.floor(Math.random() * 1000000);
+    // HD Pollinations AI URL with nologo and seed for instant 200 OK rendering
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&seed=${seed}&width=1024&height=1024`;
 
-    const replyText = `Right away, Master! ✨ Maine aapke kehne par ye beautiful image generate kar di hai. [MOOD:happy][GESTURE:bow]`;
+    const replyText = `Right away, Master! ✨ Maine aapke kehne par ye beautiful HD image generate kar di hai. [MOOD:happy][GESTURE:bow]`;
 
     return { replyText, imageUrl };
 }
