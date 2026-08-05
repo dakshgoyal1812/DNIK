@@ -9,23 +9,22 @@ const { execSync } = require('child_process');
 
 const PORT = process.env.PORT || 3000;
 
-// Provided Multi-Provider API Key Pools (Rotated dynamically with auto-failover & rate-limit cooldown)
 const API_POOLS = {
-    groq: [
+    groq: process.env.GROQ_API_KEYS ? process.env.GROQ_API_KEYS.split(',').map(k => k.trim()).filter(Boolean) : [
         "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",
         "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",
         "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",
         "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"
     ],
-    nvidia: [
+    nvidia: process.env.NVIDIA_API_KEYS ? process.env.NVIDIA_API_KEYS.split(',').map(k => k.trim()).filter(Boolean) : [
         "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",
         "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"
     ],
-    openrouter: [
+    openrouter: process.env.OPENROUTER_API_KEYS ? process.env.OPENROUTER_API_KEYS.split(',').map(k => k.trim()).filter(Boolean) : [
         "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",
         "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"
     ],
-    google: [
+    google: process.env.GEMINI_API_KEYS ? process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(Boolean) : [
         "AQ.Ab8RN6If7YhrZfWcVHQ-Pd8LZB8UoxwO72wloUVBzJJjLcSqHw",
         "AQ.Ab8RN6KQYzgg5lU196rruJNZm303pcj81XYf7CUj18Tzb-Y-DA",
         "AQ.Ab8RN6IhzCRXUI65vPk8E4y5qwLHaMx9-xKcXeWZrXHlS6gpBQ"
