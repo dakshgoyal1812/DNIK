@@ -1752,8 +1752,6 @@ pollCpuSystemMonitor();
 // =====================================================================
 // --- REAL-TIME VRM LIP-SYNC AUDIO ENGINE ---
 // =====================================================================
-let audioCtx = null;
-let audioAnalyser = null;
 let audioSourceNode = null;
 let audioDataArray = null;
 
