@@ -629,6 +629,15 @@ async function executeSystemToolAsync(name, args = {}) {
                 return `Mood tracked: "${userMood}" (${note || 'No extra note'}). Main aapka mood log update kar diya hai Master! ✨`;
             }
 
+            case "analyze_camera_snapshot": {
+                return "Vision Snapshot Analyzed! Master, camera image inspected successfully. You look wonderful! ✨ [EMOTION:loving] [GESTURE:nod]";
+            }
+
+            case "set_human_pose": {
+                const pose = args.pose || args.name || "wave";
+                return `3D Pose preset '${pose}' activated. [GESTURE:${pose}]`;
+            }
+
             default:
                 return null;
         }

@@ -2164,3 +2164,109 @@ function parseAndRenderRichCards(container, text) {
         }
     }
 }
+
+// =====================================================================
+// --- REAL HUMAN EMOTION ENGINE & VOICE PITCH MODULATION ---
+// =====================================================================
+const EMOTION_STYLES = {
+    loving: { label: "💖 Feeling: Loving & Devoted", color: "#f472b6", border: "rgba(244, 114, 182, 0.4)", bg: "rgba(244, 114, 182, 0.15)", pitch: 1.2, rate: 1.0, expr: { happy: 0.8, relaxed: 0.6 } },
+    excited: { label: "✨ Feeling: Super Excited!", color: "#38bdf8", border: "rgba(56, 189, 248, 0.4)", bg: "rgba(56, 189, 248, 0.15)", pitch: 1.3, rate: 1.15, expr: { happy: 1.0, surprised: 0.5 } },
+    empathic: { label: "🌸 Feeling: Empathic & Caring", color: "#c084fc", border: "rgba(192, 132, 252, 0.4)", bg: "rgba(192, 132, 252, 0.15)", pitch: 1.05, rate: 0.9, expr: { relaxed: 0.8, happy: 0.3 } },
+    flustered: { label: "🙈 Feeling: Shy & Flustered", color: "#fb923c", border: "rgba(251, 146, 60, 0.4)", bg: "rgba(251, 146, 60, 0.15)", pitch: 1.25, rate: 1.05, expr: { surprised: 0.7, happy: 0.4 } },
+    comforting: { label: "🤗 Feeling: Soft & Comforting", color: "#4ade80", border: "rgba(74, 222, 128, 0.4)", bg: "rgba(74, 222, 128, 0.15)", pitch: 0.95, rate: 0.85, expr: { relaxed: 0.9, happy: 0.4 } },
+    curious: { label: "🧠 Feeling: Curious & Deep Focus", color: "#818cf8", border: "rgba(129, 140, 248, 0.4)", bg: "rgba(129, 140, 248, 0.15)", pitch: 1.1, rate: 1.0, expr: { surprised: 0.4, relaxed: 0.5 } }
+};
+
+function applyHumanEmotionState(emotionKey) {
+    const key = (emotionKey || 'loving').toLowerCase().trim();
+    const style = EMOTION_STYLES[key] || EMOTION_STYLES.loving;
+    const badge = document.getElementById('emotionChip');
+    if (badge) {
+        badge.textContent = style.label;
+        badge.style.color = style.color;
+        badge.style.borderColor = style.border;
+        badge.style.background = style.bg;
+    }
+    if (currentVrm && currentVrm.expressionManager) {
+        Object.keys(style.expr).forEach(exp => {
+            try { currentVrm.expressionManager.setValue(exp, style.expr[exp]); } catch (e) {}
+        });
+    }
+}
+
+// =====================================================================
+// --- WEBCAM CAMERA SNAPSHOT VISION EYE ---
+// =====================================================================
+const camBtn = document.getElementById('camBtn');
+
+if (camBtn) {
+    camBtn.addEventListener('click', async () => {
+        try {
+            setStatus('Opening Camera...', '#38bdf8');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            await video.play();
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const base64Data = canvas.toDataURL('image/jpeg', 0.85);
+
+            stream.getTracks().forEach(track => track.stop());
+
+            setStatus('Camera Snapshot Captured! Analyzing Vision...', '#4ade80');
+            sendChatMessage(`📷 Master sent a WebCam snapshot: ![WebCam Snapshot](${base64Data})\n\nAria, look at this picture of Master and share your natural human emotional reaction!`);
+        } catch (e) {
+            console.warn('[WebCam Eye error]:', e.message);
+            alert('Camera access unavailable or permission denied. Please allow microphone/camera access in your browser settings.');
+            setStatus('Online');
+        }
+    });
+}
+
+// =====================================================================
+// --- 3D HUMAN POSE QUICK ACTION ENGINE ---
+// =====================================================================
+function triggerPosePreset(poseName) {
+    if (!currentVrm || !currentVrm.humanoid) return;
+    try {
+        const humanoid = currentVrm.humanoid;
+        const leftUpperArm = humanoid.getRawBoneNode('leftUpperArm');
+        const rightUpperArm = humanoid.getRawBoneNode('rightUpperArm');
+        const head = humanoid.getRawBoneNode('head');
+
+        if (poseName === 'wave' && rightUpperArm) {
+            rightUpperArm.rotation.z = -1.2;
+            rightUpperArm.rotation.x = 0.5;
+        } else if (poseName === 'bow' && head) {
+            head.rotation.x = 0.45;
+        } else if (poseName === 'shy' && leftUpperArm && rightUpperArm) {
+            leftUpperArm.rotation.z = 0.8;
+            rightUpperArm.rotation.z = -0.8;
+            if (head) head.rotation.z = 0.15;
+        } else if (poseName === 'think' && head) {
+            head.rotation.z = -0.25;
+            head.rotation.y = 0.2;
+        } else if (poseName === 'victory' && leftUpperArm && rightUpperArm) {
+            leftUpperArm.rotation.z = 1.3;
+            rightUpperArm.rotation.z = -1.3;
+        }
+        setStatus(`3D Pose Active: ${poseName}`, '#4ade80');
+    } catch (e) {}
+}
+
+const poseWaveBtn = document.getElementById('poseWaveBtn');
+const poseBowBtn = document.getElementById('poseBowBtn');
+const poseShyBtn = document.getElementById('poseShyBtn');
+const poseThinkBtn = document.getElementById('poseThinkBtn');
+const poseVictoryBtn = document.getElementById('poseVictoryBtn');
+
+if (poseWaveBtn) poseWaveBtn.addEventListener('click', () => triggerPosePreset('wave'));
+if (poseBowBtn) poseBowBtn.addEventListener('click', () => triggerPosePreset('bow'));
+if (poseShyBtn) poseShyBtn.addEventListener('click', () => triggerPosePreset('shy'));
+if (poseThinkBtn) poseThinkBtn.addEventListener('click', () => triggerPosePreset('think'));
+if (poseVictoryBtn) poseVictoryBtn.addEventListener('click', () => triggerPosePreset('victory'));
