@@ -57,6 +57,8 @@ const chatLog = document.getElementById('chatLog');
 const chatInput = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendBtn');
 const micBtn = document.getElementById('micBtn');
+const pdfBtn = document.getElementById('pdfBtn');
+const pdfPicker = document.getElementById('pdfPicker');
 const modelNameSpan = document.getElementById('modelName') || { textContent: '' };
 const statusDiv = document.getElementById('status') || { textContent: '', style: {} };
 
@@ -1649,3 +1651,54 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
+
+// =====================================================================
+// --- AUTONOMOUS SELF-HEALING & UI EXCEPTION SHIELD ---
+// =====================================================================
+function reportClientErrorToSelfHealing(errorMsg, source = 'Browser UI') {
+    try {
+        fetch('/api/self-heal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ error: errorMsg, source })
+        }).then(r => r.json()).then(data => {
+            if (data && data.healthScore) {
+                updateSelfHealingBadge(data.healthScore);
+            }
+        }).catch(() => {});
+    } catch (e) {}
+}
+
+window.onerror = (message, source, lineno, colno, error) => {
+    const errText = `${message} at ${source}:${lineno}:${colno}`;
+    reportClientErrorToSelfHealing(errText, 'window.onerror');
+    return false;
+};
+
+window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason?.message || String(event.reason);
+    reportClientErrorToSelfHealing(`Unhandled Promise Rejection: ${reason}`, 'unhandledrejection');
+});
+
+async function pollSelfHealingStatus() {
+    try {
+        const res = await fetch('/api/self-heal');
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.healthScore !== undefined) {
+                updateSelfHealingBadge(data.healthScore, data.autoHealedCount);
+            }
+        }
+    } catch (e) {}
+}
+
+function updateSelfHealingBadge(healthScore = 100, autoHealedCount = 0) {
+    const badge = document.getElementById('selfHealBadge');
+    if (badge) {
+        badge.innerHTML = `<i class="dot" style="background: #4ade80; box-shadow: 0 0 8px #4ade80;"></i>💚 Self-Healing: Active | Health: ${healthScore}%`;
+        badge.title = `Autonomous Self-Healing Active (${autoHealedCount} issues auto-repaired)`;
+    }
+}
+
+setInterval(pollSelfHealingStatus, 15000);
+pollSelfHealingStatus();

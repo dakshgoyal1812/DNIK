@@ -10,5 +10,11 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "msedge-tts": "^2.0.7",
+    "nodemailer": "^6.9.13",
+    "pdf-parse": "^1.1.1",
+    "youtube-transcript": "^1.2.1"
   }
 }
