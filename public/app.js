@@ -2344,3 +2344,29 @@ const sfxGiggleBtn = document.getElementById('sfxGiggleBtn');
 
 if (sfxCheerBtn) sfxCheerBtn.addEventListener('click', () => playSFXSound('cheer'));
 if (sfxGiggleBtn) sfxGiggleBtn.addEventListener('click', () => playSFXSound('giggle'));
+
+// =====================================================================
+// --- 3D STAGE CAMERA PRESET SWITCHER ---
+// =====================================================================
+const camPresetSelect = document.getElementById('camPresetSelect');
+
+if (camPresetSelect) {
+    camPresetSelect.addEventListener('change', (e) => {
+        const mode = e.target.value;
+        if (!camera || !controls) return;
+        try {
+            if (mode === 'portrait') {
+                camera.position.set(0, 1.4, 1.2);
+                controls.target.set(0, 1.35, 0);
+            } else if (mode === 'half') {
+                camera.position.set(0, 1.25, 2.2);
+                controls.target.set(0, 1.05, 0);
+            } else if (mode === 'full') {
+                camera.position.set(0, 1.0, 3.4);
+                controls.target.set(0, 0.9, 0);
+            }
+            controls.update();
+            setStatus(`Camera Framing: ${mode}`, '#38bdf8');
+        } catch (err) {}
+    });
+}
