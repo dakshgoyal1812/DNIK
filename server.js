@@ -250,10 +250,12 @@ function handleKeySuccess(keyObj) {
 const DATA_DIR = path.join(__dirname, 'data');
 const MEMORY_FILE = path.join(DATA_DIR, 'long_term_memory.json');
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
+const MOOD_LOG_FILE = path.join(DATA_DIR, 'mood_log.json');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(MEMORY_FILE)) fs.writeFileSync(MEMORY_FILE, JSON.stringify([]));
 if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
+if (!fs.existsSync(MOOD_LOG_FILE)) fs.writeFileSync(MOOD_LOG_FILE, JSON.stringify([]));
 
 // --- All Aria Core Tools Engine (Crash-Proof Native Implementation) ---
 const REMINDERS_FILE = path.join(DATA_DIR, 'reminders.json');
@@ -592,6 +594,39 @@ async function executeSystemToolAsync(name, args = {}) {
 
             case "self_improve": {
                 return selfHealingEngine.runSelfImprovement();
+            }
+
+            case "play_game": {
+                const game = (args.game || args.name || "antakshari").toLowerCase();
+                if (game.includes("antakshari")) {
+                    return "Antakshari Game active! Master, aap koi gaana gaayiye ya song line boliye, phir main uske last letter se agla song sunati hoon! 🎤";
+                } else if (game.includes("trivia")) {
+                    return "Trivia Quiz Game active! Question: Space mein sabse pehla artificial satellite kaunsa bheja gaya tha? (A) Apollo 11 (B) Sputnik 1 (C) Voyager 1";
+                } else if (game.includes("twenty") || game.includes("20")) {
+                    return "20 Questions Game active! Kisi object ya celebrity ke baare mein sochiye, main 20 yes/no questions pooch kar guess karungi! 🧠";
+                } else if (game.includes("truth")) {
+                    return "Truth or Dare Game active! Master, batayein aap kya choose karte hain: Truth 😇 ya Dare 😈?";
+                }
+                return `Game '${game}' started! Master, chalo khelna shuru karte hain! 🎲`;
+            }
+
+            case "manage_pomodoro": {
+                const action = args.action || "start";
+                if (action === "start") {
+                    return "Pomodoro 25-minute focus session started! Master, abhi full focus se kaam kijiye. Main aapko 25 mins baad rest Break ke liye remind karungi! ⏳⚡";
+                }
+                return "Pomodoro focus coach session active.";
+            }
+
+            case "track_mood": {
+                let moodLogs = [];
+                try { moodLogs = JSON.parse(fs.readFileSync(MOOD_LOG_FILE, 'utf-8')); } catch (e) {}
+                const userMood = args.mood || "happy";
+                const note = args.note || args.text || "";
+                const entry = { id: Date.now(), mood: userMood, note, timestamp: new Date().toISOString() };
+                moodLogs.push(entry);
+                fs.writeFileSync(MOOD_LOG_FILE, JSON.stringify(moodLogs, null, 2));
+                return `Mood tracked: "${userMood}" (${note || 'No extra note'}). Main aapka mood log update kar diya hai Master! ✨`;
             }
 
             default:
@@ -1928,6 +1963,58 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: "cleared", result: resultText }));
         return;
+    }
+
+    // Aria API: Mood Tracker Endpoint
+    if (reqUrl === '/api/mood') {
+        if (req.method === 'GET') {
+            let logs = [];
+            try { logs = JSON.parse(fs.readFileSync(MOOD_LOG_FILE, 'utf-8')); } catch (e) {}
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(logs));
+            return;
+        } else if (req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => { body += chunk.toString(); });
+            req.on('end', async () => {
+                try {
+                    const data = JSON.parse(body || '{}');
+                    const resText = await executeSystemToolAsync("track_mood", { mood: data.mood, note: data.note });
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ status: "success", result: resText }));
+                } catch (e) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: e.message }));
+                }
+            });
+            return;
+        }
+    }
+
+    // Aria API: WhatsApp Webhook Service Endpoint
+    if (reqUrl === '/api/whatsapp/webhook') {
+        if (req.method === 'GET') {
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end('Aria WhatsApp Webhook Active');
+            return;
+        } else if (req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => { body += chunk.toString(); });
+            req.on('end', async () => {
+                try {
+                    const data = JSON.parse(body || '{}');
+                    const userMsg = data.message || data.body || '';
+                    const sender = data.sender || 'Master';
+                    const replyObj = await fetchAIReply(userMsg, 'normal', sender);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ reply: replyObj.replyText, imageUrl: replyObj.imageUrl }));
+                } catch (e) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: e.message }));
+                }
+            });
+            return;
+        }
     }
 
     // Aria API: Tools Suite List

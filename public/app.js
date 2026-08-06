@@ -1744,3 +1744,251 @@ async function pollCpuSystemMonitor() {
 
 setInterval(pollCpuSystemMonitor, 3000);
 pollCpuSystemMonitor();
+
+// =====================================================================
+// --- REAL-TIME VRM LIP-SYNC AUDIO ENGINE ---
+// =====================================================================
+let audioCtx = null;
+let audioAnalyser = null;
+let audioSourceNode = null;
+let audioDataArray = null;
+
+function setupAudioLipSync(audioElement) {
+    if (!audioElement) return;
+    try {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        if (audioCtx && !audioAnalyser) {
+            audioAnalyser = audioCtx.createAnalyser();
+            audioAnalyser.fftSize = 256;
+            audioDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+        }
+        if (audioCtx && audioAnalyser) {
+            try {
+                if (audioSourceNode) audioSourceNode.disconnect();
+                audioSourceNode = audioCtx.createMediaElementSource(audioElement);
+                audioSourceNode.connect(audioAnalyser);
+                audioAnalyser.connect(audioCtx.destination);
+            } catch (err) {}
+        }
+    } catch (e) {
+        console.warn('[LipSync Engine warning]:', e.message);
+    }
+}
+
+function updateVrmLipSync() {
+    if (!currentVrm || !currentVrm.expressionManager || !audioAnalyser || !audioDataArray) return;
+    try {
+        audioAnalyser.getByteFrequencyData(audioDataArray);
+        let sum = 0;
+        for (let i = 0; i < audioDataArray.length; i++) {
+            sum += audioDataArray[i];
+        }
+        const average = sum / audioDataArray.length;
+        const volume = Math.min(1.0, average / 45);
+
+        if (volume > 0.08) {
+            const mouthA = Math.min(1.0, volume * 1.2);
+            const mouthI = Math.min(0.8, volume * 0.6);
+            const mouthO = Math.min(0.7, volume * 0.5);
+            currentVrm.expressionManager.setValue('aa', mouthA);
+            currentVrm.expressionManager.setValue('ih', mouthI);
+            currentVrm.expressionManager.setValue('ou', mouthO);
+        } else {
+            currentVrm.expressionManager.setValue('aa', 0);
+            currentVrm.expressionManager.setValue('ih', 0);
+            currentVrm.expressionManager.setValue('ou', 0);
+        }
+    } catch (e) {}
+}
+
+function lipSyncLoop() {
+    updateVrmLipSync();
+    requestAnimationFrame(lipSyncLoop);
+}
+requestAnimationFrame(lipSyncLoop);
+
+// =====================================================================
+// --- 3D ENVIRONMENT & LIGHTING PRESETS ENGINE ---
+// =====================================================================
+const ENV_PRESETS = {
+    dark_studio: { bg: 0x0f172a, lightColor: 0x38bdf8, lightIntensity: 1.2, ambientColor: 0x1e293b, ambientIntensity: 0.8 },
+    cyberpunk_neon: { bg: 0x0a051b, lightColor: 0xf43f5e, lightIntensity: 1.8, ambientColor: 0x818cf8, ambientIntensity: 1.1 },
+    sunset_glow: { bg: 0x2a1005, lightColor: 0xf97316, lightIntensity: 1.6, ambientColor: 0xfbcfe8, ambientIntensity: 0.9 },
+    cherry_blossom: { bg: 0x1a0f1d, lightColor: 0xf472b6, lightIntensity: 1.5, ambientColor: 0xe0e7ff, ambientIntensity: 1.0 }
+};
+
+const envSelect = document.getElementById('envSelect');
+if (envSelect) {
+    envSelect.addEventListener('change', (e) => {
+        const key = e.target.value;
+        const config = ENV_PRESETS[key] || ENV_PRESETS.dark_studio;
+        if (scene) {
+            scene.background = new THREE.Color(config.bg);
+            scene.traverse((obj) => {
+                if (obj.isDirectionalLight) {
+                    obj.color.setHex(config.lightColor);
+                    obj.intensity = config.lightIntensity;
+                } else if (obj.isAmbientLight) {
+                    obj.color.setHex(config.ambientColor);
+                    obj.intensity = config.ambientIntensity;
+                }
+            });
+        }
+    });
+}
+
+// =====================================================================
+// --- AMBIENT LOFI DJ MUSIC PLAYER ---
+// =====================================================================
+let ambientAudioCtx = null;
+let ambientOsc1 = null;
+let ambientOsc2 = null;
+let ambientGain = null;
+let ambientNoiseNode = null;
+
+function stopAmbientMusic() {
+    try {
+        if (ambientOsc1) { ambientOsc1.stop(); ambientOsc1.disconnect(); ambientOsc1 = null; }
+        if (ambientOsc2) { ambientOsc2.stop(); ambientOsc2.disconnect(); ambientOsc2 = null; }
+        if (ambientNoiseNode) { ambientNoiseNode.disconnect(); ambientNoiseNode = null; }
+        if (ambientGain) { ambientGain.disconnect(); ambientGain = null; }
+    } catch (e) {}
+}
+
+function playAmbientMusic(trackType) {
+    stopAmbientMusic();
+    if (trackType === 'off') return;
+
+    try {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (!ambientAudioCtx) ambientAudioCtx = new AudioCtxClass();
+        if (ambientAudioCtx.state === 'suspended') ambientAudioCtx.resume();
+
+        ambientGain = ambientAudioCtx.createGain();
+        ambientGain.gain.setValueAtTime(0.08, ambientAudioCtx.currentTime);
+        ambientGain.connect(ambientAudioCtx.destination);
+
+        if (trackType === 'lofi_beats' || trackType === 'synthwave') {
+            const freq1 = trackType === 'synthwave' ? 110 : 130.81;
+            const freq2 = trackType === 'synthwave' ? 164.81 : 164.81;
+
+            ambientOsc1 = ambientAudioCtx.createOscillator();
+            ambientOsc2 = ambientAudioCtx.createOscillator();
+            ambientOsc1.type = 'sine';
+            ambientOsc2.type = 'triangle';
+            ambientOsc1.frequency.setValueAtTime(freq1, ambientAudioCtx.currentTime);
+            ambientOsc2.frequency.setValueAtTime(freq2, ambientAudioCtx.currentTime);
+
+            ambientOsc1.connect(ambientGain);
+            ambientOsc2.connect(ambientGain);
+            ambientOsc1.start();
+            ambientOsc2.start();
+        } else if (trackType === 'chill_rain' || trackType === 'cozy_fireplace') {
+            const bufferSize = ambientAudioCtx.sampleRate * 2;
+            const noiseBuffer = ambientAudioCtx.createBuffer(1, bufferSize, ambientAudioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            ambientNoiseNode = ambientAudioCtx.createBufferSource();
+            ambientNoiseNode.buffer = noiseBuffer;
+            ambientNoiseNode.loop = true;
+
+            const filter = ambientAudioCtx.createBiquadFilter();
+            filter.type = trackType === 'chill_rain' ? 'lowpass' : 'bandpass';
+            filter.frequency.value = trackType === 'chill_rain' ? 800 : 400;
+
+            ambientNoiseNode.connect(filter);
+            filter.connect(ambientGain);
+            ambientNoiseNode.start();
+        }
+    } catch (e) {
+        console.warn('[Ambient DJ warning]:', e.message);
+    }
+}
+
+const lofiSelect = document.getElementById('lofiSelect');
+if (lofiSelect) {
+    lofiSelect.addEventListener('change', (e) => {
+        playAmbientMusic(e.target.value);
+    });
+}
+
+// =====================================================================
+// --- POMODORO 25-MIN FOCUS COACH TIMER ---
+// =====================================================================
+let pomoSeconds = 25 * 60;
+let pomoInterval = null;
+let isPomoRunning = false;
+
+const pomoWidget = document.getElementById('pomoWidget');
+const pomoTimeSpan = document.getElementById('pomoTime');
+
+function updatePomoDisplay() {
+    const mins = Math.floor(pomoSeconds / 60).toString().padStart(2, '0');
+    const secs = (pomoSeconds % 60).toString().padStart(2, '0');
+    if (pomoTimeSpan) pomoTimeSpan.textContent = `${mins}:${secs}`;
+}
+
+if (pomoWidget) {
+    pomoWidget.addEventListener('click', () => {
+        if (!isPomoRunning) {
+            isPomoRunning = true;
+            pomoWidget.style.borderColor = '#4ade80';
+            pomoWidget.style.color = '#4ade80';
+            pomoInterval = setInterval(() => {
+                if (pomoSeconds > 0) {
+                    pomoSeconds--;
+                    updatePomoDisplay();
+                } else {
+                    clearInterval(pomoInterval);
+                    isPomoRunning = false;
+                    pomoSeconds = 25 * 60;
+                    updatePomoDisplay();
+                    pomoWidget.style.borderColor = '#c084fc';
+                    pomoWidget.style.color = '#c084fc';
+
+                    if (chatInput) {
+                        chatInput.value = "Master! Focus session complete! Take a 5-minute rest break!";
+                        if (sendBtn) sendBtn.click();
+                    }
+                }
+            }, 1000);
+        } else {
+            clearInterval(pomoInterval);
+            isPomoRunning = false;
+            pomoSeconds = 25 * 60;
+            updatePomoDisplay();
+            pomoWidget.style.borderColor = '#c084fc';
+            pomoWidget.style.color = '#c084fc';
+        }
+    });
+}
+
+// =====================================================================
+// --- HANDS-FREE CONTINUOUS VOICE MODE ---
+// =====================================================================
+let isHandsFreeMode = false;
+const handsFreeBtn = document.getElementById('handsFreeBtn');
+
+if (handsFreeBtn) {
+    handsFreeBtn.addEventListener('click', () => {
+        isHandsFreeMode = !isHandsFreeMode;
+        handsFreeBtn.setAttribute('aria-pressed', isHandsFreeMode ? 'true' : 'false');
+        handsFreeBtn.style.color = isHandsFreeMode ? '#4ade80' : 'var(--text-3)';
+        handsFreeBtn.style.borderColor = isHandsFreeMode ? '#4ade80' : 'transparent';
+
+        if (isHandsFreeMode) {
+            setStatus('Hands-Free Active', '#4ade80');
+            if (micBtn) micBtn.click();
+        } else {
+            setStatus('Online');
+        }
+    });
+}
