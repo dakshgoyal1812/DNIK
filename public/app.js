@@ -1169,6 +1169,10 @@ function addToLog(sender, text, moodTag = null, imageUrl = null, audioContent = 
         bubble.appendChild(tag);
     }
 
+    if (sender !== 'You') {
+        parseAndRenderRichCards(bubble, text);
+    }
+
     chatLog.appendChild(bubble);
     chatLog.scrollTop = chatLog.scrollHeight;
 }
@@ -1991,4 +1995,172 @@ if (handsFreeBtn) {
             setStatus('Online');
         }
     });
+}
+
+// =====================================================================
+// --- MEMORY & MOOD VISUALIZER MODAL ENGINE ---
+// =====================================================================
+const memoryModal = document.getElementById('memoryModal');
+const memModalBtn = document.getElementById('memModalBtn');
+const closeMemModalBtn = document.getElementById('closeMemModalBtn');
+const memSearchInput = document.getElementById('memSearchInput');
+const memFactsList = document.getElementById('memFactsList');
+const moodHistoryList = document.getElementById('moodHistoryList');
+const factCountSpan = document.getElementById('factCount');
+const clearMemBtn = document.getElementById('clearMemBtn');
+
+let allMemoriesData = [];
+
+async function loadMemoryModalData() {
+    try {
+        const memRes = await fetch('/api/memories');
+        if (memRes.ok) {
+            allMemoriesData = await memRes.json();
+            renderMemoriesList(allMemoriesData);
+        }
+        const moodRes = await fetch('/api/mood');
+        if (moodRes.ok) {
+            const moodLogs = await moodRes.json();
+            renderMoodHistory(moodLogs);
+        }
+    } catch (e) {
+        console.warn('[Memory Modal warning]:', e.message);
+    }
+}
+
+function renderMemoriesList(memories) {
+    if (!memFactsList) return;
+    const filter = (memSearchInput?.value || '').toLowerCase().trim();
+    const filtered = memories.filter(m => !filter || (m.fact && m.fact.toLowerCase().includes(filter)));
+
+    if (factCountSpan) factCountSpan.textContent = filtered.length;
+
+    if (filtered.length === 0) {
+        memFactsList.innerHTML = `<div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-3); padding: 8px;">No matching learned facts found.</div>`;
+        return;
+    }
+
+    memFactsList.innerHTML = filtered.map((m) => `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; background: var(--ink-2); border: 1px solid var(--line-soft); border-radius: var(--r-md);">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <span style="font-size: 0.8125rem; color: var(--text); font-weight: 500;">${m.fact || m}</span>
+                <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-3);">${m.date ? new Date(m.date).toLocaleString() : 'Learned Fact'} ${m.source ? `• ${m.source}` : ''}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderMoodHistory(moodLogs) {
+    if (!moodHistoryList) return;
+    if (!moodLogs || moodLogs.length === 0) {
+        moodHistoryList.innerHTML = `<div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-3);">No mood logs recorded yet.</div>`;
+        return;
+    }
+
+    const moodColors = { happy: '#4ade80', sad: '#f87171', relaxed: '#38bdf8', angry: '#fb923c', surprised: '#c084fc' };
+
+    moodHistoryList.innerHTML = moodLogs.slice(-12).reverse().map(l => `
+        <span class="chip" style="background: rgba(15, 23, 42, 0.7); border: 1px solid ${moodColors[l.mood] || 'var(--line)'}; color: ${moodColors[l.mood] || 'var(--text-2)'}; font-size: 0.6875rem; padding: 4px 10px; border-radius: var(--r-pill);">
+            ${l.mood === 'happy' ? '😊' : l.mood === 'sad' ? '😢' : l.mood === 'relaxed' ? '😌' : '✨'} ${l.mood} (${new Date(l.timestamp).toLocaleDateString()})
+        </span>
+    `).join('');
+}
+
+if (memModalBtn && memoryModal) {
+    memModalBtn.addEventListener('click', () => {
+        memoryModal.style.display = 'grid';
+        loadMemoryModalData();
+    });
+}
+if (closeMemModalBtn && memoryModal) {
+    closeMemModalBtn.addEventListener('click', () => {
+        memoryModal.style.display = 'none';
+    });
+}
+if (memSearchInput) {
+    memSearchInput.addEventListener('input', () => {
+        renderMemoriesList(allMemoriesData);
+    });
+}
+if (clearMemBtn) {
+    clearMemBtn.addEventListener('click', async () => {
+        if (confirm('Clear all learned facts and memories?')) {
+            await fetch('/api/memories/clear', { method: 'POST' });
+            allMemoriesData = [];
+            renderMemoriesList([]);
+        }
+    });
+}
+
+// =====================================================================
+// --- RICH LIVE DATA CARDS PARSER & RENDERER ---
+// =====================================================================
+function parseAndRenderRichCards(container, text) {
+    if (!container || !text) return;
+
+    // 1. Weather Card Parser
+    if (text.includes("Weather in") || text.includes("Temperature:")) {
+        const tempMatch = text.match(/Temperature:\s*([^,\n]+)/i);
+        const cityMatch = text.match(/Weather (?:in|for)\s+([a-zA-Z\s]+):/i);
+        const descMatch = text.match(/:\s*([^,\n]+),\s*Temperature/i);
+        const city = cityMatch ? cityMatch[1].trim() : "City";
+        const temp = tempMatch ? tempMatch[1].trim() : "25°C";
+        const desc = descMatch ? descMatch[1].trim() : "Pleasant";
+
+        const card = document.createElement('div');
+        card.className = 'rich-card rich-card-weather';
+        card.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.5rem;">☀️</span>
+                    <div>
+                        <strong style="font-size: 0.9375rem; color: #fb923c;">${city} Weather</strong>
+                        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-2);">${desc}</div>
+                    </div>
+                </div>
+                <div style="font-family: var(--font-ui); font-size: 1.25rem; font-weight: 700; color: var(--text);">${temp}</div>
+            </div>
+        `;
+        container.appendChild(card);
+    }
+
+    // 2. Crypto Price Card Parser
+    if (text.includes("live price of") || text.includes("USD.")) {
+        const coinMatch = text.match(/price of\s+([a-zA-Z]+)\s+is\s+\$([0-9.,]+)/i);
+        if (coinMatch) {
+            const coin = coinMatch[1].toUpperCase();
+            const price = coinMatch[2];
+
+            const card = document.createElement('div');
+            card.className = 'rich-card rich-card-crypto';
+            card.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.4rem;">🪙</span>
+                        <div>
+                            <strong style="font-size: 0.9375rem; color: #4ade80;">${coin} Live Price</strong>
+                            <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-3);">Market Data • USD</div>
+                        </div>
+                    </div>
+                    <div style="font-family: var(--font-mono); font-size: 1.125rem; font-weight: 700; color: #4ade80;">$${price}</div>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+    }
+
+    // 3. QR Code Link Card Parser
+    if (text.includes("qrserver.com/v1/create-qr-code")) {
+        const qrMatch = text.match(/(https:\/\/api\.qrserver\.com\/v1\/create-qr-code\/\?[^\s]+)/i);
+        if (qrMatch) {
+            const qrUrl = qrMatch[1];
+            const card = document.createElement('div');
+            card.className = 'rich-card rich-card-qr';
+            card.innerHTML = `
+                <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--aqua-mid); margin-bottom: 4px;">✨ Generated QR Code</div>
+                <img src="${qrUrl}" alt="Generated QR Code" />
+            `;
+            container.appendChild(card);
+        }
+    }
 }
