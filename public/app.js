@@ -1184,9 +1184,9 @@ async function sendChatMessage(userText) {
     try {
         setStatus('Thinking...', '#818cf8');
 
-        const moodMode = 'yuki';
+        const moodMode = 'normal';
         const voiceSelect = document.getElementById('voiceSelect');
-        const voiceName = voiceSelect ? voiceSelect.value : 'Zephyr';
+        const voiceName = voiceSelect ? voiceSelect.value : 'Swara';
 
         const res = await fetch('/chat', {
             method: 'POST',

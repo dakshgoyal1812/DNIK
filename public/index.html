@@ -732,11 +732,11 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
         <span class="count mono" id="msgCount">01 msg</span>
       </div>
       <div class="voice-controls" style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: nowrap;">
-        <span id="yukiBadge" class="chip" style="background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.4); color: #f472b6; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;" title="Yuki Mode Active Automatically">
-          💖 Yuki — Devoted Assistant
+        <span id="ariaBadge" class="chip" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;" title="Aria Hinglish Companion Active">
+          ✨ Aria — 3D AI Companion
         </span>
         <span id="voiceBadge" style="font-family: var(--font-mono); font-size: 0.6875rem; color: #38bdf8; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.4); padding: 5px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-          🎙️ Voice: Edge Neural Female
+          🎙️ Voice: Natural Hinglish Female (Swara)
         </span>
         <button id="testVoiceBtn" type="button" title="Test selected voice playback" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: var(--aqua); padding: 4px 10px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
           🔊 Test
@@ -750,30 +750,31 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 
     <div id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
       <div class="msg-bubble msg-ai">
-        <b class="who">Yuki</b>
-        I am here, Master. What do you need me to handle for you today?
-        <span class="msg-tag">yuki core active</span>
+        <b class="who">Aria</b>
+        Namaste, Master! ✨ Main Aria hoon, aapki devoted AI companion. Aapka din kaisa raha? 👋
+        <span class="msg-tag">aria hinglish active</span>
       </div>
     </div>
 
     <div class="typing" id="typingIndicator" data-on="false" aria-hidden="true">
-      <span></span><span></span><span></span><em>Yuki is thinking</em>
+      <span></span><span></span><span></span><em>Aria is thinking</em>
     </div>
 
     <div class="chips" id="quickPrompts">
-      <button type="button" data-prompt="Scold me for working late without resting!">Scold me 🌙</button>
-      <button type="button" data-prompt="Praise me for my hard work today!">Praise me 💖</button>
-      <button type="button" data-prompt="Run a full CPU and hardware system telemetry check.">CPU System ⚡</button>
-      <button type="button" data-prompt="What is the weather report today?">Weather ☀️</button>
-      <button type="button" data-prompt="Check live crypto prices.">Crypto 🪙</button>
-      <button type="button" data-prompt="Search web for latest news today.">Web Search 🔍</button>
+      <button type="button" data-prompt="Mujhe ek majedar funny joke sunao!">Tell a Joke 🎭</button>
+      <button type="button" data-prompt="Translate 'Hello my dear friend, how are you today?' into Hindi!">Translate 🌐</button>
+      <button type="button" data-prompt="Chalo mere sath Antakshari khelo!">Antakshari 🎶</button>
+      <button type="button" data-prompt="Aaj ka mausam aur weather report batao.">Weather ☀️</button>
+      <button type="button" data-prompt="Bitcoin ka live crypto price check karo.">Crypto 🪙</button>
+      <button type="button" data-prompt="Search web for latest AI news today.">Web Search 🔍</button>
       <button type="button" data-prompt="Show my reminders and saved tasks list.">Reminders ⏰</button>
+      <button type="button" data-prompt="Run a full CPU and hardware system telemetry check.">CPU System ⚡</button>
     </div>
 
     <div class="chat-input-bar">
       <div class="input-wrapper">
-        <label class="sr-only" for="chatInput" hidden>Message Yuki</label>
-        <input type="text" id="chatInput" placeholder="Message Yuki…" autocomplete="off" autofocus />
+        <label class="sr-only" for="chatInput" hidden>Message Aria</label>
+        <input type="text" id="chatInput" placeholder="Message Aria…" autocomplete="off" autofocus />
         <div class="input-actions">
           <button id="micBtn" class="btn-voice" type="button" title="Voice input" aria-label="Voice input">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -870,8 +871,8 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
           <dd id="sysUptime">0.0<small>hrs</small></dd>
         </div>
         <div class="readout">
-          <dt>Yuki AI Core</dt>
-          <dd style="font-size: 0.75rem; color: #4ade80; font-weight: 600;">ACTIVE 💖</dd>
+          <dt>Aria AI Core</dt>
+          <dd style="font-size: 0.75rem; color: #4ade80; font-weight: 600;">ACTIVE ✨</dd>
         </div>
       </dl>
     </div>
