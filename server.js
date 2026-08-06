@@ -444,6 +444,12 @@ async function executeSystemToolAsync(name, args = {}) {
                 return "No fact text provided to remember.";
             }
 
+            case "clear_memories": {
+                fs.writeFileSync(MEMORY_FILE, JSON.stringify([]));
+                fs.writeFileSync(VECTOR_MEMORY_FILE, JSON.stringify({}));
+                return "All long-term memories and vector facts cleared successfully.";
+            }
+
             case "get_memories": {
                 return fs.readFileSync(MEMORY_FILE, "utf-8");
             }
@@ -879,6 +885,55 @@ async function callGoogleGeminiAPI(userMessage, systemPrompt) {
     return null;
 }
 
+// --- Active Learning Auto-Memorization Engine ---
+function autoMemorizeUserContext(userMessage) {
+    if (!userMessage || typeof userMessage !== 'string') return null;
+    const lower = userMessage.toLowerCase().trim();
+
+    let extractedFact = null;
+    if (lower.includes("name is") || lower.includes("mera naam") || lower.includes("call me")) {
+        extractedFact = `User identity detail: "${userMessage.trim()}"`;
+    } else if (lower.includes("remember that") || lower.includes("yaad rakhna") || lower.includes("don't forget")) {
+        const fact = userMessage.replace(/(?:remember that|yaad rakhna|don't forget|note that)/gi, '').trim();
+        if (fact.length > 2) extractedFact = `User note: "${fact}"`;
+    } else if (lower.includes("i like") || lower.includes("i love") || lower.includes("my favorite") || lower.includes("mujhe pasand")) {
+        extractedFact = `User preference: "${userMessage.trim()}"`;
+    } else if (lower.includes("i work") || lower.includes("i am a") || lower.includes("my job")) {
+        extractedFact = `User work/role detail: "${userMessage.trim()}"`;
+    } else if (lower.includes("my birthday") || lower.includes("janamdin")) {
+        extractedFact = `User birthday detail: "${userMessage.trim()}"`;
+    } else if (lower.includes("i live in") || lower.includes("rehta hoon") || lower.includes("rehti hoon")) {
+        extractedFact = `User location detail: "${userMessage.trim()}"`;
+    }
+
+    if (extractedFact) {
+        try {
+            const rawMem = fs.readFileSync(MEMORY_FILE, "utf-8");
+            const memories = JSON.parse(rawMem || '[]');
+            const exists = memories.some(m => m.fact && m.fact.toLowerCase() === extractedFact.toLowerCase());
+            if (!exists) {
+                memories.push({ date: new Date().toISOString(), fact: extractedFact, source: "auto_learn" });
+                if (memories.length > 100) memories.shift();
+                fs.writeFileSync(MEMORY_FILE, JSON.stringify(memories, null, 2));
+
+                let vectorMem = {};
+                if (fs.existsSync(VECTOR_MEMORY_FILE)) {
+                    try { vectorMem = JSON.parse(fs.readFileSync(VECTOR_MEMORY_FILE, 'utf-8')); } catch (e) {}
+                }
+                const key = `fact_${Date.now()}`;
+                vectorMem[key] = { data: extractedFact, timestamp: new Date().toISOString() };
+                fs.writeFileSync(VECTOR_MEMORY_FILE, JSON.stringify(vectorMem, null, 2));
+
+                console.log(`[Auto-Memorizer] 🧠 Saved new fact: ${extractedFact}`);
+                return extractedFact;
+            }
+        } catch (e) {
+            console.warn('[Auto-Memorizer warning]:', e.message);
+        }
+    }
+    return null;
+}
+
 // Main Smart AI Router (Auto task classifier, Key Rotation & Provider Failover)
 async function fetchAIReply(userMessage, moodModeInput = 'normal', userName = 'Master', isTelegram = false) {
     if (isImageGenerationRequest(userMessage)) {
@@ -933,13 +988,23 @@ async function fetchAIReply(userMessage, moodModeInput = 'normal', userName = 'M
         console.warn("[Tool Auto-Exec Note]:", tErr?.message);
     }
 
+    autoMemorizeUserContext(userMessage);
+
     let memoryContext = "";
     try {
-        const rawMem = fs.readFileSync(MEMORY_FILE, "utf-8");
-        const memories = JSON.parse(rawMem);
-        if (memories.length > 0) {
-            memoryContext = "\n## Long-Term Memory (Facts Master asked you to remember):\n" +
-                memories.map(m => `- ${m.fact}`).join("\n");
+        const memories = JSON.parse(fs.readFileSync(MEMORY_FILE, "utf-8") || "[]");
+        const vectorMem = JSON.parse(fs.readFileSync(VECTOR_MEMORY_FILE, "utf-8") || "{}");
+        const factList = [];
+        for (const m of memories) {
+            if (m.fact) factList.push(`- ${m.fact}`);
+        }
+        for (const [k, v] of Object.entries(vectorMem)) {
+            if (v && v.data) factList.push(`- ${v.data}`);
+        }
+
+        if (factList.length > 0) {
+            const uniqueFacts = Array.from(new Set(factList)).slice(-15);
+            memoryContext = "\n## Learned Facts & Personal Memory (Recall what Master shared):\n" + uniqueFacts.join("\n");
         }
     } catch (e) {}
 
@@ -1582,14 +1647,75 @@ async function pollTelegramUpdates() {
                         console.log(`[Telegram Bot] 📩 Message from ${userName} (${chatId}): "${userText}"`);
 
                         if (userText === '/start' || userText === '/help') {
-                            const welcomeMsg = `✨ *Namaste ${userName}!* ✨\n\nMain *Aria* hoon, aapki 3D AI Companion! 💃\n\nAap mujhse yahan Telegram par baatein kar sakte hain, sawal pooch sakte hain, ya photos generate karwa sakte hain (jaise: *"generate image of beautiful sunset"*).\n\n*Commands:*\n• /start - Restart conversation & view options\n• /memory - View long-term facts stored\n• /help - Get assistance\n\n*Aapki seva mein hamesha hajir hoon, Master!* 🙏`;
+                            const welcomeMsg = `✨ *Namaste ${userName}!* ✨\n\nMain *Aria* hoon, aapki 3D AI Companion! 💃\n\nMain active memory learning, 25+ system tools, natural voice synthesis aur HD photo generation sab Telegram par direct handle karti hoon!\n\n🤖 *Commands List:*\n• /start / /help - Show this guide\n• /memory / /facts - View learned facts & memories\n• /remember <fact> - Save a fact to long-term memory\n• /clear_memory - Reset long-term memory\n• /reminders - View active reminders\n• /add_reminder <task> - Set a new reminder\n• /status - Live CPU, RAM, Uptime telemetry\n• /diagnose / /heal - System self-healing audit report\n• /tools - List all 25+ integrated system tools\n\n💡 *Pro Tips:*\n• Ask me anything in natural Hinglish!\n• Generate images: *"generate image of cute cat"*\n• Request voice note: Include *"voice"*, *"bolke sunao"*, or *"audio"*\n• Get Weather, Crypto prices, Math, Web Search, YouTube transcripts natively!\n\n*Aapki seva mein hamesha hajir hoon, Master!* 🙏`;
                             await sendTelegramMessage(chatId, welcomeMsg);
                             continue;
                         }
 
                         if (userText === '/memory' || userText === '/facts') {
                             const mems = await executeSystemTool("get_memories");
-                            await sendTelegramMessage(chatId, `🧠 *Long-term Memory Facts:*\n\`\`\`json\n${mems}\n\`\`\``);
+                            await sendTelegramMessage(chatId, `🧠 *Learned & Stored Memories:*\n\`\`\`json\n${mems}\n\`\`\``);
+                            continue;
+                        }
+
+                        if (userText.startsWith('/remember')) {
+                            const factToSave = userText.replace('/remember', '').trim();
+                            if (!factToSave) {
+                                await sendTelegramMessage(chatId, "⚠️ Usage: `/remember My favorite movie is Interstellar`");
+                            } else {
+                                const resText = await executeSystemTool("remember_fact", { fact: factToSave });
+                                await sendTelegramMessage(chatId, `✅ *Memory Stored:* ${resText}`);
+                            }
+                            continue;
+                        }
+
+                        if (userText === '/clear_memory') {
+                            const resText = await executeSystemTool("clear_memories");
+                            await sendTelegramMessage(chatId, `🧹 *Memory Reset:* ${resText}`);
+                            continue;
+                        }
+
+                        if (userText === '/status' || userText === '/system') {
+                            const sysInfo = await executeSystemTool("get_system_info");
+                            const memInfo = await executeSystemTool("get_memory_usage");
+                            await sendTelegramMessage(chatId, `📊 *Aria System Telemetry:*\n\n🖥️ *System Specs:* ${sysInfo}\n\n💾 *RAM Status:* ${memInfo}`);
+                            continue;
+                        }
+
+                        if (userText === '/reminders') {
+                            const rems = await executeSystemTool("manage_reminders", { action: "view" });
+                            await sendTelegramMessage(chatId, `⏰ *Your Reminders:*\n\`\`\`json\n${rems}\n\`\`\``);
+                            continue;
+                        }
+
+                        if (userText.startsWith('/add_reminder')) {
+                            const taskToSet = userText.replace('/add_reminder', '').trim();
+                            if (!taskToSet) {
+                                await sendTelegramMessage(chatId, "⚠️ Usage: `/add_reminder Buy milk at 5 PM`");
+                            } else {
+                                const resText = await executeSystemTool("manage_reminders", { action: "add", task: taskToSet });
+                                await sendTelegramMessage(chatId, `✅ *Reminder Set:* ${resText}`);
+                            }
+                            continue;
+                        }
+
+                        if (userText === '/diagnose' || userText === '/heal') {
+                            const auditReport = await executeSystemTool("self_improve");
+                            await sendTelegramMessage(chatId, `💚 *Aria Self-Healing Audit:* \n\n${auditReport}`);
+                            continue;
+                        }
+
+                        if (userText === '/tools') {
+                            const toolsList = await executeSystemTool("get_system_info");
+                            const allTools = [
+                                "get_current_time", "get_system_info", "get_memory_usage", "get_storage_info",
+                                "calculator", "send_email", "search_web", "remember_fact", "get_memories",
+                                "save_to_memory", "search_memory", "backup_data", "read_website", "generate_image",
+                                "manage_reminders", "check_crypto_price", "read_youtube", "read_pdf",
+                                "execute_python_code", "control_spotify", "post_to_twitter", "post_to_instagram",
+                                "get_weather", "screenshot_website", "generate_qr_code", "self_heal_diagnose", "self_improve"
+                            ];
+                            await sendTelegramMessage(chatId, `🛠️ *Active Aria Tools (25+):*\n\`\`\`json\n${JSON.stringify(allTools, null, 2)}\n\`\`\``);
                             continue;
                         }
 
@@ -1793,6 +1919,14 @@ const server = http.createServer(async (req, res) => {
         const mems = await executeSystemToolAsync("get_memories");
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(mems || '[]');
+        return;
+    }
+
+    // Aria API: Clear Long-Term Memory
+    if (reqUrl === '/api/memories/clear' && req.method === 'POST') {
+        const resultText = await executeSystemToolAsync("clear_memories");
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: "cleared", result: resultText }));
         return;
     }
 
