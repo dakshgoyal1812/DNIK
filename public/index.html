@@ -731,27 +731,18 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
         <h2 class="label">Comms Relay</h2>
         <span class="count mono" id="msgCount">01 msg</span>
       </div>
-      <div class="voice-controls" style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
-        <span id="voiceBadge" style="font-family: var(--font-mono); font-size: 0.6875rem; color: #38bdf8; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.4); padding: 4px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;">
-          🎙️ Voice: Edge Neural Female (hi-IN Swara)
+      <div class="voice-controls" style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: nowrap;">
+        <span id="yukiBadge" class="chip" style="background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.4); color: #f472b6; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;" title="Yuki Mode Active Automatically">
+          💖 Yuki — Devoted Assistant
         </span>
-        <select id="roleplayMoodSelect" title="Select Persona Mode" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(129, 140, 248, 0.4); color: #818cf8; font-family: var(--font-mono); font-size: 0.6875rem; padding: 4px 8px; border-radius: 12px; outline: none; cursor: pointer;">
-          <option value="normal" selected>Mode: Normal (Polite)</option>
-          <option value="yuki">Mode: Yuki — Devoted Assistant 💖</option>
-          <option value="devoted">Mode: Devoted Maid</option>
-          <option value="romantic">Mode: Romantic Girlfriend</option>
-          <option value="tsundere">Mode: Tsundere Anime</option>
-          <option value="chill">Mode: Chill Friend</option>
-          <option value="translator">Mode: Voice & Text Translator 🌐</option>
-          <option value="entertainment">Mode: Jokes, Riddles & Games 🎭</option>
-          <option value="engineer">Mode: Engineer Specialist</option>
-          <option value="therapy">Mode: Therapy & Comfort</option>
-        </select>
-        <button id="testVoiceBtn" type="button" title="Test selected voice playback" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: var(--aqua); padding: 3px 8px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+        <span id="voiceBadge" style="font-family: var(--font-mono); font-size: 0.6875rem; color: #38bdf8; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.4); padding: 5px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+          🎙️ Voice: Edge Neural Female
+        </span>
+        <button id="testVoiceBtn" type="button" title="Test selected voice playback" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: var(--aqua); padding: 4px 10px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
           🔊 Test
         </button>
         <input type="file" id="pdfPicker" accept=".pdf,.txt" style="display:none;" />
-        <button id="pdfBtn" type="button" title="Upload PDF / Document to analyze" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 3px 8px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+        <button id="pdfBtn" type="button" title="Upload PDF / Document to analyze" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 4px 10px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
           📄 PDF
         </button>
       </div>
@@ -759,31 +750,30 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 
     <div id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
       <div class="msg-bubble msg-ai">
-        <b class="who">Aria</b>
-        Welcome back, Master! ✨ Main Aria hoon, aapki devoted AI companion. PDF Reader, Translator & 3D Studio active hain! 👋
-        <span class="msg-tag">boot sequence complete</span>
+        <b class="who">Yuki</b>
+        I am here, Master. What do you need me to handle for you today?
+        <span class="msg-tag">yuki core active</span>
       </div>
     </div>
 
     <div class="typing" id="typingIndicator" data-on="false" aria-hidden="true">
-      <span></span><span></span><span></span><em>Aria is thinking</em>
+      <span></span><span></span><span></span><em>Yuki is thinking</em>
     </div>
 
     <div class="chips" id="quickPrompts">
-      <button type="button" data-prompt="Mujhe ek majedar funny joke sunao!">Tell a Joke 🎭</button>
-      <button type="button" data-prompt="Translate 'Hello my dear friend, how are you today?' into Hindi!">Translate 🌐</button>
-      <button type="button" data-prompt="Chalo mere sath Antakshari khelo!">Antakshari 🎶</button>
-      <button type="button" data-prompt="Aaj ka mausam aur weather report batao.">Weather ☀️</button>
-      <button type="button" data-prompt="Bitcoin ka live crypto price check karo.">Crypto 🪙</button>
-      <button type="button" data-prompt="Search web for latest AI news today.">Web Search 🔍</button>
+      <button type="button" data-prompt="Scold me for working late without resting!">Scold me 🌙</button>
+      <button type="button" data-prompt="Praise me for my hard work today!">Praise me 💖</button>
+      <button type="button" data-prompt="Run a full CPU and hardware system telemetry check.">CPU System ⚡</button>
+      <button type="button" data-prompt="What is the weather report today?">Weather ☀️</button>
+      <button type="button" data-prompt="Check live crypto prices.">Crypto 🪙</button>
+      <button type="button" data-prompt="Search web for latest news today.">Web Search 🔍</button>
       <button type="button" data-prompt="Show my reminders and saved tasks list.">Reminders ⏰</button>
-      <button type="button" data-prompt="Run a full system diagnostic.">System info ⚡</button>
     </div>
 
     <div class="chat-input-bar">
       <div class="input-wrapper">
-        <label class="sr-only" for="chatInput" hidden>Message Aria</label>
-        <input type="text" id="chatInput" placeholder="Message Aria…" autocomplete="off" autofocus />
+        <label class="sr-only" for="chatInput" hidden>Message Yuki</label>
+        <input type="text" id="chatInput" placeholder="Message Yuki…" autocomplete="off" autofocus />
         <div class="input-actions">
           <button id="micBtn" class="btn-voice" type="button" title="Voice input" aria-label="Voice input">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -832,51 +822,56 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     </div>
   </section>
 
-  <!-- ---------- TELEMETRY ---------- -->
-  <aside class="panel panel--ticks tele rise" style="--i:4" aria-label="System telemetry">
+  <!-- ---------- REAL-TIME CPU & HARDWARE SYSTEM MONITOR ---------- -->
+  <aside class="panel panel--ticks tele rise" style="--i:4" aria-label="Live System Hardware Telemetry">
     <div class="panel-head">
-      <h2 class="label">Telemetry</h2>
-      <span class="count mono">live</span>
+      <h2 class="label">CPU & Hardware Monitor</h2>
+      <span class="count mono" style="color: #4ade80;">LIVE ⚡</span>
     </div>
 
     <div class="tele-body">
+      <!-- Real CPU Usage Meter -->
       <div class="integrity">
         <div class="top">
-          <span class="label">System integrity</span>
-          <span class="val" id="integrityVal">98<span>%</span></span>
+          <span class="label">CPU Utilization</span>
+          <span class="val" id="cpuVal">00<span>%</span></span>
         </div>
-        <div class="meter" role="meter" aria-valuenow="98" aria-valuemin="0" aria-valuemax="100" aria-label="System integrity">
-          <i id="integrityBar" style="--v:.98"></i>
+        <div class="meter" role="meter" aria-label="CPU Utilization">
+          <i id="cpuBar" style="width: 15%; background: linear-gradient(90deg, #38bdf8, #818cf8);"></i>
         </div>
       </div>
 
-      <dl class="readouts">
+      <!-- Real RAM Usage Meter -->
+      <div class="integrity" style="margin-top: 14px;">
+        <div class="top">
+          <span class="label">RAM Memory Usage</span>
+          <span class="val" id="ramVal">00<span>%</span></span>
+        </div>
+        <div class="meter" role="meter" aria-label="RAM Memory Usage">
+          <i id="ramBar" style="width: 45%; background: linear-gradient(90deg, #c084fc, #f472b6);"></i>
+        </div>
+      </div>
+
+      <dl class="readouts" style="margin-top: 16px;">
         <div class="readout">
-          <dt>Data throughput</dt>
-          <dd id="throughput">45.2<small>TB/s</small></dd>
-          <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true">
-            <path id="sparkArea" d=""></path>
-            <polyline id="sparkLine" points=""></polyline>
-          </svg>
+          <dt>RAM Memory Status</dt>
+          <dd id="ramDetail">0.0 GB <small>/ 0.0 GB</small></dd>
         </div>
         <div class="readout">
-          <dt>Threat level</dt>
-          <dd style="display:flex;align-items:center;gap:10px;">
-            <span class="ladder" data-level="1" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-            <span style="font-size:.8125rem;color:var(--aqua)">LOW</span>
-          </dd>
+          <dt>Processor Core</dt>
+          <dd id="cpuModel" style="font-size: 0.75rem; color: var(--aqua); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Multi-Core Processor</dd>
         </div>
         <div class="readout">
-          <dt>Active nodes</dt>
-          <dd id="nodes">1024<small>/ 1024</small></dd>
+          <dt>Host System</dt>
+          <dd id="osHost" style="font-size: 0.75rem; color: #38bdf8;">Windows System</dd>
         </div>
         <div class="readout">
-          <dt>Round trip</dt>
-          <dd id="latency">08<small>ms</small></dd>
+          <dt>System Uptime</dt>
+          <dd id="sysUptime">0.0<small>hrs</small></dd>
         </div>
         <div class="readout">
-          <dt>AI core</dt>
-          <dd style="font-size:.8125rem;color:var(--aqua)">STABLE</dd>
+          <dt>Yuki AI Core</dt>
+          <dd style="font-size: 0.75rem; color: #4ade80; font-weight: 600;">ACTIVE 💖</dd>
         </div>
       </dl>
     </div>

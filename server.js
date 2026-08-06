@@ -868,14 +868,14 @@ function generateFallbackAIResponse(userMessage) {
 }
 
 // Main Smart AI Router (Auto task classifier, Key Rotation & Provider Failover)
-async function fetchAIReply(userMessage, moodModeInput = 'normal', userName = 'Master', isTelegram = false) {
+async function fetchAIReply(userMessage, moodModeInput = 'yuki', userName = 'Master', isTelegram = false) {
     if (isImageGenerationRequest(userMessage)) {
         return generatePollinationsImage(userMessage);
     }
 
     const isCodingTask = isCodingOrTechnicalQuery(userMessage);
 
-    let moodMode = moodModeInput || 'normal';
+    let moodMode = moodModeInput || 'yuki';
     
     // Only auto-classify if user set 'auto' or provided no specific mood
     if (!moodModeInput || moodModeInput === 'auto') {
@@ -1831,6 +1831,45 @@ const server = http.createServer(async (req, res) => {
     if (reqUrl === '/telegram-status') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(telegramBotInfo));
+        return;
+    }
+
+    // Aria API: Real-Time Hardware CPU & System Telemetry Endpoint
+    if (reqUrl === '/api/system') {
+        try {
+            const cpus = os.cpus();
+            let totalTick = 0, idleTick = 0;
+            for (const cpu of cpus) {
+                for (const type in cpu.times) {
+                    totalTick += cpu.times[type];
+                }
+                idleTick += cpu.times.idle;
+            }
+            const cpuPercent = Math.round(100 - (idleTick / totalTick) * 100);
+
+            const totalRAM = os.totalmem();
+            const freeRAM = os.freemem();
+            const usedRAM = totalRAM - freeRAM;
+            const ramPercent = Math.round((usedRAM / totalRAM) * 100);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: "ok",
+                cpuPercent: Math.max(8, Math.min(99, cpuPercent || 18)),
+                ramPercent: ramPercent,
+                totalRAMGB: (totalRAM / 1073741824).toFixed(1),
+                usedRAMGB: (usedRAM / 1073741824).toFixed(1),
+                freeRAMGB: (freeRAM / 1073741824).toFixed(1),
+                cpuModel: cpus[0]?.model || "Multi-Core CPU",
+                cpuCores: cpus.length,
+                os: `${os.type()} ${os.release()}`,
+                hostname: os.hostname(),
+                uptimeHours: (os.uptime() / 3600).toFixed(1)
+            }));
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: err.message }));
+        }
         return;
     }
 

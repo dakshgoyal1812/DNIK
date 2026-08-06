@@ -1184,8 +1184,7 @@ async function sendChatMessage(userText) {
     try {
         setStatus('Thinking...', '#818cf8');
 
-        const moodSelect = document.getElementById('roleplayMoodSelect');
-        const moodMode = moodSelect ? moodSelect.value : 'normal';
+        const moodMode = 'yuki';
         const voiceSelect = document.getElementById('voiceSelect');
         const voiceName = voiceSelect ? voiceSelect.value : 'Zephyr';
 
@@ -1702,3 +1701,46 @@ function updateSelfHealingBadge(healthScore = 100, autoHealedCount = 0) {
 
 setInterval(pollSelfHealingStatus, 15000);
 pollSelfHealingStatus();
+
+// =====================================================================
+// --- LIVE HARDWARE CPU & SYSTEM MONITORING ---
+// =====================================================================
+async function pollCpuSystemMonitor() {
+    try {
+        const res = await fetch('/api/system');
+        if (res.ok) {
+            const data = await res.json();
+
+            // 1. CPU Utilization
+            const cpuVal = document.getElementById('cpuVal');
+            const cpuBar = document.getElementById('cpuBar');
+            if (cpuVal) cpuVal.innerHTML = `${data.cpuPercent}<span>%</span>`;
+            if (cpuBar) cpuBar.style.width = `${data.cpuPercent}%`;
+
+            // 2. RAM Memory Usage
+            const ramVal = document.getElementById('ramVal');
+            const ramBar = document.getElementById('ramBar');
+            if (ramVal) ramVal.innerHTML = `${data.ramPercent}<span>%</span>`;
+            if (ramBar) ramBar.style.width = `${data.ramPercent}%`;
+
+            // 3. RAM Details
+            const ramDetail = document.getElementById('ramDetail');
+            if (ramDetail) ramDetail.innerHTML = `${data.usedRAMGB} GB <small>/ ${data.totalRAMGB} GB</small>`;
+
+            // 4. CPU Model
+            const cpuModel = document.getElementById('cpuModel');
+            if (cpuModel) cpuModel.textContent = `${data.cpuCores} Cores (${data.cpuModel})`;
+
+            // 5. Host & OS
+            const osHost = document.getElementById('osHost');
+            if (osHost) osHost.textContent = `${data.hostname} (${data.os})`;
+
+            // 6. Uptime
+            const sysUptime = document.getElementById('sysUptime');
+            if (sysUptime) sysUptime.innerHTML = `${data.uptimeHours}<small>hrs</small>`;
+        }
+    } catch (e) {}
+}
+
+setInterval(pollCpuSystemMonitor, 3000);
+pollCpuSystemMonitor();
