@@ -2270,3 +2270,77 @@ if (poseBowBtn) poseBowBtn.addEventListener('click', () => triggerPosePreset('bo
 if (poseShyBtn) poseShyBtn.addEventListener('click', () => triggerPosePreset('shy'));
 if (poseThinkBtn) poseThinkBtn.addEventListener('click', () => triggerPosePreset('think'));
 if (poseVictoryBtn) poseVictoryBtn.addEventListener('click', () => triggerPosePreset('victory'));
+
+// =====================================================================
+// --- EXPORT CHAT TRANSCRIPT ENGINE ---
+// =====================================================================
+const exportBtn = document.getElementById('exportBtn');
+
+if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+        const chatLog = document.getElementById('chatLog');
+        if (!chatLog) return;
+
+        const bubbles = chatLog.querySelectorAll('.msg-bubble');
+        let transcript = `# Aria 3D Studio - Conversation Log\nDate: ${new Date().toLocaleString()}\n\n---\n\n`;
+
+        bubbles.forEach(b => {
+            const who = b.querySelector('.who')?.textContent || 'User';
+            const text = b.innerText.replace(who, '').trim();
+            transcript += `**${who}**: ${text}\n\n`;
+        });
+
+        const blob = new Blob([transcript], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Aria_Chat_Transcript_${Date.now()}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        setStatus('Chat transcript exported!', '#4ade80');
+    });
+}
+
+// =====================================================================
+// --- INTERACTIVE SOUNDBOARD SFX ENGINE ---
+// =====================================================================
+function playSFXSound(type) {
+    try {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtxClass();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'cheer') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+            setStatus('SFX: 🎉 Cheering Sound', '#f472b6');
+        } else if (type === 'giggle') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, ctx.currentTime);
+            osc.frequency.setValueAtTime(750, ctx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(600, ctx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.3);
+            setStatus('SFX: 🤭 Playful Giggle', '#c084fc');
+        }
+    } catch (e) {}
+}
+
+const sfxCheerBtn = document.getElementById('sfxCheerBtn');
+const sfxGiggleBtn = document.getElementById('sfxGiggleBtn');
+
+if (sfxCheerBtn) sfxCheerBtn.addEventListener('click', () => playSFXSound('cheer'));
+if (sfxGiggleBtn) sfxGiggleBtn.addEventListener('click', () => playSFXSound('giggle'));
