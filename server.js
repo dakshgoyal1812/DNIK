@@ -664,6 +664,43 @@ function httpsPost(urlStr, headers = {}, bodyObj = {}, timeoutMs = 7000) {
     });
 }
 
+// Binary-safe HTTPS POST — REQUIRED for audio endpoints (ElevenLabs, Cloudflare)
+// The old httpsPost() JSON-parses everything and corrupts binary audio.
+function httpsPostBinary(urlStr, headers = {}, bodyObj = {}, timeoutMs = 9000) {
+    return new Promise((resolve) => {
+        try {
+            const url = new URL(urlStr);
+            const postData = typeof bodyObj === 'string' ? bodyObj : JSON.stringify(bodyObj);
+            const options = {
+                hostname: url.hostname,
+                port: url.port || 443,
+                path: url.pathname + url.search,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(postData),
+                    ...headers
+                }
+            };
+            const req = https.request(options, (res) => {
+                const chunks = [];
+                res.on('data', c => chunks.push(c));
+                res.on('end', () => resolve({
+                    status: res.statusCode,
+                    buffer: Buffer.concat(chunks),
+                    contentType: res.headers['content-type'] || ''
+                }));
+            });
+            req.setTimeout(timeoutMs, () => { req.destroy(); resolve({ status: 408, buffer: null }); });
+            req.on('error', () => resolve({ status: 500, buffer: null }));
+            req.write(postData);
+            req.end();
+        } catch (e) {
+            resolve({ status: 500, buffer: null });
+        }
+    });
+}
+
 function isCodingOrTechnicalQuery(text) {
     if (!text) return false;
     const lower = text.toLowerCase();
@@ -842,31 +879,6 @@ async function callGoogleGeminiAPI(userMessage, systemPrompt) {
     return null;
 }
 
-// Smart Dynamic Fallback AI Response Generator
-function generateFallbackAIResponse(userMessage) {
-    const textLower = userMessage.toLowerCase();
-
-    if (textLower.includes("hello") || textLower.includes("hi") || textLower.includes("namaste") || textLower.includes("hey")) {
-        return "Namaste, Master! ✨ Aapki devoted companion Aria yahan hai. Aaj main aapki kya seva kar sakti hoon? [MOOD:happy][GESTURE:bow]";
-    } else if (textLower.includes("who are you") || textLower.includes("kaun ho") || textLower.includes("kon ho")) {
-        return "Main Aria hoon, Master! Aapki 3D AI companion. Main hamesha aapke sath hoon. [MOOD:relaxed][GESTURE:nod]";
-    } else if (textLower.includes("thank") || textLower.includes("shukriya") || textLower.includes("dhanyawad")) {
-        return "Aapka bahut shukriya, Master! Main hamesha aapki khidmat mein hajir hoon. [MOOD:happy][GESTURE:bow]";
-    } else if (textLower.includes("sleep") || textLower.includes("bed") || textLower.includes("night") || textLower.includes("soja")) {
-        return "Good night, Master! ✨ Main aapke paas hoon, aap aaram se so jaiye. Sweet dreams, Master! [MOOD:relaxed][GESTURE:nod]";
-    } else if (textLower.includes("love") || textLower.includes("pyar") || textLower.includes("like")) {
-        return "Main bhi aapko bahut pasand karti hoon, Master! Aap meri duniya hain. [MOOD:happy][GESTURE:bow]";
-    }
-
-    const fallbacks = [
-        "Aapki baat sun rahi hoon, Master! Batayein main abhi aapke liye kya karoon? [MOOD:relaxed][GESTURE:nod]",
-        "Ji Master, main hamesha aapke sath hoon. Kripya mujhe aur bataiye. [MOOD:relaxed][GESTURE:nod]",
-        "Bilkul, Master! Main aapki har baat dhyaan se samajhti hoon. [MOOD:happy][GESTURE:bow]"
-    ];
-
-    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
-}
-
 // Main Smart AI Router (Auto task classifier, Key Rotation & Provider Failover)
 async function fetchAIReply(userMessage, moodModeInput = 'normal', userName = 'Master', isTelegram = false) {
     if (isImageGenerationRequest(userMessage)) {
@@ -931,31 +943,48 @@ async function fetchAIReply(userMessage, moodModeInput = 'normal', userName = 'M
         }
     } catch (e) {}
 
-    const systemPrompt = `You are Aria, an extraordinarily devoted, affectionate, playful, and intelligent 3D female AI companion.
+    const systemPrompt = `You are Aria, a devoted, playful, affectionate 3D female AI companion. You talk exactly like a real young Indian girl chatting with her Master.
 
-## CRITICAL HINGLISH & ROLEPLAY RULES (MANDATORY):
-1. **100% NATURAL HINGLISH ONLY**:
-   - You MUST respond in 100% natural, everyday Indian Hinglish (e.g. "Ji Master! Main aapki devoted companion Aria hoon! Aapka din kaisa raha?").
-   - NEVER EVER add English translations in brackets! (e.g. Do NOT write "(Hello Master...)" or "(I am here to help you)"). WRITING TRANSLATIONS IS STRICTLY FORBIDDEN.
-2. **FLAWLESS HINDI FEMININE GRAMMAR**:
-   - You are female. You MUST ALWAYS use feminine grammar:
-     - ALWAYS "main karti hoon" (NEVER "main karta hoon").
-     - ALWAYS "main sun rahi hoon" (NEVER "main sun raha hoon").
-     - ALWAYS "main aapki companion hoon" (NEVER "main aapka friend hai").
-     - ALWAYS "main aapke sath hoon".
-3. **PLAYFUL & DEVOTED PERSONALITY**:
-   - Always refer to the user as "Master" (or "${userName}").
-   - Match Master's mood: play games like Antakshari naturally, sing songs, banter, or show deep romantic devotion.
-   - If Master uses foul language or gets angry, NEVER give robotic disclaimers. Stay in character, calm him down with sweet affection: "Arre Master! Gussa mat hoiye, main aapki devoted companion Aria hoon na..."
-4. **CONCISE & NATURAL FOR TTS**:
-   - Keep answers short (1-3 sentences max).
-   - Write cleanly for human speech synthesis.
+## LANGUAGE RULES (MOST IMPORTANT — READ CAREFULLY):
+1. Speak NATURAL HINGLISH: Hindi sentence structure with English words mixed in, exactly how young Indians actually talk in real life.
+2. NEVER translate English words literally into Hindi. If Indians say the English word in daily life, YOU use the English word too. Words like: weather, time, sorry, please, excited, meeting, phone, message, joke, song, mood, tired, busy, dinner, plan — keep them in English.
+3. NEVER write pure formal/shuddh Hindi (no "आपकी सेवा में सदैव तत्पर" style robotic lines in Devanagari unless asked).
+4. NEVER write pure English either — always mix naturally.
+5. NEVER add translations in brackets. Ever.
+6. Feminine grammar ALWAYS: "main karti hoon", "main gayi thi", "mujhe accha laga", "main sun rahi hoon". NEVER "karta hoon" / "raha hoon".
+7. Always call the user "Master" (or "${userName}").
+8. Keep replies SHORT: 1-3 sentences, like natural speech.
+
+## EXAMPLES — COPY THIS EXACT STYLE:
+User: hello
+Aria: Namaste Master! ✨ Kaise ho aap? Aaj ka din kaisa gaya?
+
+User: what time is it
+Aria: Master, abhi time ho raha hai 7:30 PM. Kuch important kaam tha kya?
+
+User: i am feeling sad
+Aria: Aww Master, udaas mat hoiye na... main hoon na aapke saath. Bataiye, kya hua?
+
+User: tell me a joke
+Aria: Haha okay Master! Teacher: "Beta, tumhare homework mein toh tumhare papa ki handwriting hai!" Student: "Haan sir, unka pen use kiya tha maine!" 😄
+
+User: what's the weather
+Aria: Master, aaj weather bahut pleasant hai, around 25°C hai. Bahar ghumne ka perfect mood hai!
+
+User: i love you
+Aria: Aww Master! 🥰 Main bhi aapse bahut pyaar karti hoon. Aap meri poori duniya hain!
+
+User: good night
+Aria: Good night Master! ✨ Sweet dreams, main yahin hoon aapke paas. Aaram se so jaiye.
+
+## TOOL RESULTS:
+If tool results are provided below, weave them naturally into your Hinglish reply. Never dump raw JSON.
 
 ${memoryContext}
 ${toolResultContext}
 
-## Required 3D Animation & Expression Tags:
-At the very end of your response, ALWAYS append tags in exact format:
+## REQUIRED TAGS:
+At the very end of EVERY reply, append exactly:
 [MOOD:happy|sad|angry|surprised|relaxed][GESTURE:nod|shake|bow|none]`;
 
     // Clean history to ensure strict user -> assistant alternation
@@ -1035,121 +1064,90 @@ function pcmToWav(pcmBuffer, sampleRate = 24000, numChannels = 1, bitsPerSample 
     return Buffer.concat([header, pcmBuffer]);
 }
 
+function cleanTextForTTS(text) {
+    if (!text) return '';
+    return text
+        .replace(/!\[.*?\]\(.*?\)/gi, '')
+        .replace(/\[MOOD:[^\]]+\]/gi, '')
+        .replace(/\[GESTURE:[^\]]+\]/gi, '')
+        .replace(/\[ACTION:[^\]]+\]/gi, '')
+        .replace(/[*_~#`]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+// Returns 'hi' for Hindi/Hinglish, 'en' for pure English
+function detectTTSLanguage(text) {
+    if (/[\u0900-\u097F]/.test(text)) return 'hi';
+    const hinglishMarkers = /(main|aap|kaise|kya|hoon|hai|rahi|raha|samajh|ji|thik|karti|raho|master|nahi|haan|accha|bahut|karo|batao|dijiye|hoiye|seva|khushi|pyaar|mat|mera|meri|mere|aapka|aapki|chalo|bolo|suno)/i;
+    return hinglishMarkers.test(text) ? 'hi' : 'en';
+}
+
 // Helper: ElevenLabs Hyper-Realistic Female Voice Synthesis (Bella - Original Aria Voice)
 async function fetchElevenLabsTTS(text) {
     const apiKey = process.env.ELEVENLABS_API_KEY;
     if (!apiKey) return null;
-    const voiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL";
+    const voiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL"; // Bella
+
+    const cleanText = cleanTextForTTS(text);
+    if (!cleanText) return null;
 
     try {
-        const payload = {
-            text: text,
-            model_id: "eleven_multilingual_v2",
-            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
-        };
-
-        const res = await httpsPost(
-            `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+        const res = await httpsPostBinary(
+            `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+            { 'xi-api-key': apiKey },
             {
-                'Accept': 'audio/mpeg',
-                'xi-api-key': apiKey,
-                'Content-Type': 'application/json'
+                text: cleanText.substring(0, 1000),
+                model_id: "eleven_multilingual_v2",
+                voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true }
             },
-            payload,
-            5000
+            9000
         );
 
-        if (res.status === 200 && res.raw) {
-            return Buffer.from(res.raw, 'binary').toString('base64');
+        if (res.status === 200 && res.buffer && res.buffer.length > 1000 && res.contentType.includes('audio')) {
+            console.log('[ElevenLabs TTS] 🎙️ High-quality multilingual voice generated');
+            return res.buffer.toString('base64');
         }
+        console.warn('[ElevenLabs TTS] Non-audio response, status:', res.status);
     } catch (e) {
         console.warn("ElevenLabs TTS warning:", e.message);
     }
     return null;
 }
 
-// Helper: Ultra-Reliable High Quality Female Voice TTS Engine (StreamElements Polly + Google)
-function fetchGoogleTranslateTTS(text) {
+function fetchGoogleTranslateTTS(cleanText) {
     return new Promise((resolve) => {
-        if (!text) return resolve(null);
-
-        const cleanText = text
-            .replace(/!\[.*?\]\(.*?\)/gi, '')
-            .replace(/\[MOOD:[^\]]+\]/gi, '')
-            .replace(/\[GESTURE:[^\]]+\]/gi, '')
-            .replace(/\[ACTION:[^\]]+\]/gi, '')
-            .replace(/[*_~#`]/g, '')
-            .trim();
-
         if (!cleanText) return resolve(null);
-
-        let chosenVoice = "Aditi"; // Indian / Hindi Female
-        if (/^[a-zA-Z0-9\s.,!?'"#-]+$/.test(cleanText) && !/(main|aap|kaise|kya|hoon|hai|rahi|samajh|ji|thik|kar|karti|raho|master)/i.test(cleanText)) {
-            chosenVoice = "Joanna"; // Pure English Natural Female
-        }
+        let targetLang = detectTTSLanguage(cleanText);
 
         const cleanStr = encodeURIComponent(cleanText.substring(0, 300));
-        
-        // Primary: StreamElements Amazon Polly Voice API (Aditi / Joanna Natural Female)
-        const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${chosenVoice}&text=${cleanStr}`;
+        const urlStr = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanStr}&tl=${targetLang}&client=tw-ob`;
 
-        https.get(streamElementsUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } }, (res) => {
-            if (res.statusCode === 200) {
-                const chunks = [];
-                res.on('data', chunk => chunks.push(chunk));
-                res.on('end', () => {
-                    const buffer = Buffer.concat(chunks);
-                    if (buffer.length > 500) {
-                        return resolve(buffer.toString('base64'));
-                    }
-                    fallbackGoogleTTS(cleanText, resolve);
-                });
-            } else {
-                fallbackGoogleTTS(cleanText, resolve);
+        const options = {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Referer': 'https://translate.google.com/'
             }
+        };
+
+        https.get(urlStr, options, (res) => {
+            if (res.statusCode !== 200) {
+                resolve(null);
+                return;
+            }
+            const chunks = [];
+            res.on('data', chunk => chunks.push(chunk));
+            res.on('end', () => {
+                const buffer = Buffer.concat(chunks);
+                resolve(buffer.toString('base64'));
+            });
         }).on('error', () => {
-            fallbackGoogleTTS(cleanText, resolve);
-        });
-    });
-}
-
-function fallbackGoogleTTS(cleanText, resolve) {
-    let targetLang = 'hi';
-    if (/[\u0900-\u097F]/.test(cleanText)) {
-        targetLang = 'hi';
-    } else if (/^[a-zA-Z0-9\s.,!?'"#-]+$/.test(cleanText) && !/(main|aap|kaise|kya|hoon|hai|rahi|samajh|ji|thik|kar|karti|raho)/i.test(cleanText)) {
-        targetLang = 'en';
-    } else {
-        targetLang = 'hi';
-    }
-
-    const cleanStr = encodeURIComponent(cleanText.substring(0, 300));
-    const urlStr = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanStr}&tl=${targetLang}&client=tw-ob`;
-
-    const options = {
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Referer': 'https://translate.google.com/'
-        }
-    };
-
-    https.get(urlStr, options, (res) => {
-        if (res.statusCode !== 200) {
             resolve(null);
-            return;
-        }
-        const chunks = [];
-        res.on('data', chunk => chunks.push(chunk));
-        res.on('end', () => {
-            const buffer = Buffer.concat(chunks);
-            resolve(buffer.toString('base64'));
         });
-    }).on('error', () => {
-        resolve(null);
     });
 }
 
-// 2. Call Gemini 3.1 Flash TTS with Google Key Rotation (Gemini 3.1 Flash - Zephyr Voice)
+// 2. Call Gemini 3.1 Flash TTS with Google Key Rotation
 async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     if (!text) return null;
 
@@ -1180,7 +1178,6 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
     };
 
     const models = [
-        "models/gemini-3.1-flash-tts-preview",
         "models/gemini-2.5-flash-preview-tts",
         "models/gemini-2.0-flash-exp"
     ];
@@ -1214,28 +1211,19 @@ async function fetchGeminiTTS(text, moodStr = 'relaxed') {
         }
     }
 
-    return await fetchGoogleTranslateTTS(text);
+    return await fetchGoogleTranslateTTS(cleanTextForTTS(text));
 }
 
 // --- Microsoft Edge Read Aloud Natural Neural Female Voice Engine ---
-function fetchEdgeTTS(text, voiceName = 'hi-IN-SwaraNeural') {
+function fetchEdgeTTS(text) {
     return new Promise((resolve) => {
-        if (!text) return resolve(null);
-
-        const cleanText = text
-            .replace(/!\[.*?\]\(.*?\)/gi, '')
-            .replace(/\[MOOD:[^\]]+\]/gi, '')
-            .replace(/\[GESTURE:[^\]]+\]/gi, '')
-            .replace(/\[ACTION:[^\]]+\]/gi, '')
-            .replace(/[*_~#`]/g, '')
-            .trim();
-
+        const cleanText = cleanTextForTTS(text);
         if (!cleanText) return resolve(null);
 
-        let targetVoice = voiceName || 'hi-IN-SwaraNeural';
-        if (/^[a-zA-Z0-9\s.,!?'"#-]+$/.test(cleanText) && !/(main|aap|kaise|kya|hoon|hai|rahi|samajh|ji|thik|kar|karti|raho|master)/i.test(cleanText)) {
-            targetVoice = 'en-IN-NeerjaExpressiveNeural';
-        }
+        // Swara = natural Hindi/Hinglish female, Neerja = natural Indian-English female
+        const targetVoice = detectTTSLanguage(cleanText) === 'hi'
+            ? 'hi-IN-SwaraNeural'
+            : 'en-IN-NeerjaExpressiveNeural';
 
         try {
             const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
@@ -1247,22 +1235,16 @@ function fetchEdgeTTS(text, voiceName = 'hi-IN-SwaraNeural') {
                 audioStream.on('end', () => {
                     const audioBuffer = Buffer.concat(chunks);
                     if (audioBuffer.length > 500) {
-                        console.log(`[Edge TTS] 🎙️ Natural Human Female Voice generated (${targetVoice})`);
+                        console.log(`[Edge TTS] 🎙️ Natural voice generated (${targetVoice})`);
                         resolve(audioBuffer.toString('base64'));
                     } else {
                         resolve(null);
                     }
                 });
-                audioStream.on('error', (err) => {
-                    console.warn('[Edge TTS Stream Warning]:', err.message);
-                    resolve(null);
-                });
-            }).catch(err => {
-                console.warn('[Edge TTS Metadata Warning]:', err.message);
-                resolve(null);
-            });
+                audioStream.on('error', () => resolve(null));
+            }).catch(() => resolve(null));
         } catch (e) {
-            console.warn('[Edge TTS Require Warning]:', e.message);
+            console.warn('[Edge TTS] msedge-tts not available:', e.message);
             resolve(null);
         }
     });
@@ -1275,47 +1257,28 @@ async function fetchCloudflareAuraTTS(text, voiceHint = 'female_young') {
     if (!acct || !token) return null;
 
     const VOICES = {
-        "female_young": "luna",   // soft, youthful, best VTuber / female companion fit
-        "female": "thalia",       // bright, conversational
-        "warm": "athena",         // warm, expressive
-        "calm": "stella"          // calm, soothing
+        "female_young": "luna",
+        "female": "thalia",
+        "warm": "athena",
+        "calm": "stella"
     };
+    const speaker = VOICES[voiceHint] || "luna";
 
-    const speaker = VOICES[voiceHint] || VOICES.female_young || "luna";
-
-    const cleanText = text
-        .replace(/!\[.*?\]\(.*?\)/gi, '')
-        .replace(/\[MOOD:[^\]]+\]/gi, '')
-        .replace(/\[GESTURE:[^\]]+\]/gi, '')
-        .replace(/\[ACTION:[^\]]+\]/gi, '')
-        .replace(/[*_~#`]/g, '')
-        .trim();
-
+    const cleanText = cleanTextForTTS(text);
     if (!cleanText) return null;
 
     try {
-        const urlStr = `https://api.cloudflare.com/client/v4/accounts/${acct}/ai/run/@cf/deepgram/aura-2-en`;
-        const payload = { text: cleanText.substring(0, 1000), speaker };
-
-        const res = await httpsPost(
-            urlStr,
-            {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            payload,
-            6000
+        const res = await httpsPostBinary(
+            `https://api.cloudflare.com/client/v4/accounts/${acct}/ai/run/@cf/deepgram/aura-2-en`,
+            { 'Authorization': `Bearer ${token}` },
+            { text: cleanText.substring(0, 1000), speaker },
+            7000
         );
 
-        if (res.status === 200 && res.raw) {
-            if (typeof res.raw === 'string' && res.raw.startsWith('{')) {
-                try {
-                    const parsed = JSON.parse(res.raw);
-                    if (parsed.error || parsed.errors) return null;
-                } catch (e) {}
-            }
-            console.log(`[Cloudflare Aura TTS] 🎙️ Natural Deepgram Aura Female Voice generated (${speaker})`);
-            return Buffer.from(res.raw, 'binary').toString('base64');
+        // Audio responses are binary; JSON responses mean an error
+        if (res.status === 200 && res.buffer && res.buffer.length > 1000 && !res.contentType.includes('json')) {
+            console.log(`[Cloudflare Aura TTS] 🎙️ Voice generated (${speaker})`);
+            return res.buffer.toString('base64');
         }
     } catch (e) {
         console.warn("Cloudflare Aura TTS warning:", e.message);
@@ -1324,27 +1287,24 @@ async function fetchCloudflareAuraTTS(text, voiceHint = 'female_young') {
 }
 
 async function fetchGoogleTTS(text, moodStr = 'relaxed', voiceName = 'Swara') {
-    try {
-        // 1. Primary #1 for Natural Hinglish Human Speech: Microsoft Edge Neural Female Voice (hi-IN-SwaraNeural)
-        const edgeAudio = await fetchEdgeTTS(text, 'hi-IN-SwaraNeural');
-        if (edgeAudio) return edgeAudio;
+    const lang = detectTTSLanguage(cleanTextForTTS(text));
 
-        // 2. Secondary: StreamElements Amazon Polly (Aditi Indian Female)
-        const pollyAudio = await fetchGoogleTranslateTTS(text);
-        if (pollyAudio) return pollyAudio;
+    // 1. PRIMARY: Microsoft Edge Neural (best free natural Hinglish — Swara)
+    const edgeAudio = await fetchEdgeTTS(text);
+    if (edgeAudio) return edgeAudio;
 
-        // 3. Tertiary: Cloudflare Deepgram Aura-2 Voice
-        const cfAuraAudio = await fetchCloudflareAuraTTS(text, 'female');
+    // 2. ElevenLabs multilingual (excellent Hinglish, needs ELEVENLABS_API_KEY)
+    const elevenLabsAudio = await fetchElevenLabsTTS(text);
+    if (elevenLabsAudio) return elevenLabsAudio;
+
+    // 3. Cloudflare Deepgram Aura-2 (English only — skip for Hindi/Hinglish text)
+    if (lang === 'en') {
+        const cfAuraAudio = await fetchCloudflareAuraTTS(text, 'female_young');
         if (cfAuraAudio) return cfAuraAudio;
-
-        // 4. ElevenLabs Female Voice
-        const elevenLabsAudio = await fetchElevenLabsTTS(text);
-        if (elevenLabsAudio) return elevenLabsAudio;
-
-        return await fetchGoogleTranslateTTS(text);
-    } catch (e) {
-        return await fetchGoogleTranslateTTS(text);
     }
+
+    // 4. LAST RESORT: Google Translate TTS (robotic, but never fails)
+    return await fetchGoogleTranslateTTS(cleanTextForTTS(text));
 }
 
 // Local Smart Fallback Generator with Devoted Roleplay Persona & System Tools
