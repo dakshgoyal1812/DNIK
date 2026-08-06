@@ -1291,17 +1291,76 @@ function fetchEdgeTTS(text, voiceName = 'hi-IN-SwaraNeural') {
     });
 }
 
+// Helper: Cloudflare Workers AI - Deepgram Aura-2 Human Female Voice TTS Engine (@cf/deepgram/aura-2-en)
+async function fetchCloudflareAuraTTS(text, voiceHint = 'female_young') {
+    const acct = process.env.CF_ACCOUNT_ID;
+    const token = process.env.CF_API_TOKEN;
+    if (!acct || !token) return null;
+
+    const VOICES = {
+        "female_young": "luna",   // soft, youthful, best VTuber / female companion fit
+        "female": "thalia",       // bright, conversational
+        "warm": "athena",         // warm, expressive
+        "calm": "stella"          // calm, soothing
+    };
+
+    const speaker = VOICES[voiceHint] || VOICES.female_young || "luna";
+
+    const cleanText = text
+        .replace(/!\[.*?\]\(.*?\)/gi, '')
+        .replace(/\[MOOD:[^\]]+\]/gi, '')
+        .replace(/\[GESTURE:[^\]]+\]/gi, '')
+        .replace(/\[ACTION:[^\]]+\]/gi, '')
+        .replace(/[*_~#`]/g, '')
+        .trim();
+
+    if (!cleanText) return null;
+
+    try {
+        const urlStr = `https://api.cloudflare.com/client/v4/accounts/${acct}/ai/run/@cf/deepgram/aura-2-en`;
+        const payload = { text: cleanText.substring(0, 1000), speaker };
+
+        const res = await httpsPost(
+            urlStr,
+            {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            payload,
+            6000
+        );
+
+        if (res.status === 200 && res.raw) {
+            if (typeof res.raw === 'string' && res.raw.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(res.raw);
+                    if (parsed.error || parsed.errors) return null;
+                } catch (e) {}
+            }
+            console.log(`[Cloudflare Aura TTS] 🎙️ Natural Deepgram Aura Female Voice generated (${speaker})`);
+            return Buffer.from(res.raw, 'binary').toString('base64');
+        }
+    } catch (e) {
+        console.warn("Cloudflare Aura TTS warning:", e.message);
+    }
+    return null;
+}
+
 async function fetchGoogleTTS(text, moodStr = 'relaxed', voiceName = 'Zephyr') {
     try {
-        // 1. Primary: Microsoft Edge Natural Human Female Neural Voice (hi-IN-SwaraNeural / en-IN-NeerjaNeural)
+        // 0. Primary High-Fidelity: Cloudflare Deepgram Aura-2 Human Female Voice Engine
+        const cfAuraAudio = await fetchCloudflareAuraTTS(text, voiceName === 'Zephyr' ? 'female_young' : 'female');
+        if (cfAuraAudio) return cfAuraAudio;
+
+        // 1. Secondary: Microsoft Edge Natural Human Female Neural Voice (hi-IN-SwaraNeural / en-IN-NeerjaNeural)
         const edgeAudio = await fetchEdgeTTS(text);
         if (edgeAudio) return edgeAudio;
 
-        // 2. Secondary: ElevenLabs Female Voice
+        // 2. Tertiary: ElevenLabs Female Voice
         const elevenLabsAudio = await fetchElevenLabsTTS(text);
         if (elevenLabsAudio) return elevenLabsAudio;
 
-        // 3. Tertiary: Gemini 3.1 Flash Voice
+        // 3. Quaternary: Gemini 3.1 Flash Voice
         const geminiAudio = await fetchGeminiTTS(text, moodStr);
         if (geminiAudio) return geminiAudio;
 
