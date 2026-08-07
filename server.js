@@ -1266,9 +1266,17 @@ const server = http.createServer(async (req, res) => {
                 }
 
 // Neural TTS Engine using High-Quality Voice Synthesis Buffer
-async function fetchNeuralTTS(text, lang = 'hi') {
+async function fetchNeuralTTS(text, voiceName = 'Swara') {
     if (!text) return null;
     try {
+        let lang = 'hi';
+        if (voiceName === 'Neerja' || voiceName === 'Ana' || voiceName === 'GoogleEnglish') {
+            lang = 'en';
+        } else if (voiceName === 'Swara' || voiceName === 'GoogleHindi') {
+            lang = 'hi';
+        } else {
+            lang = /[a-zA-Z]{5,}/.test(text) ? 'en' : 'hi';
+        }
         const clean = text.replace(/[*#_`[\]]/g, '').slice(0, 300);
         const encodedText = encodeURIComponent(clean);
         const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=tw-ob`;
@@ -1296,8 +1304,7 @@ async function fetchNeuralTTS(text, lang = 'hi') {
                 let audioContent = null;
                 if (!imageUrl) {
                     try {
-                        const targetLang = /[a-zA-Z]{5,}/.test(cleanText) ? 'en' : 'hi';
-                        audioContent = await fetchNeuralTTS(cleanText, targetLang);
+                        audioContent = await fetchNeuralTTS(cleanText, voiceName);
                     } catch (ttsErr) {
                         console.error("TTS error:", ttsErr);
                     }
