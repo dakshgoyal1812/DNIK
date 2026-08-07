@@ -674,7 +674,10 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   </div>
 
   <div class="topbar-mid">
-    <div class="select" title="3D Studio Environment Preset">
+    <span class="chip" id="personaBadge" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px;">
+      <i class="dot" style="background: #4ade80; box-shadow: 0 0 8px #4ade80;"></i>AUTO-PERSONA AI ACTIVE
+    </span>
+    <div class="select" title="3D Studio Environment Preset" style="margin-left: 4px;">
       <select id="envSelect">
         <option value="dark_studio">🌌 Dark Studio</option>
         <option value="cyberpunk_neon">🌆 Cyberpunk Neon</option>
@@ -692,6 +695,9 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   </div>
 
   <div class="topbar-end">
+    <div id="speakingBox" style="font-family: var(--font-mono); font-size: 0.6875rem; color: #00f5d4; background: rgba(0, 245, 212, 0.1); border: 1px solid rgba(0, 245, 212, 0.3); padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px;">
+      SPEAKING: "<span id="speakingText">...</span>"
+    </div>
     <button class="ibtn" id="handsFreeBtn" type="button" aria-pressed="false" title="Toggle Continuous Hands-Free Voice Mode" aria-label="Toggle Continuous Hands-Free Voice Mode">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
@@ -714,86 +720,88 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 <!-- ============================ MAIN ============================ -->
 <main class="hud">
 
-  <!-- ---------- COMMS ---------- -->
-  <section class="panel panel--ticks comms rise" style="--i:1" aria-label="Conversation with Aria">
-    <div class="panel-head" style="display: flex; align-items: center; justify-space: space-between; flex-wrap: wrap; gap: 8px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <h2 class="label">Comms Relay</h2>
-        <span class="count mono" id="msgCount">01 msg</span>
-      </div>
-      <div class="voice-controls" style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: nowrap;">
-        <span id="ariaBadge" class="chip" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;" title="Aria Hinglish Companion Active">
-          ✨ Aria — 3D AI Companion
-        </span>
-        <span id="voiceBadge" style="font-family: var(--font-mono); font-size: 0.6875rem; color: #38bdf8; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.4); padding: 5px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-          🎙️ Voice: Natural Hinglish Female (Swara)
-        </span>
-        <button id="testVoiceBtn" type="button" title="Test selected voice playback" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: var(--aqua); padding: 4px 10px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-          🔊 Test
-        </button>
-      </div>
-    </div>
-
-    <div id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
-      <div class="msg-bubble msg-ai">
-        <b class="who">Aria</b>
-        Namaste! ✨ Main Aria hoon, aapki AI companion. Kaise hain aap? 👋
-        <span class="msg-tag">aria hinglish active</span>
-      </div>
-    </div>
-
-    <div class="typing" id="typingIndicator" data-on="false" aria-hidden="true">
-      <span></span><span></span><span></span><em>Aria is thinking</em>
-    </div>
-
-    <div class="chips" id="quickPrompts">
-      <button type="button" data-prompt="Mujhe ek majedar funny joke sunao!">Tell a Joke 🎭</button>
-      <button type="button" id="poseWaveBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">👋 Wave Pose</button>
-      <button type="button" id="poseBowBtn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">🙇 Bow Pose</button>
-      <button type="button" id="poseShyBtn" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">🙈 Shy Pose</button>
-      <button type="button" id="poseThinkBtn" style="color: #fb923c; border-color: rgba(251, 146, 60, 0.4);">🤔 Think Pose</button>
-      <button type="button" id="poseVictoryBtn" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.4);">✌️ Victory Pose</button>
-      <button type="button" id="sfxCheerBtn" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">🎉 Cheer SFX</button>
-      <button type="button" id="sfxGiggleBtn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">🤭 Giggle SFX</button>
-      <button type="button" id="exportBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">💾 Export Chat</button>
-    </div>
-
-    <div class="chat-input-bar">
-      <div class="input-wrapper">
-        <label class="sr-only" for="chatInput" hidden>Message Aria</label>
-        <input type="text" id="chatInput" placeholder="Message Aria…" autocomplete="off" autofocus />
-        <div class="input-actions">
-          <button id="camBtn" class="ibtn" type="button" title="Capture WebCam picture for Aria's Vision Eye" aria-label="Capture WebCam picture" style="color: #38bdf8; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 50%; width: 36px; height: 36px; display: grid; place-items: center; cursor: pointer; margin-right: 4px;">
-            📷
-          </button>
-          <button id="micBtn" class="btn-voice" type="button" title="Voice input" aria-label="Voice input">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="2" width="6" height="11" rx="3"/>
-              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-              <line x1="12" y1="18" x2="12" y2="22"/>
-              <line x1="8" y1="22" x2="16" y2="22"/>
-            </svg>
-            <span class="voice-pulse"></span>
-          </button>
-          <button id="sendBtn" class="btn-send" type="button" title="Send message" aria-label="Send message">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/>
-            </svg>
-          </button>
+  <!-- ---------- COMMS COLUMN ---------- -->
+  <div style="display: flex; flex-direction: column; gap: var(--s-3); min-height: 0; grid-area: chat;">
+    <section class="panel panel--ticks comms rise" style="--i:1; flex: 1; min-height: 0;" aria-label="Conversation with Aria">
+      <div class="panel-head" style="display: flex; align-items: center; justify-space: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h2 class="label">Comms Relay</h2>
+          <span class="count mono" id="msgCount">01 msg</span>
+        </div>
+        <div class="voice-controls" style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: nowrap;">
+          <span id="ariaBadge" class="chip" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;" title="Aria Hinglish Companion Active">
+            ✨ Aria — 3D AI Companion
+          </span>
         </div>
       </div>
 
-      <div class="voice-indicator" id="voiceIndicator">
-        <div class="voice-bars"><span></span><span></span><span></span><span></span><span></span></div>
-        <span class="voice-text">Listening… speak now</span>
+      <div id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
+        <div class="msg-bubble msg-ai">
+          <b class="who">Aria</b>
+          Welcome back, Master! ✨ Main Aria hoon, aapki devoted AI companion. 3D Studio online hai. 👋
+          <span class="msg-tag">boot sequence complete</span>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ---------- STAGE ---------- -->
-  <section class="stage rise" style="--i:3" aria-label="Aria 3D viewport">
+      <div class="typing" id="typingIndicator" data-on="false" aria-hidden="true">
+        <span></span><span></span><span></span><em>Aria is thinking</em>
+      </div>
+
+      <div class="chips" id="quickPrompts">
+        <button type="button" id="chipDiagBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">System diagnostic</button>
+        <button type="button" id="chipExprBtn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">Change expression</button>
+        <button type="button" id="chipCapBtn" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">Capabilities</button>
+        <button type="button" id="poseWaveBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">👋 Wave Pose</button>
+        <button type="button" id="exportBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">💾 Export Chat</button>
+      </div>
+
+      <div class="chat-input-bar">
+        <div class="input-wrapper" style="border-color: rgba(0, 245, 212, 0.4);">
+          <label class="sr-only" for="chatInput" hidden>Message Aria</label>
+          <input type="text" id="chatInput" placeholder="Message Aria…" autocomplete="off" autofocus />
+          <div class="input-actions">
+            <button id="camBtn" class="ibtn" type="button" title="Capture WebCam picture for Aria's Vision Eye" aria-label="Capture WebCam picture" style="color: #00f5d4; background: rgba(0, 245, 212, 0.15); border: 1px solid rgba(0, 245, 212, 0.4); border-radius: 50%; width: 36px; height: 36px; display: grid; place-items: center; cursor: pointer; margin-right: 4px;">
+              📷
+            </button>
+            <button id="micBtn" class="btn-voice" type="button" title="Voice input" aria-label="Voice input">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="2" width="6" height="11" rx="3"/>
+                <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                <line x1="12" y1="18" x2="12" y2="22"/>
+                <line x1="8" y1="22" x2="16" y2="22"/>
+              </svg>
+              <span class="voice-pulse"></span>
+            </button>
+            <button id="sendBtn" class="btn-send" type="button" title="Send message" aria-label="Send message" style="background: #00f5d4; color: #0a0f12;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="voice-indicator" id="voiceIndicator">
+          <div class="voice-bars"><span></span><span></span><span></span><span></span><span></span></div>
+          <span class="voice-text">Listening… speak now</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 3D FIBONACCI SPHERE RADAR ---------- -->
+    <section class="panel panel--ticks scope rise" id="globe-container" style="--i:2; height: 160px; min-height: 160px;" aria-label="3D Fibonacci Sphere">
+      <h2 class="label scope-title">3D Sphere</h2>
+      <canvas id="radar-canvas" role="img" aria-label="Rotating 3D Fibonacci sphere"></canvas>
+      <div class="scope-meta">
+        <span class="label">Points</span>
+        <span class="v mono" id="contactCount">468 active</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ---------- STAGE VIEWPORT ---------- -->
+  <section class="stage rise" style="--i:3; grid-area: stage;" aria-label="Aria 3D viewport">
     <div class="stage-tag">
-      <i class="dot"></i><span id="modelName">Aria 2.0.vrm</span>
+      <i class="dot" style="background: #00f5d4; box-shadow: 0 0 8px #00f5d4;"></i><span id="modelName">Aria 2.0.vrm</span>
     </div>
 
     <div id="canvas-container"></div>
@@ -813,13 +821,53 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     </div>
   </section>
 
-  <!-- ---------- 3D FIBONACCI SPHERE RADAR ---------- -->
-  <section class="panel panel--ticks scope rise" id="globe-container" style="--i:2" aria-label="3D Fibonacci Sphere">
-    <h2 class="label scope-title">3D Sphere</h2>
-    <canvas id="radar-canvas" role="img" aria-label="Rotating 3D Fibonacci sphere"></canvas>
-    <div class="scope-meta">
-      <span class="label">Points</span>
-      <span class="v mono" id="contactCount">460 active</span>
+  <!-- ---------- TELEMETRY live & SELF-HEALING ENGINE ---------- -->
+  <section class="panel panel--ticks telemetry rise" style="--i:2; grid-area: radar; min-height: 0; display: flex; flex-direction: column;" aria-label="Telemetry & System Diagnostics">
+    <div class="panel-head">
+      <h2 class="label">Telemetry</h2>
+      <span class="count mono" style="color: #00f5d4;">live</span>
+    </div>
+
+    <div class="tele-body" style="flex: 1; overflow-y: auto;">
+      <div class="integrity">
+        <div class="top">
+          <span class="label">System Integrity</span>
+          <div class="val"><span id="systemIntegrityVal">98</span><span>%</span></div>
+        </div>
+        <div class="meter"><i id="systemIntegrityBar" style="--v: 0.98; background: #00f5d4;"></i></div>
+      </div>
+
+      <div class="readouts" style="margin-top: 16px;">
+        <div class="readout">
+          <dt>Data Throughput</dt>
+          <dd id="throughputVal">45.2<small>TB/s</small></dd>
+        </div>
+        <div class="readout">
+          <dt>Threat Level</dt>
+          <dd style="display: flex; align-items: center; gap: 8px;">
+            <div class="ladder" data-level="1"><i></i><i></i><i></i><i></i></div>
+            <span style="color: #00f5d4; font-size: 0.75rem; font-family: var(--font-mono);">LOW</span>
+          </dd>
+        </div>
+        <div class="readout">
+          <dt>Active Nodes</dt>
+          <dd>1024 <small>/ 1024</small></dd>
+        </div>
+        <div class="readout">
+          <dt>Round Trip</dt>
+          <dd id="pingVal">08<small>ms</small></dd>
+        </div>
+        <div class="readout">
+          <dt>AI Core</dt>
+          <dd style="color: #00f5d4; font-family: var(--font-mono);">STABLE</dd>
+        </div>
+      </div>
+    </div>
+
+    <div class="tele-foot" style="margin-top: auto; padding: 12px;">
+      <button id="selfHealBtn" class="btn-engine" type="button" title="Trigger Autonomous Self-Healing Diagnostic Shield" style="border-color: rgba(0, 245, 212, 0.4); color: #00f5d4;">
+        <span id="selfHealBtnText">ARIA 3D ENGINE ONLINE</span>
+      </button>
     </div>
   </section>
 </main>
