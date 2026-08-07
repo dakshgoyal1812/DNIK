@@ -304,16 +304,14 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   display:grid;
   min-height:0;
   gap:var(--s-3);
-  grid-template-columns:clamp(300px, 22vw, 356px) minmax(0,1fr) clamp(258px, 18.5vw, 310px);
-  grid-template-rows:minmax(0,1fr) 200px;
+  grid-template-columns:clamp(320px, 28vw, 400px) minmax(0,1fr) clamp(260px, 22vw, 340px);
+  grid-template-rows:minmax(0,1fr);
   grid-template-areas:
-    "chat stage tele"
     "chat stage radar";
 }
 .comms { grid-area:chat;  min-height:0; display:flex; flex-direction:column; }
-.scope { grid-area:radar; min-height:0; overflow:hidden; }
 .stage { grid-area:stage; min-height:0; }
-.tele  { grid-area:tele;  min-height:0; display:flex; flex-direction:column; }
+.scope { grid-area:radar; min-height:0; overflow:hidden; }
 
 /* entrance */
 .rise{ opacity:0; transform:translateY(14px); animation:rise .7s var(--ease-out) forwards; animation-delay:calc(var(--i,0) * 70ms); }
@@ -634,35 +632,17 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width:1180px){
-  .hud{
-    grid-template-columns:minmax(0,1fr) 286px;
-    grid-template-rows:minmax(0,1fr) minmax(240px,38%);
-    grid-template-areas:
-      "stage tele"
-      "chat  tele";
-  }
-  .scope{ display:none; }
-  .brand .sub{ display:none; }
-}
-
 @media (max-width:820px){
-  body{ overflow:auto; padding:var(--s-2); gap:var(--s-2); grid-template-rows:auto auto auto; }
+  body{ overflow:auto; padding:var(--s-2); gap:var(--s-2); grid-template-rows:auto auto; }
   .topbar{ grid-template-columns:1fr auto; row-gap:var(--s-2); }
   .topbar-mid{ grid-column:1 / -1; justify-content:flex-start; }
   .hud{
     grid-template-columns:minmax(0,1fr);
-    grid-template-rows:auto auto auto;
-    grid-template-areas:"stage" "tele" "chat";
+    grid-template-rows:auto auto;
+    grid-template-areas:"stage" "chat";
   }
   .stage{ aspect-ratio:4 / 5; }
   .comms{ height:min(70dvh, 560px); }
-  .tele-body{
-    flex-direction:row; overflow-x:auto; gap:var(--s-5);
-    scroll-snap-type:x proximity; padding:var(--s-3) var(--s-4);
-  }
-  .tele-body > *{ flex:0 0 210px; scroll-snap-align:start; }
-  .tele-foot{ display:none; }
   .stage-hint{ display:none; }
 }
 
@@ -727,9 +707,6 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
         <option value="full">🌐 Full 3D Orbit</option>
       </select>
     </div>
-    <span class="chip" id="closenessChip" style="background: rgba(244, 114, 182, 0.15); border: 1px solid rgba(244, 114, 182, 0.4); color: #f472b6; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px;" title="Friendship & Relationship Closeness Metric">
-      💞 Bond: Soulmate (98%)
-    </span>
   </div>
 
   <div class="topbar-end">
@@ -738,9 +715,6 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
       </svg>
     </button>
-    <span class="chip" id="selfHealBadge" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px;" title="Autonomous Self-Healing Shield Active">
-      <i class="dot" style="background: #4ade80; box-shadow: 0 0 8px #4ade80;"></i>💚 Self-Healing: Active
-    </span>
     <span class="chip" id="status" data-state="online" role="status"><i class="dot"></i>Online</span>
     <button class="ibtn" id="muteBtn" type="button" aria-pressed="false" title="Mute Aria's voice" aria-label="Mute Aria's voice">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -775,17 +749,13 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
         <button id="testVoiceBtn" type="button" title="Test selected voice playback" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: var(--aqua); padding: 4px 10px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
           🔊 Test
         </button>
-        <input type="file" id="pdfPicker" accept=".pdf,.txt" style="display:none;" />
-        <button id="pdfBtn" type="button" title="Upload PDF / Document to analyze" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 4px 10px; border-radius: 12px; font-family: var(--font-mono); font-size: 0.6875rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-          📄 PDF
-        </button>
       </div>
     </div>
 
     <div id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
       <div class="msg-bubble msg-ai">
         <b class="who">Aria</b>
-        Namaste, Master! ✨ Main Aria hoon, aapki devoted AI companion. Aapka din kaisa raha? 👋
+        Namaste! ✨ Main Aria hoon, aapki AI companion. Kaise hain aap? 👋
         <span class="msg-tag">aria hinglish active</span>
       </div>
     </div>
@@ -796,7 +766,6 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
 
     <div class="chips" id="quickPrompts">
       <button type="button" data-prompt="Mujhe ek majedar funny joke sunao!">Tell a Joke 🎭</button>
-      <button type="button" data-prompt="Chalo mere sath Antakshari khelo!">Antakshari 🎶</button>
       <button type="button" id="poseWaveBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">👋 Wave Pose</button>
       <button type="button" id="poseBowBtn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">🙇 Bow Pose</button>
       <button type="button" id="poseShyBtn" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">🙈 Shy Pose</button>
@@ -805,11 +774,6 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
       <button type="button" id="sfxCheerBtn" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">🎉 Cheer SFX</button>
       <button type="button" id="sfxGiggleBtn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">🤭 Giggle SFX</button>
       <button type="button" id="exportBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">💾 Export Chat</button>
-      <button type="button" data-prompt="Aaj ka mausam aur weather report batao.">Weather ☀️</button>
-      <button type="button" data-prompt="Bitcoin ka live crypto price check karo.">Crypto 🪙</button>
-      <button type="button" data-prompt="Search web for latest AI news today.">Web Search 🔍</button>
-      <button type="button" data-prompt="Run a full CPU and hardware system telemetry check.">CPU System ⚡</button>
-      <button type="button" data-prompt="Execute python code print('Hello Master from Python!')">Python Sandbox 🐍</button>
     </div>
 
     <div class="chat-input-bar">
@@ -867,62 +831,7 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     </div>
   </section>
 
-  <!-- ---------- REAL-TIME CPU & HARDWARE SYSTEM MONITOR ---------- -->
-  <aside class="panel panel--ticks tele rise" style="--i:4" aria-label="Live System Hardware Telemetry">
-    <div class="panel-head">
-      <h2 class="label">CPU & Hardware Monitor</h2>
-      <span class="count mono" style="color: #4ade80;">LIVE ⚡</span>
-    </div>
-
-    <div class="tele-body">
-      <!-- Real CPU Usage Meter -->
-      <div class="integrity">
-        <div class="top">
-          <span class="label">CPU Utilization</span>
-          <span class="val" id="cpuVal">00<span>%</span></span>
-        </div>
-        <div class="meter" role="meter" aria-label="CPU Utilization">
-          <i id="cpuBar" style="width: 15%; background: linear-gradient(90deg, #38bdf8, #818cf8);"></i>
-        </div>
-      </div>
-
-      <!-- Real RAM Usage Meter -->
-      <div class="integrity" style="margin-top: 14px;">
-        <div class="top">
-          <span class="label">RAM Memory Usage</span>
-          <span class="val" id="ramVal">00<span>%</span></span>
-        </div>
-        <div class="meter" role="meter" aria-label="RAM Memory Usage">
-          <i id="ramBar" style="width: 45%; background: linear-gradient(90deg, #c084fc, #f472b6);"></i>
-        </div>
-      </div>
-
-      <dl class="readouts" style="margin-top: 16px;">
-        <div class="readout">
-          <dt>RAM Memory Status</dt>
-          <dd id="ramDetail">0.0 GB <small>/ 0.0 GB</small></dd>
-        </div>
-        <div class="readout">
-          <dt>Processor Core</dt>
-          <dd id="cpuModel" style="font-size: 0.75rem; color: var(--aqua); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Multi-Core Processor</dd>
-        </div>
-        <div class="readout">
-          <dt>Host System</dt>
-          <dd id="osHost" style="font-size: 0.75rem; color: #38bdf8;">Windows System</dd>
-        </div>
-        <div class="readout">
-          <dt>System Uptime</dt>
-          <dd id="sysUptime">0.0<small>hrs</small></dd>
-        </div>
-        <div class="readout">
-          <dt>Aria AI Core</dt>
-          <dd style="font-size: 0.75rem; color: #4ade80; font-weight: 600;">ACTIVE ✨</dd>
-        </div>
-      </dl>
-    </div>
-  </aside>
-
-  <!-- ---------- SCOPE ---------- -->
+  <!-- ---------- 3D FIBONACCI SPHERE RADAR ---------- -->
   <section class="panel panel--ticks scope rise" id="globe-container" style="--i:2" aria-label="3D Fibonacci Sphere">
     <h2 class="label scope-title">3D Sphere</h2>
     <canvas id="radar-canvas" role="img" aria-label="Rotating 3D Fibonacci sphere"></canvas>
@@ -932,8 +841,6 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     </div>
   </section>
 </main>
-
-
 
 <!-- ============================ DROP OVERLAY ============================ -->
 <div id="drop-overlay" aria-hidden="true">
@@ -1100,46 +1007,6 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     });
   })();
 
-  /* ---------- telemetry drift + sparkline ---------- */
-  (() => {
-    const line = $("#sparkLine"), area = $("#sparkArea");
-    const tp = $("#throughput"), lat = $("#latency"), fps = $("#fpsReadout");
-    const iv = $("#integrityVal"), ib = $("#integrityBar");
-    let data = Array.from({ length: 24 }, () => 40 + Math.random() * 12);
-
-    const render = () => {
-      const max = Math.max(...data), min = Math.min(...data);
-      const span = Math.max(max - min, 1);
-      const pts = data.map((v, i) => [
-        (i / (data.length - 1)) * 100,
-        24 - ((v - min) / span) * 21
-      ]);
-      if (line) line.setAttribute("points", pts.map(p => p.join(",")).join(" "));
-      if (area) area.setAttribute("d", `M0,26 L${pts.map(p => p.join(",")).join(" L")} L100,26 Z`);
-    };
-    render();
-
-    setInterval(() => {
-      data = [...data.slice(1), Math.min(58, Math.max(32, data.at(-1) + (Math.random() - 0.5) * 7))];
-      render();
-      if (tp) tp.innerHTML = `${data.at(-1).toFixed(1)}<small>TB/s</small>`;
-      if (lat) lat.innerHTML = `${String(Math.round(6 + Math.random() * 6)).padStart(2, "0")}<small>ms</small>`;
-      const integ = 96 + Math.round(Math.random() * 3);
-      if (iv) iv.innerHTML = `${integ}<span>%</span>`;
-      if (ib) ib.style.setProperty("--v", integ / 100);
-      if (ib && ib.parentElement) ib.parentElement.setAttribute("aria-valuenow", integ);
-    }, 2200);
-
-    /* real frame counter */
-    let frames = 0, last = performance.now();
-    const loop = (t) => {
-      frames++;
-      if (t - last >= 1000) { if (fps) fps.textContent = `${frames} fps`; frames = 0; last = t; }
-      requestAnimationFrame(loop);
-    };
-    if (fps) requestAnimationFrame(loop);
-  })();
-
   /* ---------- stage: hide loader once app.js mounts a canvas ---------- */
   (() => {
     const loader = $("#stageLoading");
@@ -1184,12 +1051,9 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     fn && fn(on);
   });
   toggle($("#muteBtn"), on => dispatchEvent(new CustomEvent("aria:mute", { detail: { muted: on } })));
-  toggle($("#gridBtn"), on => { const amb = $(".ambient"); if (amb) amb.style.opacity = on ? "1" : ".35"; });
-  if ($("#gridBtn")) $("#gridBtn").setAttribute("aria-pressed", "true");
   if ($("#fsBtn")) $("#fsBtn").addEventListener("click", () => {
     document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
   });
-  if ($("#consoleBtn")) $("#consoleBtn").addEventListener("click", () => dispatchEvent(new CustomEvent("aria:console")));
 
   /* ---------- message counter ---------- */
   (() => {
@@ -1228,59 +1092,6 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   };
 })();
 </script>
-
-<style>
-/* Rich Live Data Cards */
-.rich-card {
-  margin-top: 8px; border-radius: var(--r-md); padding: 12px 14px;
-  background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.3);
-  font-family: var(--font-ui); font-size: 0.8125rem; color: var(--text);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-}
-.rich-card-weather { border-color: rgba(251, 146, 60, 0.4); background: rgba(30, 20, 15, 0.6); }
-.rich-card-crypto { border-color: rgba(74, 222, 128, 0.4); background: rgba(10, 30, 20, 0.6); }
-.rich-card-qr { text-align: center; }
-.rich-card-qr img { max-width: 140px; border-radius: 8px; margin-top: 6px; border: 2px solid var(--aqua); }
-</style>
-
-<!-- ============================ MEMORY & MOOD VISUALIZER MODAL ============================ -->
-<div id="memoryModal" class="modal-overlay" style="position: fixed; inset: 0; z-index: 9999; display: none; place-items: center; background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(16px); padding: 20px;">
-  <div class="panel" style="width: min(680px, 92vw); max-height: 85vh; display: flex; flex-direction: column; border-radius: var(--r-lg); background: var(--ink-1); border: 1px solid var(--line); box-shadow: 0 16px 40px rgba(0,0,0,0.5); overflow: hidden;">
-    <div class="panel-head" style="padding: 16px 20px; border-bottom: 1px solid var(--line-soft); display: flex; align-items: center; justify-content: space-between;">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 1.25rem;">🧠</span>
-        <h2 style="font-size: 1rem; font-weight: 700; color: var(--text);">Memory & Mood Visualizer</h2>
-      </div>
-      <button id="closeMemModalBtn" class="ibtn" type="button" style="font-size: 1.2rem;">✕</button>
-    </div>
-
-    <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1;">
-      <!-- Search Input -->
-      <div class="input-wrapper" style="width: 100%;">
-        <input type="text" id="memSearchInput" placeholder="Search learned facts, topics, preferences…" autocomplete="off" />
-      </div>
-
-      <!-- Learned Facts Section -->
-      <div>
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-          <span class="label" style="color: var(--aqua-mid);">Learned Context & Facts (<span id="factCount">0</span>)</span>
-          <button id="clearMemBtn" type="button" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; font-family: var(--font-mono); font-size: 0.6875rem; padding: 4px 10px; border-radius: var(--r-pill); cursor: pointer;">🧹 Clear All</button>
-        </div>
-        <div id="memFactsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; padding-right: 4px;">
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-3);">Loading memories…</div>
-        </div>
-      </div>
-
-      <!-- Mood History Log Section -->
-      <div style="margin-top: 12px; border-top: 1px solid var(--line-soft); padding-top: 14px;">
-        <span class="label" style="color: #c084fc; display: block; margin-bottom: 8px;">Daily Mood History Logs</span>
-        <div id="moodHistoryList" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 160px; overflow-y: auto;">
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-3);">Loading mood logs…</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script type="module" src="/app.js"></script>
 </body>
