@@ -1,7 +1,23 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-08-08T05:38:06.409Z",
+      "event": "DIAGNOSTIC_PASS",
+      "details": "No anomalies detected. System is running at peak 100% integrity."
+    },
+    {
+      "timestamp": "2026-08-08T05:40:48.725Z",
+      "event": "DIAGNOSTIC_PASS",
+      "details": "No anomalies detected. System is running at peak 100% integrity."
+    },
+    {
+      "timestamp": "2026-08-08T05:40:51.673Z",
+      "event": "DIAGNOSTIC_PASS",
+      "details": "No anomalies detected. System is running at peak 100% integrity."
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
     "lastHealingEvent": null,
