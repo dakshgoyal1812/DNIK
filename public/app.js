@@ -988,14 +988,17 @@ window.addEventListener('click', unlockAudioContext, { passive: true });
 window.addEventListener('touchstart', unlockAudioContext, { passive: true });
 window.addEventListener('keydown', unlockAudioContext, { passive: true });
 
-function playRealFemaleAudio(base64Audio) {
+function playRealFemaleAudio(base64Audio, rawText = '') {
     if (!base64Audio) return false;
 
     try {
         unlockAudioContext();
 
-        const mimeType = base64Audio.startsWith('UklGR') ? 'audio/wav' : 'audio/mp3';
-        const audioSrc = `data:${mimeType};base64,${base64Audio}`;
+        let audioSrc = base64Audio;
+        if (!base64Audio.startsWith('data:')) {
+            const mimeType = base64Audio.startsWith('UklGR') ? 'audio/wav' : 'audio/mp3';
+            audioSrc = `data:${mimeType};base64,${base64Audio}`;
+        }
 
         if (!globalAudioElement) {
             globalAudioElement = new Audio();
@@ -1038,7 +1041,8 @@ function playRealFemaleAudio(base64Audio) {
             playPromise.then(() => {
                 isAudioPlaying = true;
             }).catch((err) => {
-                console.warn("Audio play promise error (retrying on user click):", err);
+                console.warn("Audio play error, falling back to Web Speech synthesis:", err);
+                if (rawText) speakWithFakeLipSync(rawText);
             });
         }
 
@@ -1094,7 +1098,7 @@ function speakWithFakeLipSync(text) {
 function speak(text, audioContent = null) {
     if (!text) return;
 
-    if (audioContent && playRealFemaleAudio(audioContent)) {
+    if (audioContent && playRealFemaleAudio(audioContent, text)) {
         return;
     }
 
