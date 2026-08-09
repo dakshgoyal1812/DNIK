@@ -1,7 +1,28 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-08-09T05:41:32.417Z",
+      "severity": "info",
+      "message": "Periodic audit complete. System health is optimal, no anomalies found."
+    },
+    {
+      "timestamp": "2026-08-09T05:41:35.354Z",
+      "severity": "info",
+      "message": "Periodic audit complete. System health is optimal, no anomalies found."
+    },
+    {
+      "timestamp": "2026-08-09T05:47:24.617Z",
+      "severity": "info",
+      "message": "Periodic audit complete. System health is optimal, no anomalies found."
+    },
+    {
+      "timestamp": "2026-08-09T05:48:03.059Z",
+      "severity": "info",
+      "message": "Periodic audit complete. System health is optimal, no anomalies found."
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
     "lastHealingEvent": null,
