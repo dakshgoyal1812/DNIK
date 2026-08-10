@@ -1,10 +1,35 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-08-10T05:49:10.556Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    },
+    {
+      "timestamp": "2026-08-10T05:47:56.005Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    },
+    {
+      "timestamp": "2026-08-10T05:46:23.768Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    },
+    {
+      "timestamp": "2026-08-10T05:45:44.299Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
+    "lastHealingEvent": "2026-08-10T05:49:10.556Z",
     "totalExceptionsCaught": 0,
     "activeProtections": [
       "API Cooldown Resetter",

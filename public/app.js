@@ -172,6 +172,10 @@ function init() {
 
     // Start render loop
     animate();
+
+    // Start polling self-healing status and logs immediately and then on interval
+    pollSelfHealingStatus();
+    setInterval(pollSelfHealingStatus, 10000);
 }
 
 const targetMousePos = { x: 0, y: 1.15, z: 2.0 };
@@ -1692,14 +1696,48 @@ window.addEventListener('unhandledrejection', (event) => {
 
 async function pollSelfHealingStatus() {
     try {
-        const res = await fetch('/api/self-heal');
+        const res = await fetch('/api/self-heal/logs');
         if (res.ok) {
             const data = await res.json();
-            if (data && data.healthScore !== undefined) {
-                updateSelfHealingBadge(data.healthScore, data.autoHealedCount);
+
+            // 1. Update system integrity indicators if present
+            const scoreVal = document.getElementById('systemIntegrityVal');
+            const scoreBar = document.getElementById('systemIntegrityBar');
+            if (scoreVal && data.healthScore !== undefined) {
+                scoreVal.textContent = data.healthScore;
+            }
+            if (scoreBar && data.healthScore !== undefined) {
+                scoreBar.style.setProperty('--v', (data.healthScore / 100).toString());
+            }
+
+            // 2. Update badge if present
+            updateSelfHealingBadge(data.healthScore || 100, data.autoHealedCount || 0);
+
+            // 3. Render self-healing log history if container is present
+            const logsContainer = document.getElementById('selfHealLogs');
+            if (logsContainer && Array.isArray(data.logs)) {
+                if (data.logs.length === 0) {
+                    logsContainer.innerHTML = `<div style="color: var(--text-3); text-align: center; padding: 4px;">No audit logs recorded yet.</div>`;
+                } else {
+                    logsContainer.innerHTML = data.logs.slice(0, 15).map(log => {
+                        const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : "";
+                        const isHealed = log.filesHealed && log.filesHealed.length > 0;
+                        const icon = isHealed ? "⚠️" : "💚";
+                        const color = isHealed ? "#fb923c" : "#00f5d4";
+                        return `<div style="display: flex; gap: 6px; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px;">
+                            <span>${icon}</span>
+                            <div style="flex: 1;">
+                                <span style="color: var(--text-3); font-size: 0.65rem; display: block;">[${timeStr}]</span>
+                                <span style="color: ${color}; line-height: 1.25; display: block; font-size: 0.7rem;">${log.message}</span>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
             }
         }
-    } catch (e) {}
+    } catch (e) {
+        console.warn("[Self-Healing UI Update Failed]:", e.message);
+    }
 }
 
 function updateSelfHealingBadge(healthScore = 100, autoHealedCount = 0) {
@@ -2138,10 +2176,14 @@ async function triggerSelfHealingAudit() {
             const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
             window.speechSynthesis.speak(utter);
         }
+
+        // Refresh logs list immediately after healing
+        pollSelfHealingStatus();
     } catch (e) {
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
         if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
         setStatus("System Restored!", "#4ade80");
+        pollSelfHealingStatus();
     }
 }
 
