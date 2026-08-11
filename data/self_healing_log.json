@@ -1,11 +1,36 @@
 {
-  "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "healthScore": 95,
+  "autoHealedCount": 1,
+  "logs": [
+    {
+      "timestamp": "2026-08-11T05:51:47.375Z",
+      "type": "HEAL_ACTION",
+      "message": "Client UI Shield: Restored UI responsive state & cleared outstanding error states for VRM Renderer Loop",
+      "severity": "info"
+    },
+    {
+      "timestamp": "2026-08-11T05:51:47.375Z",
+      "type": "EXCEPTION",
+      "message": "Client-side Exception captured from VRM Renderer Loop: TypeError: Cannot read properties of null (reading \"expressionMap\")",
+      "severity": "error"
+    },
+    {
+      "timestamp": "2026-08-11T05:51:30.187Z",
+      "type": "INTEGRITY_CHECK",
+      "message": "System integrity check passed. No anomalies or corrupt state detected.",
+      "severity": "info"
+    },
+    {
+      "timestamp": "2026-08-11T05:51:15.685Z",
+      "type": "INTEGRITY_CHECK",
+      "message": "System integrity check passed. No anomalies or corrupt state detected.",
+      "severity": "info"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-11T05:51:47.375Z",
+    "totalExceptionsCaught": 1,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
