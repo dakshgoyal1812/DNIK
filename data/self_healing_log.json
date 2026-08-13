@@ -1,11 +1,33 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 2,
+  "logs": [
+    {
+      "timestamp": "2026-08-13T06:29:39.066Z",
+      "type": "audit",
+      "message": "Autonomous Self-Healing Audit complete. Verified 4 files (Healed: 1), Reset 0 keys.",
+      "details": [
+        "Corrupted file found: reminders.json. Rebuilding..."
+      ]
+    },
+    {
+      "timestamp": "2026-08-13T06:29:39.062Z",
+      "type": "exception",
+      "error": "TypeError: Cannot read properties of undefined (reading 'getNormalizedBoneNode')",
+      "source": "Browser client-side VRM loader",
+      "mitigation": "Aria Shield activated. Dynamic runtime protection applied to prevent UI layout collapse."
+    },
+    {
+      "timestamp": "2026-08-13T06:29:39.058Z",
+      "type": "audit",
+      "message": "Autonomous Self-Healing Audit complete. Verified 4 files (Healed: 0), Reset 0 keys.",
+      "details": []
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-13T06:29:39.066Z",
+    "totalExceptionsCaught": 1,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
