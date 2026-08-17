@@ -1,11 +1,54 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 4,
+  "logs": [
+    {
+      "timestamp": "2026-08-17T05:50:30.437Z",
+      "action": "Self-Healing Audit Executed",
+      "repairedFiles": 1,
+      "status": "SUCCESS",
+      "details": "Audit completed. 1 data state files repaired. Key states reset."
+    },
+    {
+      "timestamp": "2026-08-17T05:50:30.433Z",
+      "action": "Client Exception Mitigated: Integration Test",
+      "repairedFiles": 0,
+      "status": "AUTO_HEALED",
+      "details": "Test WebGL context lost"
+    },
+    {
+      "timestamp": "2026-08-17T05:50:30.424Z",
+      "action": "Self-Healing Audit Executed",
+      "repairedFiles": 0,
+      "status": "SUCCESS",
+      "details": "Audit completed. 0 data state files repaired. Key states reset."
+    },
+    {
+      "timestamp": "2026-08-17T05:50:11.794Z",
+      "action": "Self-Healing Audit Executed",
+      "repairedFiles": 1,
+      "status": "SUCCESS",
+      "details": "Audit completed. 1 data state files repaired. Key states reset."
+    },
+    {
+      "timestamp": "2026-08-17T05:50:11.788Z",
+      "action": "Client Exception Mitigated: Integration Test",
+      "repairedFiles": 0,
+      "status": "AUTO_HEALED",
+      "details": "Test WebGL context lost"
+    },
+    {
+      "timestamp": "2026-08-17T05:50:11.778Z",
+      "action": "Self-Healing Audit Executed",
+      "repairedFiles": 0,
+      "status": "SUCCESS",
+      "details": "Audit completed. 0 data state files repaired. Key states reset."
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-17T05:50:30.433Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
