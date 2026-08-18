@@ -1,10 +1,13 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 2,
+  "logs": [
+    "[2026-08-18T05:54:53.905Z] Repaired/restored corrupted JSON file: long_term_memory.json",
+    "[2026-08-18T05:54:31.736Z] Repaired/restored corrupted JSON file: long_term_memory.json"
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
+    "lastHealingEvent": "2026-08-18T05:54:53.905Z",
     "totalExceptionsCaught": 0,
     "activeProtections": [
       "API Cooldown Resetter",
