@@ -1,11 +1,179 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 2,
+  "logs": [
+    {
+      "timestamp": "2026-08-19T06:47:57.091Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 74493952,
+          "heapTotal": 7340032,
+          "heapUsed": 6100664,
+          "external": 6656326,
+          "arrayBuffers": 4436635
+        },
+        "durationMs": 1
+      }
+    },
+    {
+      "timestamp": "2026-08-19T06:47:54.211Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 56020992,
+          "heapTotal": 7077888,
+          "heapUsed": 5761024,
+          "external": 2681250,
+          "arrayBuffers": 461559
+        },
+        "durationMs": 1
+      }
+    },
+    {
+      "timestamp": "2026-08-19T06:46:34.547Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 55742464,
+          "heapTotal": 7340032,
+          "heapUsed": 5367200,
+          "external": 2107468,
+          "arrayBuffers": 18927
+        },
+        "durationMs": 1
+      }
+    },
+    {
+      "timestamp": "2026-08-19T06:44:32.917Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 56262656,
+          "heapTotal": 7602176,
+          "heapUsed": 5833904,
+          "external": 2106506,
+          "arrayBuffers": 19010
+        },
+        "durationMs": 1
+      }
+    },
+    {
+      "timestamp": "2026-08-19T06:44:32.913Z",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "source": "IntegrationTest",
+      "error": "Test exception for self-healing verification",
+      "status": "AUTO_REPAIRED"
+    },
+    {
+      "timestamp": "2026-08-19T06:44:32.909Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 56000512,
+          "heapTotal": 7340032,
+          "heapUsed": 5646064,
+          "external": 2106423,
+          "arrayBuffers": 18927
+        },
+        "durationMs": 0
+      }
+    },
+    {
+      "timestamp": "2026-08-19T06:44:32.742Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 55738368,
+          "heapTotal": 7340032,
+          "heapUsed": 5419104,
+          "external": 2106383,
+          "arrayBuffers": 18927
+        },
+        "durationMs": 1
+      }
+    },
+    {
+      "timestamp": "2026-08-19T06:43:25.221Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 56356864,
+          "heapTotal": 7602176,
+          "heapUsed": 5769304,
+          "external": 2106506,
+          "arrayBuffers": 19010
+        },
+        "durationMs": 0
+      }
+    },
+    {
+      "timestamp": "2026-08-19T06:43:25.217Z",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "source": "IntegrationTest",
+      "error": "Test exception for self-healing verification",
+      "status": "AUTO_REPAIRED"
+    },
+    {
+      "timestamp": "2026-08-19T06:43:25.213Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 56094720,
+          "heapTotal": 7340032,
+          "heapUsed": 5601560,
+          "external": 2106423,
+          "arrayBuffers": 18927
+        },
+        "durationMs": 1
+      }
+    },
+    {
+      "timestamp": "2026-08-19T06:43:25.165Z",
+      "event": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": {
+        "repairedFiles": 0,
+        "keysReset": 0,
+        "memoryUsage": {
+          "rss": 55963648,
+          "heapTotal": 7340032,
+          "heapUsed": 5381256,
+          "external": 2106383,
+          "arrayBuffers": 18927
+        },
+        "durationMs": 83
+      }
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-19T06:47:57.091Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
