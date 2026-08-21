@@ -1,11 +1,90 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 13,
+  "logs": [
+    {
+      "timestamp": "2026-08-21T05:46:56.017Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:46:44.159Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:45:59.325Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:45:10.868Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:45:10.866Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:45:10.861Z",
+      "error": "WebGL context loss simulated in test",
+      "source": "IntegrationTest",
+      "mitigation": "Auto-repaired state and reset rate-limiting locks."
+    },
+    {
+      "timestamp": "2026-08-21T05:45:10.858Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:45:08.371Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:44:35.659Z",
+      "error": "Test UI Error",
+      "source": "Playwright",
+      "mitigation": "Auto-repaired state and reset rate-limiting locks."
+    },
+    {
+      "timestamp": "2026-08-21T05:44:35.653Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:44:35.649Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:44:35.642Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-21T05:44:32.211Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-21T05:46:56.017Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
