@@ -1,11 +1,226 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 7,
+  "logs": [
+    {
+      "timestamp": "2026-08-22T06:09:56.753Z",
+      "level": "HEAL",
+      "event": "ARIA_VITALITY_HEAL",
+      "message": "Aria deep vitality recovery performed. Rate limits reset, state restored, system integrity 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:09:56.752Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:09:30.645Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:09:06.855Z",
+      "level": "WARN",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "source": "Playwright UI Test",
+      "message": "Test Unhandled UI Rejection",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:09:06.852Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:09:06.849Z",
+      "level": "HEAL",
+      "event": "ARIA_VITALITY_HEAL",
+      "message": "Aria deep vitality recovery performed. Rate limits reset, state restored, system integrity 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:09:06.849Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:09:06.841Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:09:04.885Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Audit completed: Repaired corrupted JSON file: reminders.json",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:08:44.187Z",
+      "level": "WARN",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "source": "Playwright UI Test",
+      "message": "Test Unhandled UI Rejection",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:08:44.184Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:08:44.181Z",
+      "level": "HEAL",
+      "event": "ARIA_VITALITY_HEAL",
+      "message": "Aria deep vitality recovery performed. Rate limits reset, state restored, system integrity 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:08:44.181Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:08:44.173Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:08:42.215Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Audit completed: Repaired corrupted JSON file: reminders.json",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:08:21.637Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:08:06.559Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:55.775Z",
+      "level": "WARN",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "source": "Playwright UI Test",
+      "message": "Test Unhandled UI Rejection",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:55.773Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:55.770Z",
+      "level": "HEAL",
+      "event": "ARIA_VITALITY_HEAL",
+      "message": "Aria deep vitality recovery performed. Rate limits reset, state restored, system integrity 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:55.770Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:55.763Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:53.807Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Audit completed: Repaired corrupted JSON file: reminders.json",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:05.586Z",
+      "level": "WARN",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "source": "UI Test",
+      "message": "Test UI Error",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:05.561Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:05.548Z",
+      "level": "HEAL",
+      "event": "ARIA_VITALITY_HEAL",
+      "message": "Aria deep vitality recovery performed. Rate limits reset, state restored, system integrity 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:05.548Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:05.533Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:07:04.567Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-22T06:06:11.929Z",
+      "level": "INFO",
+      "event": "SELF_HEALING_AUDIT",
+      "message": "Routine self-healing audit completed. All systems healthy.",
+      "healthScore": 100
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-22T06:09:56.752Z",
+    "totalExceptionsCaught": 4,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
