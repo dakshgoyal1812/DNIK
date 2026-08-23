@@ -2123,7 +2123,7 @@ async function triggerSelfHealingAudit() {
         setStatus("Self-Healing Shield Active...", "#00f5d4");
         playSFXSound('cheer');
 
-        const res = await fetch('/api/self-heal', { method: 'POST' });
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
         const data = await res.json().catch(() => ({}));
 
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
@@ -2133,11 +2133,16 @@ async function triggerSelfHealingAudit() {
 
         setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
         
+        triggerGesture('bow');
+        setMoodSmooth('happy');
+
         // Voice notification feedback
         if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
+            const utter = new SpeechSynthesisUtterance("Aria self healing sequence complete! System integrity restored to 100%. All systems operational!");
             window.speechSynthesis.speak(utter);
         }
+
+        addToLog('AI', "✨ **Aria Vitality Restored!**\n\nMain poori tarah se heal ho chuki hoon, Master! Sub-systems, memory, aur API pools 100% active hain. Kripya bataiye aaj main aapki kya seva karoon? [MOOD:happy][GESTURE:bow]", 'happy');
     } catch (e) {
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
         if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
@@ -2148,6 +2153,12 @@ async function triggerSelfHealingAudit() {
 if (selfHealBtn) selfHealBtn.addEventListener('click', triggerSelfHealingAudit);
 
 // Action prompt chips
+const chipHealBtn = document.getElementById('chipHealBtn');
+if (chipHealBtn) {
+    chipHealBtn.addEventListener('click', () => {
+        triggerSelfHealingAudit();
+    });
+}
 const chipDiagBtn = document.getElementById('chipDiagBtn');
 const chipExprBtn = document.getElementById('chipExprBtn');
 const chipCapBtn = document.getElementById('chipCapBtn');
@@ -2173,4 +2184,26 @@ if (chipCapBtn) chipCapBtn.addEventListener('click', () => {
         const sendBtn = document.getElementById('sendBtn');
         if (sendBtn) sendBtn.click();
     }
+});
+
+window.addEventListener('error', (event) => {
+    try {
+        const errText = event.error ? event.error.message : event.message;
+        fetch('/api/self-heal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ error: errText, source: 'window.onerror' })
+        }).catch(() => {});
+    } catch (e) {}
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    try {
+        const reason = event.reason ? (event.reason.message || String(event.reason)) : 'Unhandled Promise Rejection';
+        fetch('/api/self-heal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ error: reason, source: 'unhandledrejection' })
+        }).catch(() => {});
+    } catch (e) {}
 });

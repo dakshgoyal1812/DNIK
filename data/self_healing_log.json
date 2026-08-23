@@ -1,11 +1,72 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 10,
+  "logs": [
+    {
+      "timestamp": "2026-08-23T06:02:04.225Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-23T06:01:25.414Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-23T06:00:53.486Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-23T06:00:53.484Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-23T06:00:53.480Z",
+      "error": "WebGL context loss simulated in test",
+      "source": "IntegrationTest",
+      "mitigation": "Auto-repaired state and reset rate-limiting locks."
+    },
+    {
+      "timestamp": "2026-08-23T06:00:53.476Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-23T06:00:51.054Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-23T05:58:53.287Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-23T05:58:53.263Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-08-23T05:58:51.278Z",
+      "action": "System Diagnostics Audit",
+      "details": "Repaired 0 files, reset 0 API keys, system health 100%",
+      "status": "HEALED"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-23T06:02:04.225Z",
+    "totalExceptionsCaught": 1,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
