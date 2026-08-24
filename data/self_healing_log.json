@@ -1,10 +1,113 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 17,
+  "logs": [
+    {
+      "timestamp": "2026-08-24T05:43:24.818Z",
+      "action": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "HEALED",
+      "details": "Full vitality recovery triggered. All API key cooldowns reset, health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-24T05:43:24.818Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:43:17.148Z",
+      "action": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "HEALED",
+      "details": "Full vitality recovery triggered. All API key cooldowns reset, health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-24T05:43:17.146Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:42:12.932Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:42:00.583Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:42:00.578Z",
+      "action": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "HEALED",
+      "details": "Full vitality recovery triggered. All API key cooldowns reset, health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-24T05:42:00.578Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:42:00.575Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:42:00.570Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:41:58.594Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:41:38.276Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:41:38.271Z",
+      "action": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "HEALED",
+      "details": "Full vitality recovery triggered. All API key cooldowns reset, health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-24T05:41:38.270Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:41:38.268Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:41:38.263Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    },
+    {
+      "timestamp": "2026-08-24T05:41:36.372Z",
+      "action": "DAILY_SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "details": "Integrity verified. Expired API key cooldowns reset (0). State files checked and clean."
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
+    "lastHealingEvent": "2026-08-24T05:43:24.818Z",
     "totalExceptionsCaught": 0,
     "activeProtections": [
       "API Cooldown Resetter",
