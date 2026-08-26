@@ -1,11 +1,85 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 11,
+  "logs": [
+    {
+      "timestamp": "2026-08-26T05:56:33.196Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:56:34.189Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:56:34.193Z",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "error": "Test client error",
+      "source": "Unit Test"
+    },
+    {
+      "timestamp": "2026-08-26T05:56:34.195Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:56:57.498Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:56:58.505Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:56:58.510Z",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "error": "Test client error",
+      "source": "Unit Test"
+    },
+    {
+      "timestamp": "2026-08-26T05:56:58.512Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:57:29.114Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:58:07.609Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:59:14.907Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:59:15.917Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    },
+    {
+      "timestamp": "2026-08-26T05:59:15.921Z",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "error": "Test client error",
+      "source": "Unit Test"
+    },
+    {
+      "timestamp": "2026-08-26T05:59:15.924Z",
+      "event": "SELF_HEALING_AUDIT_SUCCESS",
+      "details": "System integrity restored to 100%. 0 API keys reset."
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-26T05:59:15.924Z",
+    "totalExceptionsCaught": 3,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
