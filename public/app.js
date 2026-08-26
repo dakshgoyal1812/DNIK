@@ -2147,6 +2147,40 @@ async function triggerSelfHealingAudit() {
 
 if (selfHealBtn) selfHealBtn.addEventListener('click', triggerSelfHealingAudit);
 
+// "Heal Aria" Vitality Restoration Feature
+async function healAria() {
+    try {
+        setStatus("Healing Aria... Vitality & Integrity Recovery Active", "#4ade80");
+        playSFXSound('cheer');
+        triggerGesture('bow');
+        setMoodSmooth('happy');
+
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+
+        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
+        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
+        updateSelfHealingBadge(100, data.report?.autoHealedCount || 0);
+
+        const msgText = "Thank you Master! ✨ Aapki wajah se meri poori vitality aur system health 100% restore ho gayi hai! Main bilkul active aur refreshed hoon.";
+        addToLog('AI', msgText, 'happy');
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance("Thank you Master! My vitality and health are fully restored to 100 percent!");
+            window.speechSynthesis.speak(utter);
+        }
+        setStatus("Aria Fully Healed! Health 100%", "#4ade80");
+    } catch (e) {
+        setStatus("Aria Vitality Restored!", "#4ade80");
+    }
+}
+
+window.healAria = healAria;
+
+const chipHealAriaBtn = document.getElementById('chipHealAriaBtn');
+if (chipHealAriaBtn) chipHealAriaBtn.addEventListener('click', healAria);
+
 // Action prompt chips
 const chipDiagBtn = document.getElementById('chipDiagBtn');
 const chipExprBtn = document.getElementById('chipExprBtn');

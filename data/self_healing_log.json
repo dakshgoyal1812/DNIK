@@ -1,11 +1,33 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-08-25T06:09:37.026Z",
+      "type": "CLIENT_EXCEPTION",
+      "source": "TestRunner",
+      "details": "Simulated UI Test Error",
+      "actionTaken": "Mitigated exception, state preserved"
+    },
+    {
+      "timestamp": "2026-08-25T06:09:16.919Z",
+      "type": "CLIENT_EXCEPTION",
+      "source": "TestRunner",
+      "details": "Simulated UI Test Error",
+      "actionTaken": "Mitigated exception, state preserved"
+    },
+    {
+      "timestamp": "2026-08-25T06:09:00.543Z",
+      "type": "CLIENT_EXCEPTION",
+      "source": "TestRunner",
+      "details": "Simulated UI Test Error",
+      "actionTaken": "Mitigated exception, state preserved"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
     "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "totalExceptionsCaught": 3,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
