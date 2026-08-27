@@ -1,11 +1,138 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 3,
+  "logs": [
+    {
+      "timestamp": "2026-08-27T06:01:05.770Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T06:01:05.765Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T06:01:05.763Z",
+      "event": "CLIENT_EXCEPTION_HEALED",
+      "error": "Test UI Error",
+      "source": "Unit Test",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T06:01:05.759Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T06:01:03.785Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:59:18.193Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:58:45.842Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:58:24.685Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:58:01.505Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:58:01.501Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:58:01.499Z",
+      "event": "CLIENT_EXCEPTION_HEALED",
+      "error": "Test UI Error",
+      "source": "Unit Test",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:58:01.496Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:57:59.523Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:57:39.524Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:57:39.517Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:57:39.514Z",
+      "event": "CLIENT_EXCEPTION_HEALED",
+      "error": "Test UI Error",
+      "source": "Unit Test",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:57:39.509Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-08-27T05:57:37.622Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "SUCCESS",
+      "healedIssues": 0,
+      "healthScore": 100
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-27T06:01:05.763Z",
+    "totalExceptionsCaught": 3,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
