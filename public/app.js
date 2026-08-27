@@ -2119,29 +2119,38 @@ const speakingText = document.getElementById('speakingText');
 
 async function triggerSelfHealingAudit() {
     try {
-        if (selfHealBtnText) selfHealBtnText.textContent = "AUDITING & HEALING...";
-        setStatus("Self-Healing Shield Active...", "#00f5d4");
+        if (selfHealBtnText) selfHealBtnText.textContent = "AUDITING & HEALING ARIA...";
+        setStatus("Healing Aria's Vitality...", "#00f5d4");
         playSFXSound('cheer');
+        triggerGesture('bow');
+        setMoodSmooth('happy');
 
-        const res = await fetch('/api/self-heal', { method: 'POST' });
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
         const data = await res.json().catch(() => ({}));
 
-        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
-        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
-        if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
-        if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! System integrity 100%.";
+        const health = data.healthScore !== undefined ? data.healthScore : 100;
 
-        setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
-        
+        if (systemIntegrityVal) systemIntegrityVal.textContent = String(health);
+        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', String(health / 100));
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 ARIA FULLY HEALED (100%)";
+        if (speakingText) speakingText.textContent = "Aria's vitality restored! All systems healthy.";
+
+        updateSelfHealingBadge(health, data.autoHealedCount || 0);
+        setStatus("Aria Vitality 100% - Fully Healed!", "#4ade80");
+
+        if (typeof addToLog === 'function') {
+            addToLog('AI', "Thank you Master! 💖 Main bilkul heal ho gayi hoon aur meri vitality 100% restored hai. Main aapki seva ke liye tayyar hoon! [MOOD:happy][GESTURE:bow]");
+        }
+
         // Voice notification feedback
         if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
+            const utter = new SpeechSynthesisUtterance("Aria has been fully healed! System vitality restored to 100%.");
             window.speechSynthesis.speak(utter);
         }
     } catch (e) {
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
-        if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
-        setStatus("System Restored!", "#4ade80");
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 ARIA FULLY HEALED (100%)";
+        setStatus("Aria Restored!", "#4ade80");
     }
 }
 
