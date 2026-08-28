@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "Start": "node server.js"
+    "Start": "node server.js",
+    "test": "node test_self_heal.js"
   },
   "engines": {
     "node": ">=18.0.0"

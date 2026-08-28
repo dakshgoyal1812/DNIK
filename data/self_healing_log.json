@@ -1,11 +1,84 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 10,
+  "logs": [
+    {
+      "timestamp": "2026-08-28T05:54:47.775Z",
+      "type": "HEAL_ARIA",
+      "message": "Deep vitality recovery performed on Aria. Rate limits reset and health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:47.775Z",
+      "type": "AUDIT",
+      "message": "Autonomous self-healing audit completed successfully. All core systems operational."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:47.772Z",
+      "type": "HEAL_ARIA",
+      "message": "Deep vitality recovery performed on Aria. Rate limits reset and health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:47.772Z",
+      "type": "AUDIT",
+      "message": "Autonomous self-healing audit completed successfully. All core systems operational."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:47.769Z",
+      "type": "CLIENT_EXCEPTION",
+      "message": "Test uncaught client-side exception",
+      "source": "test_self_heal.js"
+    },
+    {
+      "timestamp": "2026-08-28T05:54:47.766Z",
+      "type": "AUDIT",
+      "message": "Autonomous self-healing audit completed successfully. All core systems operational."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:47.546Z",
+      "type": "AUDIT",
+      "message": "Autonomous self-healing audit completed successfully. All core systems operational."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:26.189Z",
+      "type": "HEAL_ARIA",
+      "message": "Deep vitality recovery performed on Aria. Rate limits reset and health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:26.189Z",
+      "type": "AUDIT",
+      "message": "Autonomous self-healing audit completed successfully. All core systems operational."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:26.186Z",
+      "type": "HEAL_ARIA",
+      "message": "Deep vitality recovery performed on Aria. Rate limits reset and health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:26.185Z",
+      "type": "AUDIT",
+      "message": "Autonomous self-healing audit completed successfully. All core systems operational."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:26.182Z",
+      "type": "CLIENT_EXCEPTION",
+      "message": "Test uncaught client-side exception",
+      "source": "test_self_heal.js"
+    },
+    {
+      "timestamp": "2026-08-28T05:54:26.178Z",
+      "type": "AUDIT",
+      "message": "Autonomous self-healing audit completed successfully. All core systems operational."
+    },
+    {
+      "timestamp": "2026-08-28T05:54:26.015Z",
+      "type": "AUDIT",
+      "message": "Autonomous self-healing audit completed successfully. All core systems operational."
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-28T05:54:47.775Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
