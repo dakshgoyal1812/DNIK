@@ -1,11 +1,148 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 3,
+  "logs": [
+    {
+      "timestamp": "2026-08-29T05:50:05.449Z",
+      "event": "Client Exception Logged & Mitigated",
+      "source": "Browser UI",
+      "error": "Unknown Client Exception",
+      "action": "Auto-mitigated client exception"
+    },
+    {
+      "timestamp": "2026-08-29T05:49:55.292Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:49:02.978Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:35.429Z",
+      "event": "Audit Complete",
+      "repaired": [
+        "reminders.json (corrupt -> reset)"
+      ],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:35.428Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:35.424Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:35.422Z",
+      "event": "Client Exception Logged & Mitigated",
+      "source": "Integration Test",
+      "error": "Test UI Exception",
+      "action": "Auto-mitigated client exception"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:35.418Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:34.397Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:08.796Z",
+      "event": "Audit Complete",
+      "repaired": [
+        "reminders.json (corrupt -> reset)"
+      ],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:08.794Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:08.791Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:08.788Z",
+      "event": "Client Exception Logged & Mitigated",
+      "source": "Integration Test",
+      "error": "Test UI Exception",
+      "action": "Auto-mitigated client exception"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:08.784Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:48:07.761Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:47:47.568Z",
+      "event": "Audit Complete",
+      "repaired": [
+        "reminders.json (corrupt -> reset)"
+      ],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:47:47.566Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:47:47.562Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:47:47.559Z",
+      "event": "Client Exception Logged & Mitigated",
+      "source": "Integration Test",
+      "error": "Test UI Exception",
+      "action": "Auto-mitigated client exception"
+    },
+    {
+      "timestamp": "2026-08-29T05:47:47.550Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    },
+    {
+      "timestamp": "2026-08-29T05:47:46.523Z",
+      "event": "Audit Complete",
+      "repaired": [],
+      "status": "System integrity restored to 100%"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-29T05:50:05.449Z",
+    "totalExceptionsCaught": 4,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
