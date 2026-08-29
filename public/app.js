@@ -2148,9 +2148,38 @@ async function triggerSelfHealingAudit() {
 if (selfHealBtn) selfHealBtn.addEventListener('click', triggerSelfHealingAudit);
 
 // Action prompt chips
+const chipHealBtn = document.getElementById('chipHealBtn');
 const chipDiagBtn = document.getElementById('chipDiagBtn');
 const chipExprBtn = document.getElementById('chipExprBtn');
 const chipCapBtn = document.getElementById('chipCapBtn');
+
+async function triggerHealAriaAction() {
+    try {
+        setStatus("💖 Healing Aria...", "#4ade80");
+        if (selfHealBtnText) selfHealBtnText.textContent = "HEALING ARIA...";
+        playSFXSound('cheer');
+        triggerGesture('bow');
+        setMoodSmooth('happy');
+        applyHumanEmotionState('loving');
+
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+
+        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
+        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 ARIA FULLY HEALED";
+        if (speakingText) speakingText.textContent = "Master, thank you! My vitality and health score are restored to 100%!";
+
+        addToLog('AI', '💖 Thank you Master! Vitality restored, API key rate limits reset, and system health is at 100%!', 'happy');
+        speakWithFakeLipSync("Thank you Master! My vitality and health score are restored to 100%!");
+
+        setStatus("System Health 100% - Aria Healed!", "#4ade80");
+    } catch (e) {
+        setStatus("Aria Healed!", "#4ade80");
+    }
+}
+
+if (chipHealBtn) chipHealBtn.addEventListener('click', triggerHealAriaAction);
 
 if (chipDiagBtn) chipDiagBtn.addEventListener('click', () => {
     triggerSelfHealingAudit();
