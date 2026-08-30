@@ -1,11 +1,115 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 8,
+  "logs": [
+    {
+      "timestamp": "2026-08-30T06:26:37.280Z",
+      "event": "audit",
+      "healthScore": 100,
+      "issuesFound": 0,
+      "details": "System operating nominally."
+    },
+    {
+      "timestamp": "2026-08-30T06:26:39.281Z",
+      "event": "audit",
+      "healthScore": 100,
+      "issuesFound": 0,
+      "details": "System operating nominally."
+    },
+    {
+      "timestamp": "2026-08-30T06:26:39.288Z",
+      "event": "heal_aria",
+      "healthScore": 100,
+      "message": "Deep vitality recovery executed: key cooldowns reset, RAM garbage collected, health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-30T06:26:39.290Z",
+      "event": "recover",
+      "message": "System state recovery & rate-limit purge executed."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:06.585Z",
+      "event": "audit",
+      "healthScore": 100,
+      "issuesFound": 0,
+      "details": "System operating nominally."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:06.614Z",
+      "event": "audit",
+      "healthScore": 100,
+      "issuesFound": 0,
+      "details": "System operating nominally."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:06.618Z",
+      "event": "client_exception",
+      "source": "TestRunner",
+      "error": "Simulated WebGL Context Loss Error",
+      "action": "Mitigated & Auto-Healed"
+    },
+    {
+      "timestamp": "2026-08-30T06:27:06.618Z",
+      "event": "audit",
+      "healthScore": 100,
+      "issuesFound": 0,
+      "details": "System operating nominally."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:06.620Z",
+      "event": "heal_aria",
+      "healthScore": 100,
+      "message": "Deep vitality recovery executed: key cooldowns reset, RAM garbage collected, health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:06.624Z",
+      "event": "recover",
+      "message": "System state recovery & rate-limit purge executed."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:28.812Z",
+      "event": "audit",
+      "healthScore": 100,
+      "issuesFound": 0,
+      "details": "System operating nominally."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:28.828Z",
+      "event": "audit",
+      "healthScore": 100,
+      "issuesFound": 0,
+      "details": "System operating nominally."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:28.831Z",
+      "event": "client_exception",
+      "source": "TestRunner",
+      "error": "Simulated WebGL Context Loss Error",
+      "action": "Mitigated & Auto-Healed"
+    },
+    {
+      "timestamp": "2026-08-30T06:27:28.832Z",
+      "event": "audit",
+      "healthScore": 100,
+      "issuesFound": 0,
+      "details": "System operating nominally."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:28.834Z",
+      "event": "heal_aria",
+      "healthScore": 100,
+      "message": "Deep vitality recovery executed: key cooldowns reset, RAM garbage collected, health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-08-30T06:27:28.835Z",
+      "event": "recover",
+      "message": "System state recovery & rate-limit purge executed."
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
     "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",

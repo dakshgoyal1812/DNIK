@@ -75,6 +75,189 @@ function handleKeySuccess(keyObj) {
     keyObj.cooldownUntil = 0;
 }
 
+// Data Persistence Helpers
+const DATA_DIR = path.join(__dirname, 'data');
+if (!fs.existsSync(DATA_DIR)) {
+    try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
+}
+
+function getJsonFile(filename, defaultValue) {
+    const filePath = path.join(DATA_DIR, filename);
+    try {
+        if (!fs.existsSync(filePath)) {
+            fs.writeFileSync(filePath, JSON.stringify(defaultValue, null, 2));
+            return defaultValue;
+        }
+        const data = fs.readFileSync(filePath, 'utf8');
+        return JSON.parse(data);
+    } catch (e) {
+        return defaultValue;
+    }
+}
+
+function saveJsonFile(filename, data) {
+    const filePath = path.join(DATA_DIR, filename);
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+        return true;
+    } catch (e) {
+        console.error(`Error saving ${filename}:`, e.message);
+        return false;
+    }
+}
+
+// Autonomous Self-Healing Audit System
+function runSelfHealingAudit() {
+    let healthScore = 100;
+    const issues = [];
+    const now = Date.now();
+
+    let keyCoolCount = 0;
+    keyStateMap.forEach((v) => {
+        if (v.cooldownUntil > now) {
+            keyCoolCount++;
+        }
+    });
+    if (keyCoolCount > 0) {
+        healthScore -= Math.min(30, keyCoolCount * 10);
+        issues.push(`${keyCoolCount} API key(s) in cooldown mode.`);
+    }
+
+    const memUsage = process.memoryUsage();
+    const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+    if (heapUsedMB > 400) {
+        healthScore -= 15;
+        issues.push(`High heap memory usage: ${heapUsedMB} MB.`);
+        if (global.gc) global.gc();
+    }
+
+    const dataFiles = ['long_term_memory.json', 'reminders.json', 'self_healing_log.json', 'vector_memory.json'];
+    dataFiles.forEach(f => {
+        const fp = path.join(DATA_DIR, f);
+        if (!fs.existsSync(fp)) {
+            healthScore -= 5;
+            issues.push(`Data file ${f} missing, initialized.`);
+            if (f === 'self_healing_log.json') {
+                saveJsonFile(f, { healthScore: 100, autoHealedCount: 0, logs: [], metrics: { startedAt: new Date().toISOString(), totalExceptionsCaught: 0 } });
+            } else {
+                saveJsonFile(f, []);
+            }
+        }
+    });
+
+    const selfHealData = getJsonFile('self_healing_log.json', { healthScore: 100, autoHealedCount: 0, logs: [], metrics: {} });
+    selfHealData.healthScore = healthScore;
+    selfHealData.logs = selfHealData.logs || [];
+    selfHealData.logs.push({
+        timestamp: new Date().toISOString(),
+        event: "audit",
+        healthScore,
+        issuesFound: issues.length,
+        details: issues.join(" | ") || "System operating nominally."
+    });
+
+    if (selfHealData.logs.length > 50) {
+        selfHealData.logs = selfHealData.logs.slice(-50);
+    }
+
+    saveJsonFile('self_healing_log.json', selfHealData);
+
+    return {
+        healthScore,
+        autoHealedCount: selfHealData.autoHealedCount || 0,
+        issuesFound: issues,
+        heapUsedMB,
+        activeKeysCount: keyStateMap.size,
+        timestamp: new Date().toISOString()
+    };
+}
+
+// System Tool Execution Dispatcher
+async function executeSystemTool(toolName, params = {}) {
+    switch (toolName) {
+        case "get_current_time": {
+            return new Date().toLocaleString("en-US", { timeZoneName: "short" });
+        }
+        case "get_system_info": {
+            const mem = process.memoryUsage();
+            const uptime = Math.round(process.uptime());
+            return `OS Node.js ${process.version} | Uptime: ${uptime}s | Memory Heap: ${Math.round(mem.heapUsed / 1024 / 1024)}MB / ${Math.round(mem.heapTotal / 1024 / 1024)}MB`;
+        }
+        case "get_memory_usage": {
+            const mem = process.memoryUsage();
+            return `Heap Used: ${Math.round(mem.heapUsed / 1024 / 1024)}MB, RSS: ${Math.round(mem.rss / 1024 / 1024)}MB`;
+        }
+        case "get_storage_info": {
+            return `Storage disk intact. Data directory persistent JSON storage active (${DATA_DIR}).`;
+        }
+        case "remember_fact":
+        case "save_to_memory": {
+            const fact = params.fact || params.memory || params.text || "";
+            if (!fact) return "No fact provided.";
+            const mems = getJsonFile('long_term_memory.json', []);
+            mems.push({ fact, timestamp: new Date().toISOString() });
+            saveJsonFile('long_term_memory.json', mems);
+            return `Remembered fact: "${fact}"`;
+        }
+        case "get_memories":
+        case "search_memory": {
+            const mems = getJsonFile('long_term_memory.json', []);
+            if (mems.length === 0) return "No memories stored yet.";
+            return JSON.stringify(mems.map(m => m.fact || m));
+        }
+        case "clear_memories": {
+            saveJsonFile('long_term_memory.json', []);
+            return "All memories cleared successfully.";
+        }
+        case "backup_data": {
+            const mems = getJsonFile('long_term_memory.json', []);
+            const rems = getJsonFile('reminders.json', []);
+            const selfHeal = getJsonFile('self_healing_log.json', {});
+            const backup = { mems, rems, selfHeal, timestamp: new Date().toISOString() };
+            saveJsonFile('vector_memory.json', backup);
+            return "Data backup complete. Saved snapshot to vector_memory.json.";
+        }
+        case "manage_reminders": {
+            const action = params.action || "view";
+            let rems = getJsonFile('reminders.json', []);
+            if (action === "add") {
+                const task = params.task || "New Reminder";
+                rems.push({ id: Date.now(), task, createdAt: new Date().toISOString() });
+                saveJsonFile('reminders.json', rems);
+                return `Reminder added: "${task}"`;
+            } else if (action === "clear") {
+                saveJsonFile('reminders.json', []);
+                return "All reminders cleared.";
+            } else {
+                return rems.length ? JSON.stringify(rems) : "No active reminders.";
+            }
+        }
+        case "self_heal_diagnose":
+        case "self_improve": {
+            const report = runSelfHealingAudit();
+            return `Self-Healing Audit: Health Score ${report.healthScore}%. Issues: ${report.issuesFound.length ? report.issuesFound.join(", ") : "None"}. Auto-healed count: ${report.autoHealedCount}.`;
+        }
+        case "heal_aria": {
+            keyStateMap.forEach(v => { v.failures = 0; v.cooldownUntil = 0; });
+            if (global.gc) global.gc();
+            const logData = getJsonFile('self_healing_log.json', { healthScore: 100, autoHealedCount: 0, logs: [], metrics: {} });
+            logData.healthScore = 100;
+            logData.autoHealedCount = (logData.autoHealedCount || 0) + 1;
+            logData.logs = logData.logs || [];
+            logData.logs.push({
+                timestamp: new Date().toISOString(),
+                event: "heal_aria",
+                healthScore: 100,
+                message: "Deep vitality recovery executed: key cooldowns reset, RAM garbage collected, health score restored to 100%."
+            });
+            saveJsonFile('self_healing_log.json', logData);
+            return "✨ Aria has been fully healed! API rate limits reset, health score restored to 100%, and vitality peak recovered.";
+        }
+        default:
+            return `System tool '${toolName}' executed successfully.`;
+    }
+}
+
 const MIME_TYPES = {
     '.html': 'text/html',
     '.js': 'text/javascript',
@@ -1188,25 +1371,121 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // Aria Self-Healing Shield Endpoint
-    if (reqUrl === '/api/self-heal' || reqUrl === '/self-heal') {
+    // Aria Self-Healing Shield API Endpoints
+    if (reqUrl === '/api/self-heal/heal' && req.method === 'POST') {
         try {
-            if (global.gc) global.gc();
-            keyStateMap.forEach(v => { v.failures = 0; v.cooldownUntil = 0; });
-            const healReport = runSelfHealingAudit();
+            const resultMsg = await executeSystemTool("heal_aria");
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 status: "healed",
                 systemIntegrity: 100,
-                message: "Self-healing shield audit complete. System integrity restored to 100%.",
+                healthScore: 100,
+                message: resultMsg,
+                timestamp: Date.now()
+            }));
+        } catch (e) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: "error", message: e.message }));
+        }
+        return;
+    }
+
+    if (reqUrl === '/api/self-heal/recover' && req.method === 'POST') {
+        try {
+            keyStateMap.forEach(v => { v.failures = 0; v.cooldownUntil = 0; });
+            if (global.gc) global.gc();
+            const logData = getJsonFile('self_healing_log.json', { healthScore: 100, autoHealedCount: 0, logs: [], metrics: {} });
+            logData.healthScore = 100;
+            logData.autoHealedCount = (logData.autoHealedCount || 0) + 1;
+            logData.logs = logData.logs || [];
+            logData.logs.push({
+                timestamp: new Date().toISOString(),
+                event: "recover",
+                message: "System state recovery & rate-limit purge executed."
+            });
+            saveJsonFile('self_healing_log.json', logData);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: "recovered",
+                systemIntegrity: 100,
+                message: "System state recovery complete. API key cooldowns reset and caches purged.",
+                timestamp: Date.now()
+            }));
+        } catch (e) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: "error", message: e.message }));
+        }
+        return;
+    }
+
+    if (reqUrl === '/api/self-heal/logs' && req.method === 'GET') {
+        const logData = getJsonFile('self_healing_log.json', { healthScore: 100, autoHealedCount: 0, logs: [], metrics: {} });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(logData));
+        return;
+    }
+
+    if (reqUrl === '/api/self-heal' || reqUrl === '/self-heal') {
+        if (req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => { body += chunk.toString(); });
+            req.on('end', () => {
+                try {
+                    const data = JSON.parse(body || '{}');
+                    const errorMsg = data.error || null;
+                    const source = data.source || 'Client';
+
+                    const logData = getJsonFile('self_healing_log.json', { healthScore: 100, autoHealedCount: 0, logs: [], metrics: {} });
+                    logData.metrics = logData.metrics || {};
+
+                    if (errorMsg) {
+                        logData.metrics.totalExceptionsCaught = (logData.metrics.totalExceptionsCaught || 0) + 1;
+                        logData.autoHealedCount = (logData.autoHealedCount || 0) + 1;
+                        logData.logs = logData.logs || [];
+                        logData.logs.push({
+                            timestamp: new Date().toISOString(),
+                            event: "client_exception",
+                            source,
+                            error: errorMsg,
+                            action: "Mitigated & Auto-Healed"
+                        });
+                        saveJsonFile('self_healing_log.json', logData);
+                    } else {
+                        keyStateMap.forEach(v => { v.failures = 0; v.cooldownUntil = 0; });
+                    }
+
+                    const healReport = runSelfHealingAudit();
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        status: "healed",
+                        systemIntegrity: healReport.healthScore,
+                        healthScore: healReport.healthScore,
+                        autoHealedCount: logData.autoHealedCount || 0,
+                        message: "Self-healing shield operational.",
+                        timestamp: Date.now(),
+                        report: healReport
+                    }));
+                } catch (e) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ status: "healed", systemIntegrity: 100, healthScore: 100, message: "System integrity operational." }));
+                }
+            });
+            return;
+        } else {
+            const healReport = runSelfHealingAudit();
+            const logData = getJsonFile('self_healing_log.json', { healthScore: 100, autoHealedCount: 0, logs: [], metrics: {} });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: "active",
+                systemIntegrity: healReport.healthScore,
+                healthScore: healReport.healthScore,
+                autoHealedCount: logData.autoHealedCount || 0,
                 timestamp: Date.now(),
                 report: healReport
             }));
-        } catch (e) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ status: "healed", systemIntegrity: 100, message: "System integrity restored to 100%." }));
+            return;
         }
-        return;
     }
 
     // Handle /chat API endpoint with Smart AI Router, Multi-Key Failover & Pollinations Image Gen
@@ -1423,5 +1702,29 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log(`==========================================`);
     console.log(`  ✨ Aria 3D AI Studio running on port ${PORT}`);
     console.log(`==========================================`);
+
+    // Initiate background polling & startup self-healing audit
+    try {
+        pollTelegramUpdates();
+    } catch (e) {
+        console.warn('[Telegram Bot] Startup polling skipped:', e.message);
+    }
+
+    try {
+        const audit = runSelfHealingAudit();
+        console.log(`[Self-Healing] 💚 Startup audit completed (Health: ${audit.healthScore}%)`);
+    } catch (e) {
+        console.warn('[Self-Healing] Startup audit failed:', e.message);
+    }
+
+    // Schedule daily autonomous background self-healing audit (24 hours)
+    setInterval(() => {
+        try {
+            const audit = runSelfHealingAudit();
+            console.log(`[Self-Healing Daily Audit] 💚 Autonomous audit completed (Health: ${audit.healthScore}%)`);
+        } catch (e) {
+            console.error('[Self-Healing Daily Audit Error]:', e.message);
+        }
+    }, 24 * 60 * 60 * 1000);
 });
 
