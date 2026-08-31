@@ -1,10 +1,81 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-08-31T05:43:08.027Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:43:08.024Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:43:08.022Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:43:08.018Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:43:06.042Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:42:44.875Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:42:44.873Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:42:44.871Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:42:44.868Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    },
+    {
+      "timestamp": "2026-08-31T05:42:42.893Z",
+      "actionsTaken": [
+        "Routine self-healing audit completed. System 100% healthy."
+      ],
+      "status": "SYSTEM_RESTORED_100_PERCENT"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
+    "lastHealingEvent": "2026-08-31T05:43:08.027Z",
     "totalExceptionsCaught": 0,
     "activeProtections": [
       "API Cooldown Resetter",
