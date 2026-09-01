@@ -749,6 +749,7 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
       </div>
 
       <div class="chips" id="quickPrompts">
+        <button type="button" id="healAriaChipBtn" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.6); background: rgba(74, 222, 128, 0.12);">💖 Heal Aria</button>
         <button type="button" id="chipDiagBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">System diagnostic</button>
         <button type="button" id="chipExprBtn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">Change expression</button>
         <button type="button" id="chipCapBtn" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">Capabilities</button>
@@ -865,7 +866,10 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
       </div>
     </div>
 
-    <div class="tele-foot" style="margin-top: auto; padding: 12px;">
+    <div class="tele-foot" style="margin-top: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+      <button id="healAriaMainBtn" class="btn-engine" type="button" title="Trigger Full Vitality Recovery to Heal Aria" style="border-color: rgba(74, 222, 128, 0.6); color: #4ade80; background: rgba(74, 222, 128, 0.12);">
+        <span id="healAriaMainBtnText">💖 HEAL ARIA (RESTORE VITALITY)</span>
+      </button>
       <button id="selfHealBtn" class="btn-engine" type="button" title="Trigger Autonomous Self-Healing Diagnostic Shield" style="border-color: rgba(0, 245, 212, 0.4); color: #00f5d4;">
         <span id="selfHealBtnText">ARIA 3D ENGINE ONLINE</span>
       </button>

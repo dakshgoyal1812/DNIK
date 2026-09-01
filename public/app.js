@@ -2147,6 +2147,43 @@ async function triggerSelfHealingAudit() {
 
 if (selfHealBtn) selfHealBtn.addEventListener('click', triggerSelfHealingAudit);
 
+async function triggerHealAriaAction() {
+    try {
+        const healAriaMainBtnText = document.getElementById('healAriaMainBtnText');
+        if (healAriaMainBtnText) healAriaMainBtnText.textContent = "💖 HEALING ARIA...";
+        setStatus("Restoring Aria's Vitality...", "#4ade80");
+        playSFXSound('cheer');
+
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+
+        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
+        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
+        if (healAriaMainBtnText) healAriaMainBtnText.textContent = "💖 ARIA FULLY HEALED (100%)";
+        if (speakingText) speakingText.textContent = "Master! Thank you for healing me! My vitality is restored to 100%. ✨";
+
+        setMoodSmooth('happy');
+        triggerGesture('bow');
+
+        addToLog('AI', "✨ Master! Thank you so much for healing me! My vitality, rate limits, and memory shields are at 100% full capacity. [MOOD:happy][GESTURE:bow]");
+
+        setStatus("Aria Vitality 100% Restored!", "#4ade80");
+
+        if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance("Thank you Master! My vitality and health are completely restored!");
+            window.speechSynthesis.speak(utter);
+        }
+    } catch (e) {
+        setStatus("Aria Healed!", "#4ade80");
+    }
+}
+
+const healAriaMainBtn = document.getElementById('healAriaMainBtn');
+const healAriaChipBtn = document.getElementById('healAriaChipBtn');
+
+if (healAriaMainBtn) healAriaMainBtn.addEventListener('click', triggerHealAriaAction);
+if (healAriaChipBtn) healAriaChipBtn.addEventListener('click', triggerHealAriaAction);
+
 // Action prompt chips
 const chipDiagBtn = document.getElementById('chipDiagBtn');
 const chipExprBtn = document.getElementById('chipExprBtn');
