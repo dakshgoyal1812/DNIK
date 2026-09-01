@@ -1,11 +1,116 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-09-01T06:01:32.584Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 6
+    },
+    {
+      "timestamp": "2026-09-01T05:59:56.843Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    },
+    {
+      "timestamp": "2026-09-01T05:59:25.510Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    },
+    {
+      "timestamp": "2026-09-01T05:59:25.508Z",
+      "event": "Client Exception Caught: Test UI Exception",
+      "source": "Integration Test",
+      "status": "AUTO_MITIGATED",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-01T05:59:25.504Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    },
+    {
+      "timestamp": "2026-09-01T05:59:23.533Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    },
+    {
+      "timestamp": "2026-09-01T05:58:51.688Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    },
+    {
+      "timestamp": "2026-09-01T05:51:56.669Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    },
+    {
+      "timestamp": "2026-09-01T05:51:43.495Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    },
+    {
+      "timestamp": "2026-09-01T05:51:43.493Z",
+      "event": "Client Exception Caught: Test UI Exception",
+      "source": "Integration Test",
+      "status": "AUTO_MITIGATED",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-01T05:51:43.488Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    },
+    {
+      "timestamp": "2026-09-01T05:51:41.590Z",
+      "event": "Self-Healing Audit Complete",
+      "status": "SUCCESS",
+      "issuesFound": 0,
+      "issuesFixed": 0,
+      "healthScore": 100,
+      "memoryUsageMB": 5
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-09-01T06:01:32.584Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
