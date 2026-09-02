@@ -1,10 +1,101 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-09-02T06:14:10.679Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:14:10.679Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:13:03.679Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:13:03.679Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:12:27.850Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:12:27.850Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:12:13.290Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:12:13.290Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:12:13.286Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:12:13.286Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:12:13.284Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:12:13.284Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:12:10.792Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:12:10.792Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:11:44.772Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:11:44.772Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:11:44.768Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:11:44.768Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:11:44.765Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:11:44.765Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:11:42.297Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:11:42.297Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:11:09.190Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:11:09.190Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:11:09.185Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:11:09.185Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:11:09.183Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:11:09.183Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:11:06.750Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:11:06.750Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:07:46.357Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:07:46.357Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:07:46.344Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:07:46.344Z: 0 issues auto-repaired.",
+      "details": []
+    },
+    {
+      "timestamp": "2026-09-02T06:07:44.355Z",
+      "event": "Self-healing audit completed at 2026-09-02T06:07:44.355Z: 0 issues auto-repaired.",
+      "details": []
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
+    "lastHealingEvent": "2026-09-02T06:14:10.679Z",
     "totalExceptionsCaught": 0,
     "activeProtections": [
       "API Cooldown Resetter",
