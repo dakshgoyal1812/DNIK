@@ -2174,3 +2174,69 @@ if (chipCapBtn) chipCapBtn.addEventListener('click', () => {
         if (sendBtn) sendBtn.click();
     }
 });
+
+// Visual 3D Healing Aura Particle Effect
+function triggerHealAuraEffect() {
+    if (!scene) return;
+    try {
+        const auraGeo = new THREE.RingGeometry(0.5, 0.8, 32);
+        const auraMat = new THREE.MeshBasicMaterial({
+            color: 0x4ade80,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.8
+        });
+        const auraRing = new THREE.Mesh(auraGeo, auraMat);
+        auraRing.rotation.x = -Math.PI / 2;
+        auraRing.position.set(0, 0.02, 0);
+        scene.add(auraRing);
+
+        let elapsed = 0;
+        const auraInterval = setInterval(() => {
+            elapsed += 0.05;
+            auraRing.scale.addScalar(0.08);
+            auraMat.opacity -= 0.025;
+            if (auraMat.opacity <= 0 || elapsed > 2.0) {
+                clearInterval(auraInterval);
+                scene.remove(auraRing);
+                auraGeo.dispose();
+                auraMat.dispose();
+            }
+        }, 50);
+    } catch (e) {}
+}
+
+// "Heal Aria" Feature Controller
+async function executeHealAriaAction() {
+    try {
+        setStatus("💖 Healing Aria... Restoring 100% Vitality...", "#4ade80");
+        playSFXSound('cheer');
+        triggerHealAuraEffect();
+
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+
+        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
+        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
+
+        setMoodSmooth('happy');
+        triggerGesture('nod');
+
+        const replyMsg = data.replyText || "Master, thank you so much! Main ab 100% healthy aur fully energized hoon! ✨ [MOOD:happy][GESTURE:nod]";
+        const cleanMsg = processAIReply(replyMsg);
+
+        addToLog('AI', cleanMsg, 'happy');
+        speak(cleanMsg);
+
+        if (speakingText) speakingText.textContent = cleanMsg;
+        setStatus("✨ Aria Healed! 100% Vitality Restored!", "#4ade80");
+    } catch (e) {
+        setStatus("Aria Healed & Restored!", "#4ade80");
+    }
+}
+
+const healAriaTopBtn = document.getElementById('healAriaTopBtn');
+const healAriaPromptBtn = document.getElementById('healAriaPromptBtn');
+
+if (healAriaTopBtn) healAriaTopBtn.addEventListener('click', executeHealAriaAction);
+if (healAriaPromptBtn) healAriaPromptBtn.addEventListener('click', executeHealAriaAction);

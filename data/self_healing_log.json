@@ -1,10 +1,106 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 2,
+  "logs": [
+    {
+      "timestamp": "2026-09-03T05:54:45.571Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    },
+    {
+      "timestamp": "2026-09-03T05:54:09.721Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    },
+    {
+      "timestamp": "2026-09-03T05:54:09.719Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    },
+    {
+      "timestamp": "2026-09-03T05:54:09.715Z",
+      "action": "Client Exception Auto-Mitigated",
+      "error": "Test UI Error",
+      "source": "TestRunner",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-09-03T05:54:09.711Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    },
+    {
+      "timestamp": "2026-09-03T05:54:07.735Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    },
+    {
+      "timestamp": "2026-09-03T05:53:36.209Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    },
+    {
+      "timestamp": "2026-09-03T05:53:36.207Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    },
+    {
+      "timestamp": "2026-09-03T05:53:36.203Z",
+      "action": "Client Exception Auto-Mitigated",
+      "error": "Test UI Error",
+      "source": "TestRunner",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-09-03T05:53:36.199Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    },
+    {
+      "timestamp": "2026-09-03T05:53:34.265Z",
+      "action": "Self-Healing Audit Executed",
+      "healthScore": 100,
+      "keysReset": 0,
+      "memoryItems": 0,
+      "reminderItems": 0,
+      "status": "OPERATIONAL"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
+    "lastHealingEvent": "2026-09-03T05:54:45.571Z",
     "totalExceptionsCaught": 0,
     "activeProtections": [
       "API Cooldown Resetter",
