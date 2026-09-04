@@ -749,6 +749,7 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
       </div>
 
       <div class="chips" id="quickPrompts">
+        <button type="button" id="chipHealAriaBtn" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.5); background: rgba(74, 222, 128, 0.12);">💚 Heal Aria (100% Vitality)</button>
         <button type="button" id="chipDiagBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">System diagnostic</button>
         <button type="button" id="chipExprBtn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">Change expression</button>
         <button type="button" id="chipCapBtn" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">Capabilities</button>
@@ -1067,7 +1068,7 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
   const input = $("#chatInput");
   $$("#quickPrompts button").forEach(b => {
     b.addEventListener("click", () => {
-      if (input) {
+      if (input && b.dataset.prompt !== undefined) {
         input.value = b.dataset.prompt;
         input.focus();
         input.dispatchEvent(new Event("input", { bubbles: true }));
