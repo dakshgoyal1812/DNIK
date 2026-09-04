@@ -1,11 +1,104 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 4,
+  "logs": [
+    {
+      "timestamp": "2026-09-04T06:12:10.723Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:10:50.156Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:10:12.331Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:35.604Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 1 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:35.602Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:35.599Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:35.597Z",
+      "type": "exception_mitigated",
+      "source": "test_self_heal.js",
+      "error": "Test Client Script Error",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:35.594Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:34.584Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:13.528Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 1 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:13.526Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:13.522Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:13.520Z",
+      "type": "exception_mitigated",
+      "source": "test_self_heal.js",
+      "error": "Test Client Script Error",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:13.517Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    },
+    {
+      "timestamp": "2026-09-04T06:09:12.518Z",
+      "type": "audit",
+      "message": "Self-healing audit complete. Restored 0 files, reset 0 rate-limited keys. System health: 100%.",
+      "healthScore": 100
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-09-04T06:12:10.723Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",

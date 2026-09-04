@@ -2123,19 +2123,23 @@ async function triggerSelfHealingAudit() {
         setStatus("Self-Healing Shield Active...", "#00f5d4");
         playSFXSound('cheer');
 
-        const res = await fetch('/api/self-heal', { method: 'POST' });
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
         const data = await res.json().catch(() => ({}));
 
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
         if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
         if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
-        if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! System integrity 100%.";
+        if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! Aria is at 100% vitality.";
 
         setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
-        
+        setMoodSmooth('happy');
+        triggerGesture('bow');
+
+        addToLog('AI', "✨ Deep Vitality Recovery Complete! Main bilkul healthy hoon Master! All rate limits reset & system integrity is 100%. Thank you for healing me! 🙏 [MOOD:happy][GESTURE:bow]");
+
         // Voice notification feedback
         if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
+            const utter = new SpeechSynthesisUtterance("Deep vitality recovery complete! Aria is fully healed and at 100% vitality.");
             window.speechSynthesis.speak(utter);
         }
     } catch (e) {
@@ -2148,9 +2152,14 @@ async function triggerSelfHealingAudit() {
 if (selfHealBtn) selfHealBtn.addEventListener('click', triggerSelfHealingAudit);
 
 // Action prompt chips
+const chipHealAriaBtn = document.getElementById('chipHealAriaBtn');
 const chipDiagBtn = document.getElementById('chipDiagBtn');
 const chipExprBtn = document.getElementById('chipExprBtn');
 const chipCapBtn = document.getElementById('chipCapBtn');
+
+if (chipHealAriaBtn) chipHealAriaBtn.addEventListener('click', () => {
+    triggerSelfHealingAudit();
+});
 
 if (chipDiagBtn) chipDiagBtn.addEventListener('click', () => {
     triggerSelfHealingAudit();
