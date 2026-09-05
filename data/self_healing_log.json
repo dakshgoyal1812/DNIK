@@ -1,11 +1,72 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 12,
+  "logs": [
+    {
+      "timestamp": "2026-09-05T05:51:34.011Z",
+      "issue": "Corrupted JSON file reminders.json",
+      "action": "Restored valid default JSON state"
+    },
+    {
+      "timestamp": "2026-09-05T05:51:34.007Z",
+      "issue": "System Recovery Requested",
+      "action": "Full recovery performed, rate limits reset and caches purged"
+    },
+    {
+      "timestamp": "2026-09-05T05:51:34.005Z",
+      "issue": "Deep Vitality Heal requested",
+      "action": "System restored to 100% health & rate limits reset"
+    },
+    {
+      "timestamp": "2026-09-05T05:51:34.001Z",
+      "issue": "Exception from test_self_heal.js: Test uncaught exception",
+      "action": "Dynamic mitigation applied. Health score restored to 100%"
+    },
+    {
+      "timestamp": "2026-09-05T05:51:04.711Z",
+      "issue": "Corrupted JSON file reminders.json",
+      "action": "Restored valid default JSON state"
+    },
+    {
+      "timestamp": "2026-09-05T05:51:04.707Z",
+      "issue": "System Recovery Requested",
+      "action": "Full recovery performed, rate limits reset and caches purged"
+    },
+    {
+      "timestamp": "2026-09-05T05:51:04.705Z",
+      "issue": "Deep Vitality Heal requested",
+      "action": "System restored to 100% health & rate limits reset"
+    },
+    {
+      "timestamp": "2026-09-05T05:51:04.701Z",
+      "issue": "Exception from test_self_heal.js: Test uncaught exception",
+      "action": "Dynamic mitigation applied. Health score restored to 100%"
+    },
+    {
+      "timestamp": "2026-09-05T05:50:47.904Z",
+      "issue": "Corrupted JSON file reminders.json",
+      "action": "Restored valid default JSON state"
+    },
+    {
+      "timestamp": "2026-09-05T05:50:47.901Z",
+      "issue": "System Recovery Requested",
+      "action": "Full recovery performed, rate limits reset and caches purged"
+    },
+    {
+      "timestamp": "2026-09-05T05:50:47.899Z",
+      "issue": "Deep Vitality Heal requested",
+      "action": "System restored to 100% health & rate limits reset"
+    },
+    {
+      "timestamp": "2026-09-05T05:50:47.895Z",
+      "issue": "Exception from test_self_heal.js: Test uncaught exception",
+      "action": "Dynamic mitigation applied. Health score restored to 100%"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-09-05T05:51:34.011Z",
+    "totalExceptionsCaught": 3,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
