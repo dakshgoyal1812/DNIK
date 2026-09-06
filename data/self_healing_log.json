@@ -1,11 +1,94 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 7,
+  "logs": [
+    {
+      "timestamp": "2026-09-06T05:50:59.012Z",
+      "event": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "SUCCESS",
+      "details": "Deep vitality recovery performed. API key cooldowns reset, health score restored to 100%, state integrity verified."
+    },
+    {
+      "timestamp": "2026-09-06T05:50:37.335Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "HEALTHY",
+      "repairs": [
+        "System check complete. All components healthy."
+      ]
+    },
+    {
+      "timestamp": "2026-09-06T05:50:08.501Z",
+      "event": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "SUCCESS",
+      "details": "Deep vitality recovery performed. API key cooldowns reset, health score restored to 100%, state integrity verified."
+    },
+    {
+      "timestamp": "2026-09-06T05:50:08.496Z",
+      "event": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "SUCCESS",
+      "details": "Deep vitality recovery performed. API key cooldowns reset, health score restored to 100%, state integrity verified."
+    },
+    {
+      "timestamp": "2026-09-06T05:50:08.494Z",
+      "event": "CLIENT_EXCEPTION_LOGGED",
+      "error": "Test UI Exception simulated",
+      "source": "test_self_heal.js"
+    },
+    {
+      "timestamp": "2026-09-06T05:50:08.490Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "HEALTHY",
+      "repairs": [
+        "System check complete. All components healthy."
+      ]
+    },
+    {
+      "timestamp": "2026-09-06T05:50:06.511Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "HEALTHY",
+      "repairs": [
+        "System check complete. All components healthy."
+      ]
+    },
+    {
+      "timestamp": "2026-09-06T05:49:46.924Z",
+      "event": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "SUCCESS",
+      "details": "Deep vitality recovery performed. API key cooldowns reset, health score restored to 100%, state integrity verified."
+    },
+    {
+      "timestamp": "2026-09-06T05:49:46.920Z",
+      "event": "HEAL_ARIA_VITALITY_RECOVERY",
+      "status": "SUCCESS",
+      "details": "Deep vitality recovery performed. API key cooldowns reset, health score restored to 100%, state integrity verified."
+    },
+    {
+      "timestamp": "2026-09-06T05:49:46.918Z",
+      "event": "CLIENT_EXCEPTION_LOGGED",
+      "error": "Test UI Exception simulated",
+      "source": "test_self_heal.js"
+    },
+    {
+      "timestamp": "2026-09-06T05:49:46.914Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "HEALTHY",
+      "repairs": [
+        "System check complete. All components healthy."
+      ]
+    },
+    {
+      "timestamp": "2026-09-06T05:49:45.010Z",
+      "event": "SELF_HEALING_AUDIT",
+      "status": "HEALTHY",
+      "repairs": [
+        "System check complete. All components healthy."
+      ]
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-09-06T05:50:59.012Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",

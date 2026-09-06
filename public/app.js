@@ -2119,23 +2119,29 @@ const speakingText = document.getElementById('speakingText');
 
 async function triggerSelfHealingAudit() {
     try {
-        if (selfHealBtnText) selfHealBtnText.textContent = "AUDITING & HEALING...";
+        if (selfHealBtnText) selfHealBtnText.textContent = "AUDITING & HEALING ARIA...";
         setStatus("Self-Healing Shield Active...", "#00f5d4");
         playSFXSound('cheer');
 
-        const res = await fetch('/api/self-heal', { method: 'POST' });
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
         const data = await res.json().catch(() => ({}));
 
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
         if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
         if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
-        if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! System integrity 100%.";
+        if (speakingText) speakingText.textContent = data.message || "Aria has been healed and restored to 100% vitality!";
 
         setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
         
+        // Trigger expressive VRM Gesture & Emotion
+        triggerGesture('bow');
+        setMoodSmooth('happy');
+
         // Voice notification feedback
         if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
+            const utter = new SpeechSynthesisUtterance("Aria has been healed and restored to 100% vitality!");
+            utter.lang = 'en-US';
+            utter.pitch = 1.15;
             window.speechSynthesis.speak(utter);
         }
     } catch (e) {
