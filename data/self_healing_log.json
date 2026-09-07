@@ -1,11 +1,128 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 17,
+  "logs": [
+    {
+      "timestamp": "2026-09-07T05:49:30.435Z",
+      "type": "vitality_recovery",
+      "status": "healed",
+      "message": "Deep vitality recovery spell activated. System health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-09-07T05:49:30.434Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:48:24.742Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:48:12.045Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:48:12.043Z",
+      "type": "vitality_recovery",
+      "status": "healed",
+      "message": "Deep vitality recovery spell activated. System health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-09-07T05:48:12.043Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:48:12.041Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:48:12.040Z",
+      "type": "client_exception",
+      "source": "IntegrationTest.js",
+      "error": "Simulated UI Canvas Context Lost",
+      "status": "mitigated"
+    },
+    {
+      "timestamp": "2026-09-07T05:48:12.037Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:48:11.028Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:47:49.339Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:47:49.337Z",
+      "type": "vitality_recovery",
+      "status": "healed",
+      "message": "Deep vitality recovery spell activated. System health score restored to 100%."
+    },
+    {
+      "timestamp": "2026-09-07T05:47:49.337Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:47:49.335Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:47:49.334Z",
+      "type": "client_exception",
+      "source": "IntegrationTest.js",
+      "error": "Simulated UI Canvas Context Lost",
+      "status": "mitigated"
+    },
+    {
+      "timestamp": "2026-09-07T05:47:49.331Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    },
+    {
+      "timestamp": "2026-09-07T05:47:48.342Z",
+      "type": "system_audit",
+      "status": "healed",
+      "message": "Self-healing audit completed. Restored system health to 100%. Reset 0 API key cooldowns.",
+      "keysReset": 0
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-09-07T05:49:30.434Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
