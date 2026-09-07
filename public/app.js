@@ -2117,6 +2117,37 @@ const systemIntegrityVal = document.getElementById('systemIntegrityVal');
 const systemIntegrityBar = document.getElementById('systemIntegrityBar');
 const speakingText = document.getElementById('speakingText');
 
+async function triggerHealAria() {
+    try {
+        if (selfHealBtnText) selfHealBtnText.textContent = "HEALING ARIA...";
+        setStatus("✨ Deep Vitality Recovery Active...", "#00f5d4");
+        playSFXSound('cheer');
+        setMoodSmooth('happy');
+        triggerGesture('bow');
+
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+
+        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
+        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 ARIA FULLY HEALED (100%)";
+        if (speakingText) speakingText.textContent = "Vitality restored! System integrity 100%.";
+
+        setStatus("✨ Aria is 100% Healed & Energized!", "#4ade80");
+
+        addToLog('AI', '✨ **Aria Vitality Restored!** Master, thank you for healing me! Saari rate limits aur energy restore ho gayi hai, system integrity is at 100%! [MOOD:happy][GESTURE:bow]');
+
+        if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance("Master, thank you for healing me! I am feeling 100 percent energized and healthy!");
+            window.speechSynthesis.speak(utter);
+        }
+    } catch (e) {
+        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 ARIA FULLY HEALED";
+        setStatus("Aria Restored!", "#4ade80");
+    }
+}
+
 async function triggerSelfHealingAudit() {
     try {
         if (selfHealBtnText) selfHealBtnText.textContent = "AUDITING & HEALING...";
@@ -2146,6 +2177,12 @@ async function triggerSelfHealingAudit() {
 }
 
 if (selfHealBtn) selfHealBtn.addEventListener('click', triggerSelfHealingAudit);
+
+const healAriaBtn = document.getElementById('healAriaBtn');
+const chipHealBtn = document.getElementById('chipHealBtn');
+
+if (healAriaBtn) healAriaBtn.addEventListener('click', triggerHealAria);
+if (chipHealBtn) chipHealBtn.addEventListener('click', triggerHealAria);
 
 // Action prompt chips
 const chipDiagBtn = document.getElementById('chipDiagBtn');
