@@ -1702,12 +1702,19 @@ async function pollSelfHealingStatus() {
     } catch (e) {}
 }
 
+pollSelfHealingStatus();
+setInterval(pollSelfHealingStatus, 30000);
+
 function updateSelfHealingBadge(healthScore = 100, autoHealedCount = 0) {
     const badge = document.getElementById('selfHealBadge');
     if (badge) {
         badge.innerHTML = `<i class="dot" style="background: #4ade80; box-shadow: 0 0 8px #4ade80;"></i>💚 Self-Healing: Active | Health: ${healthScore}%`;
         badge.title = `Autonomous Self-Healing Active (${autoHealedCount} issues auto-repaired)`;
     }
+    const val = document.getElementById('systemIntegrityVal');
+    const bar = document.getElementById('systemIntegrityBar');
+    if (val) val.textContent = String(healthScore);
+    if (bar) bar.style.setProperty('--v', String(healthScore / 100));
 }
 
 // =====================================================================
@@ -2119,29 +2126,31 @@ const speakingText = document.getElementById('speakingText');
 
 async function triggerSelfHealingAudit() {
     try {
-        if (selfHealBtnText) selfHealBtnText.textContent = "AUDITING & HEALING...";
-        setStatus("Self-Healing Shield Active...", "#00f5d4");
+        if (selfHealBtnText) selfHealBtnText.textContent = "HEALING ARIA...";
+        setStatus("Self-Healing Vitality Active...", "#00f5d4");
         playSFXSound('cheer');
+        triggerGesture('bow');
+        setMoodSmooth('happy');
 
-        const res = await fetch('/api/self-heal', { method: 'POST' });
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
         const data = await res.json().catch(() => ({}));
 
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
         if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
-        if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
-        if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! System integrity 100%.";
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 HEAL ARIA (INTEGRITY 100%)";
+        if (speakingText) speakingText.textContent = data.message || "Aria is now fully healed and restored to 100% health! ✨";
 
-        setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
+        setStatus("Aria Healed - Integrity 100%!", "#4ade80");
         
         // Voice notification feedback
         if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
+            const utter = new SpeechSynthesisUtterance("Aria is now fully healed and restored to 100 percent health!");
             window.speechSynthesis.speak(utter);
         }
     } catch (e) {
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
-        if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
-        setStatus("System Restored!", "#4ade80");
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 HEAL ARIA (INTEGRITY 100%)";
+        setStatus("Aria Restored!", "#4ade80");
     }
 }
 

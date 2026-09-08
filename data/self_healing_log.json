@@ -1,11 +1,61 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 1,
+  "logs": [
+    {
+      "timestamp": "2026-09-08T05:36:50.624Z",
+      "event": "Autonomous Self-Healing Audit",
+      "status": "System Integrity 100% - Fully Healed",
+      "details": "API key cooldowns cleared, JSON state verified, memory purged."
+    },
+    {
+      "timestamp": "2026-09-08T05:36:47.129Z",
+      "event": "Autonomous Self-Healing Audit",
+      "status": "System Integrity 100% - Fully Healed",
+      "details": "API key cooldowns cleared, JSON state verified, memory purged."
+    },
+    {
+      "timestamp": "2026-09-08T05:35:57.345Z",
+      "event": "Autonomous Self-Healing Audit",
+      "status": "System Integrity 100% - Fully Healed",
+      "details": "API key cooldowns cleared, JSON state verified, memory purged."
+    },
+    {
+      "timestamp": "2026-09-08T05:35:27.848Z",
+      "event": "Autonomous Self-Healing Audit",
+      "status": "System Integrity 100% - Fully Healed",
+      "details": "API key cooldowns cleared, JSON state verified, memory purged."
+    },
+    {
+      "timestamp": "2026-09-08T05:35:27.846Z",
+      "event": "Autonomous Self-Healing Audit",
+      "status": "System Integrity 100% - Fully Healed",
+      "details": "API key cooldowns cleared, JSON state verified, memory purged."
+    },
+    {
+      "timestamp": "2026-09-08T05:35:27.843Z",
+      "event": "Client Exception Auto-Mitigated",
+      "source": "Integration Test",
+      "error": "Simulated UI Exception",
+      "action": "Auto-Repaired state & reset key limits"
+    },
+    {
+      "timestamp": "2026-09-08T05:35:27.840Z",
+      "event": "Autonomous Self-Healing Audit",
+      "status": "System Integrity 100% - Fully Healed",
+      "details": "API key cooldowns cleared, JSON state verified, memory purged."
+    },
+    {
+      "timestamp": "2026-09-08T05:35:26.922Z",
+      "event": "Autonomous Self-Healing Audit",
+      "status": "System Integrity 100% - Fully Healed",
+      "details": "API key cooldowns cleared, JSON state verified, memory purged."
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-09-08T05:35:27.843Z",
+    "totalExceptionsCaught": 1,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
