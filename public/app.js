@@ -2123,7 +2123,7 @@ async function triggerSelfHealingAudit() {
         setStatus("Self-Healing Shield Active...", "#00f5d4");
         playSFXSound('cheer');
 
-        const res = await fetch('/api/self-heal', { method: 'POST' });
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
         const data = await res.json().catch(() => ({}));
 
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
@@ -2132,10 +2132,15 @@ async function triggerSelfHealingAudit() {
         if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! System integrity 100%.";
 
         setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
-        
+
+        triggerGesture('bow');
+        setMoodSmooth('happy');
+
+        addToLog('AI', '✨ Master, my deep self-healing & vitality recovery is complete! System integrity restored to 100%. Thank you!', 'happy');
+
         // Voice notification feedback
         if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
+            const utter = new SpeechSynthesisUtterance("Aria deep self healing and vitality recovery complete! System integrity restored to 100%.");
             window.speechSynthesis.speak(utter);
         }
     } catch (e) {
@@ -2148,9 +2153,14 @@ async function triggerSelfHealingAudit() {
 if (selfHealBtn) selfHealBtn.addEventListener('click', triggerSelfHealingAudit);
 
 // Action prompt chips
+const chipHealBtn = document.getElementById('chipHealBtn');
 const chipDiagBtn = document.getElementById('chipDiagBtn');
 const chipExprBtn = document.getElementById('chipExprBtn');
 const chipCapBtn = document.getElementById('chipCapBtn');
+
+if (chipHealBtn) chipHealBtn.addEventListener('click', () => {
+    triggerSelfHealingAudit();
+});
 
 if (chipDiagBtn) chipDiagBtn.addEventListener('click', () => {
     triggerSelfHealingAudit();

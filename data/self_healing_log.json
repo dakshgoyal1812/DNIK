@@ -1,11 +1,82 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 1,
+  "logs": [
+    {
+      "timestamp": "2026-09-09T06:06:17.016Z",
+      "action": "AUTONOMOUS_DIAGNOSTIC_SWEEP",
+      "status": "HEALTHY",
+      "systemIntegrity": 100,
+      "actionsTaken": [
+        "All system components verified operating normally."
+      ]
+    },
+    {
+      "timestamp": "2026-09-09T06:06:07.804Z",
+      "action": "AUTONOMOUS_DIAGNOSTIC_SWEEP",
+      "status": "HEALTHY",
+      "systemIntegrity": 100,
+      "actionsTaken": [
+        "All system components verified operating normally."
+      ]
+    },
+    {
+      "timestamp": "2026-09-09T06:05:14.053Z",
+      "action": "AUTONOMOUS_DIAGNOSTIC_SWEEP",
+      "status": "HEALTHY",
+      "systemIntegrity": 100,
+      "actionsTaken": [
+        "All system components verified operating normally."
+      ]
+    },
+    {
+      "timestamp": "2026-09-09T06:04:53.180Z",
+      "action": "AUTONOMOUS_DIAGNOSTIC_SWEEP",
+      "status": "HEALTHY",
+      "systemIntegrity": 100,
+      "actionsTaken": [
+        "All system components verified operating normally."
+      ]
+    },
+    {
+      "timestamp": "2026-09-09T06:04:53.174Z",
+      "action": "AUTONOMOUS_DIAGNOSTIC_SWEEP",
+      "status": "HEALTHY",
+      "systemIntegrity": 100,
+      "actionsTaken": [
+        "All system components verified operating normally."
+      ]
+    },
+    {
+      "timestamp": "2026-09-09T06:04:53.172Z",
+      "source": "Integration Test Suite",
+      "error": "Test exception for self-healing verification",
+      "action": "CLIENT_EXCEPTION_MITIGATED",
+      "status": "HEALED"
+    },
+    {
+      "timestamp": "2026-09-09T06:04:53.168Z",
+      "action": "AUTONOMOUS_DIAGNOSTIC_SWEEP",
+      "status": "HEALTHY",
+      "systemIntegrity": 100,
+      "actionsTaken": [
+        "All system components verified operating normally."
+      ]
+    },
+    {
+      "timestamp": "2026-09-09T06:04:51.285Z",
+      "action": "AUTONOMOUS_DIAGNOSTIC_SWEEP",
+      "status": "HEALTHY",
+      "systemIntegrity": 100,
+      "actionsTaken": [
+        "All system components verified operating normally."
+      ]
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-09-09T06:06:17.016Z",
+    "totalExceptionsCaught": 1,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
