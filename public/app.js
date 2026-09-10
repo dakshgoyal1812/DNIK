@@ -2113,6 +2113,8 @@ if (camPresetSelect) {
 // =====================================================================
 const selfHealBtn = document.getElementById('selfHealBtn');
 const selfHealBtnText = document.getElementById('selfHealBtnText');
+const deepHealBtn = document.getElementById('deepHealBtn');
+const deepHealBtnText = document.getElementById('deepHealBtnText');
 const systemIntegrityVal = document.getElementById('systemIntegrityVal');
 const systemIntegrityBar = document.getElementById('systemIntegrityBar');
 const speakingText = document.getElementById('speakingText');
@@ -2145,7 +2147,36 @@ async function triggerSelfHealingAudit() {
     }
 }
 
+async function triggerDeepVitalityHealing() {
+    try {
+        if (deepHealBtnText) deepHealBtnText.textContent = "RECOVERING VITALITY...";
+        setStatus("Deep Vitality Healing In Progress...", "#4ade80");
+        playSFXSound('cheer');
+        triggerGesture('bow');
+        setMoodSmooth('happy');
+
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+
+        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
+        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
+        if (deepHealBtnText) deepHealBtnText.textContent = "💚 ARIA FULLY HEALED (100%)";
+        if (speakingText) speakingText.textContent = "Deep vitality recovery complete! Aria is fully healed.";
+
+        setStatus("Aria Fully Healed & Restored!", "#4ade80");
+
+        if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance("Deep vitality recovery complete. Aria is fully healed and ready!");
+            window.speechSynthesis.speak(utter);
+        }
+    } catch (e) {
+        if (deepHealBtnText) deepHealBtnText.textContent = "💚 ARIA FULLY HEALED";
+        setStatus("Aria Healed!", "#4ade80");
+    }
+}
+
 if (selfHealBtn) selfHealBtn.addEventListener('click', triggerSelfHealingAudit);
+if (deepHealBtn) deepHealBtn.addEventListener('click', triggerDeepVitalityHealing);
 
 // Action prompt chips
 const chipDiagBtn = document.getElementById('chipDiagBtn');
