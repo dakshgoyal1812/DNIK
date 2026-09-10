@@ -1,11 +1,138 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-09-10T05:54:48.095Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:54:21.514Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:58.927Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:58.070Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:58.068Z",
+      "type": "CLIENT_UI_EXCEPTION",
+      "source": "TestRunner",
+      "error": "Test uncaught error",
+      "mitigation": "Auto-cleared browser state and restored health score to 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:58.063Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:56.074Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:36.849Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:35.524Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:35.520Z",
+      "type": "CLIENT_UI_EXCEPTION",
+      "source": "TestRunner",
+      "error": "Test uncaught error",
+      "mitigation": "Auto-cleared browser state and restored health score to 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:35.516Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:53:33.582Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:52:30.877Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:52:30.847Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:52:28.847Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    },
+    {
+      "timestamp": "2026-09-10T05:52:13.767Z",
+      "type": "DAILY_SELF_HEAL_AUDIT",
+      "status": "SUCCESS",
+      "autoHealedCount": 0,
+      "cooldownsReset": 0,
+      "message": "Self-healing diagnostic complete. 0 integrity repairs, 0 API key cooldowns reset. Health: 100%"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-09-10T05:54:48.095Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
