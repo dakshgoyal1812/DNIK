@@ -2119,29 +2119,34 @@ const speakingText = document.getElementById('speakingText');
 
 async function triggerSelfHealingAudit() {
     try {
-        if (selfHealBtnText) selfHealBtnText.textContent = "AUDITING & HEALING...";
-        setStatus("Self-Healing Shield Active...", "#00f5d4");
+        if (selfHealBtnText) selfHealBtnText.textContent = "HEALING ARIA & RESTORING VITALITY...";
+        setStatus("Healing Aria Vitality Shield Active...", "#00f5d4");
         playSFXSound('cheer');
+        setMoodSmooth('happy', 1);
+        triggerGesture('bow');
 
-        const res = await fetch('/api/self-heal', { method: 'POST' });
+        const res = await fetch('/api/self-heal/heal', { method: 'POST' });
         const data = await res.json().catch(() => ({}));
 
-        if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
-        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', '1');
-        if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
-        if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! System integrity 100%.";
+        const score = data.healthScore || 100;
+        updateSelfHealingBadge(score, data.autoHealedCount || 0);
 
-        setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
+        if (systemIntegrityVal) systemIntegrityVal.textContent = String(score);
+        if (systemIntegrityBar) systemIntegrityBar.style.setProperty('--v', String(score / 100));
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 ARIA HEALED & 100% OPTIMAL";
+        if (speakingText) speakingText.textContent = "Aria vitality restoration complete! Health score 100%.";
+
+        setStatus("Aria Healed & Fully Restored (100%)!", "#4ade80");
         
         // Voice notification feedback
         if ('speechSynthesis' in window) {
-            const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
+            const utter = new SpeechSynthesisUtterance("Aria vitality restored! System health is now 100 percent.");
             window.speechSynthesis.speak(utter);
         }
     } catch (e) {
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
-        if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
-        setStatus("System Restored!", "#4ade80");
+        if (selfHealBtnText) selfHealBtnText.textContent = "💚 ARIA HEALED & 100% OPTIMAL";
+        setStatus("Aria Restored!", "#4ade80");
     }
 }
 
