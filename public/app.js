@@ -1672,8 +1672,8 @@ function reportClientErrorToSelfHealing(errorMsg, source = 'Browser UI') {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ error: errorMsg, source })
         }).then(r => r.json()).then(data => {
-            if (data && data.healthScore) {
-                updateSelfHealingBadge(data.healthScore);
+            if (data && data.healthScore !== undefined) {
+                updateSelfHealingBadge(data.healthScore, data.autoHealedCount);
             }
         }).catch(() => {});
     } catch (e) {}
@@ -1709,6 +1709,8 @@ function updateSelfHealingBadge(healthScore = 100, autoHealedCount = 0) {
         badge.title = `Autonomous Self-Healing Active (${autoHealedCount} issues auto-repaired)`;
     }
 }
+
+pollSelfHealingStatus();
 
 // =====================================================================
 // --- REAL-TIME VRM LIP-SYNC AUDIO ENGINE ---
@@ -2123,7 +2125,7 @@ async function triggerSelfHealingAudit() {
         setStatus("Self-Healing Shield Active...", "#00f5d4");
         playSFXSound('cheer');
 
-        const res = await fetch('/api/self-heal', { method: 'POST' });
+        const res = await fetch('/api/self-heal/recover', { method: 'POST' });
         const data = await res.json().catch(() => ({}));
 
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
@@ -2131,6 +2133,7 @@ async function triggerSelfHealingAudit() {
         if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
         if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! System integrity 100%.";
 
+        updateSelfHealingBadge(100, data.autoHealedCount || 0);
         setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
         
         // Voice notification feedback
