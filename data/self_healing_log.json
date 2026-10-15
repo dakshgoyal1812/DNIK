@@ -1,7 +1,37 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 2,
+  "logs": [
+    {
+      "event": "Self-Healing Audit",
+      "timestamp": "2026-08-16T06:01:16.929Z",
+      "repairedFiles": [
+        "long_term_memory.json",
+        "reminders.json"
+      ]
+    },
+    {
+      "event": "Self-Healing Audit",
+      "timestamp": "2026-08-16T06:01:19.277Z",
+      "repairedFiles": []
+    },
+    {
+      "event": "Client UI Exception Shield Mitigation",
+      "source": "TestRunner",
+      "error": "Simulated UI Exception",
+      "timestamp": "2026-08-16T06:01:19.286Z"
+    },
+    {
+      "event": "Self-Healing Audit",
+      "timestamp": "2026-08-16T06:01:19.286Z",
+      "repairedFiles": []
+    },
+    {
+      "event": "Self-Healing Audit",
+      "timestamp": "2026-08-16T06:01:51.870Z",
+      "repairedFiles": []
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
     "lastHealingEvent": null,
@@ -12,5 +42,7 @@
       "Memory Auto-Purge",
       "Client UI Exception Shield"
     ]
-  }
+  },
+  "lastAudit": "2026-08-16T06:01:51.869Z",
+  "lastDailyRoutine": "2026-08-16T06:01:51.870Z"
 }
