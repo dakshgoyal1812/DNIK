@@ -2131,6 +2131,8 @@ async function triggerSelfHealingAudit() {
         if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
         if (speakingText) speakingText.textContent = "Self-healing diagnostic complete! System integrity 100%.";
 
+        updateSelfHealingBadge(data.healthScore || 100, data.autoHealedCount || 0);
+
         setStatus("System Integrity 100% - Fully Healed!", "#4ade80");
         
         // Voice notification feedback

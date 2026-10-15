@@ -1,11 +1,22 @@
 {
   "healthScore": 100,
-  "autoHealedCount": 0,
-  "logs": [],
+  "autoHealedCount": 2,
+  "logs": [
+    {
+      "timestamp": "2026-08-15T06:18:05.195Z",
+      "event": "CORRUPTED_FILE_REPAIRED",
+      "details": "Repaired invalid JSON in long_term_memory.json"
+    },
+    {
+      "timestamp": "2026-08-15T06:18:05.189Z",
+      "event": "CLIENT_EXCEPTION_MITIGATED",
+      "details": "[test_runner] Test UI Error"
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-15T06:19:17.632Z",
+    "totalExceptionsCaught": 1,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
