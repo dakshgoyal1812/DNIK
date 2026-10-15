@@ -1,11 +1,58 @@
 {
   "healthScore": 100,
   "autoHealedCount": 0,
-  "logs": [],
+  "logs": [
+    {
+      "timestamp": "2026-08-20T05:54:07.485Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    },
+    {
+      "timestamp": "2026-08-20T05:54:07.485Z",
+      "message": "Mitigated client exception [browser]: Client UI Exception detected",
+      "source": "browser"
+    },
+    {
+      "timestamp": "2026-08-20T05:53:05.935Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    },
+    {
+      "timestamp": "2026-08-20T05:52:17.251Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    },
+    {
+      "timestamp": "2026-08-20T05:52:17.245Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    },
+    {
+      "timestamp": "2026-08-20T05:52:17.245Z",
+      "message": "Mitigated client exception [UI]: Uncaught ReferenceError: foo is not defined",
+      "source": "UI"
+    },
+    {
+      "timestamp": "2026-08-20T05:52:17.239Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    },
+    {
+      "timestamp": "2026-08-20T05:52:15.386Z",
+      "message": "Audit complete. System integrity is perfect (100%). Reset 0 API keys cooldowns.",
+      "filesHealed": [],
+      "apiKeysResetCount": 0
+    }
+  ],
   "metrics": {
     "startedAt": "2026-08-06T11:22:53.978Z",
-    "lastHealingEvent": null,
-    "totalExceptionsCaught": 0,
+    "lastHealingEvent": "2026-08-20T05:54:07.485Z",
+    "totalExceptionsCaught": 2,
     "activeProtections": [
       "API Cooldown Resetter",
       "JSON State Integrity Guard",
