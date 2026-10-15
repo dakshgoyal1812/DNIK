@@ -863,6 +863,14 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
           <dd style="color: #00f5d4; font-family: var(--font-mono);">STABLE</dd>
         </div>
       </div>
+
+      <!-- Self-Healing Log Visualizer -->
+      <div class="heal-logs-container" style="margin-top: 16px; border-top: 1px solid var(--line-soft); padding-top: 12px;">
+        <span class="label" style="display: block; margin-bottom: 8px;">Self-Healing Log History</span>
+        <div id="selfHealLogs" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-2); max-height: 120px; overflow-y: auto; background: var(--ink-3); padding: 8px; border-radius: var(--r-sm); border: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 6px;">
+          <div style="color: var(--text-3);">Loading audit logs...</div>
+        </div>
+      </div>
     </div>
 
     <div class="tele-foot" style="margin-top: auto; padding: 12px;">
