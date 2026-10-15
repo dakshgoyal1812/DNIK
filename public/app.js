@@ -172,6 +172,10 @@ function init() {
 
     // Start render loop
     animate();
+
+    // Setup Self-Healing Status updates
+    pollSelfHealingStatus();
+    setInterval(pollSelfHealingStatus, 5000);
 }
 
 const targetMousePos = { x: 0, y: 1.15, z: 2.0 };
@@ -1692,14 +1696,44 @@ window.addEventListener('unhandledrejection', (event) => {
 
 async function pollSelfHealingStatus() {
     try {
-        const res = await fetch('/api/self-heal');
+        const res = await fetch('/api/self-heal/logs');
         if (res.ok) {
             const data = await res.json();
-            if (data && data.healthScore !== undefined) {
-                updateSelfHealingBadge(data.healthScore, data.autoHealedCount);
+            if (data) {
+                const healthScore = data.healthScore !== undefined ? data.healthScore : 100;
+                const autoHealedCount = data.autoHealedCount !== undefined ? data.autoHealedCount : 0;
+
+                // Update Badge
+                updateSelfHealingBadge(healthScore, autoHealedCount);
+
+                // Update Telemetry Elements
+                const integrityVal = document.getElementById('systemIntegrityVal');
+                if (integrityVal) integrityVal.textContent = healthScore;
+
+                const integrityBar = document.getElementById('systemIntegrityBar');
+                if (integrityBar) integrityBar.style.setProperty('--v', (healthScore / 100).toString());
+
+                const healedCountVal = document.getElementById('healedCountVal');
+                if (healedCountVal) healedCountVal.textContent = autoHealedCount;
+
+                // Update Scrollable Console
+                const logsBox = document.getElementById('selfHealLogs');
+                if (logsBox && Array.isArray(data.logs)) {
+                    const formattedLogs = data.logs.map(log => {
+                        const time = new Date(log.timestamp).toLocaleTimeString();
+                        const prefix = log.severity === 'warning' ? '⚠️' : 'ℹ️';
+                        return `[${time}] ${prefix} ${log.message}`;
+                    }).join('\n');
+
+                    logsBox.textContent = formattedLogs || "System health is optimal, no anomalies found.";
+                    // Auto scroll to bottom
+                    logsBox.scrollTop = logsBox.scrollHeight;
+                }
             }
         }
-    } catch (e) {}
+    } catch (e) {
+        console.warn('Error polling self-healing status:', e);
+    }
 }
 
 function updateSelfHealingBadge(healthScore = 100, autoHealedCount = 0) {
@@ -2138,10 +2172,14 @@ async function triggerSelfHealingAudit() {
             const utter = new SpeechSynthesisUtterance("Self healing diagnostic complete! System integrity restored to 100%.");
             window.speechSynthesis.speak(utter);
         }
+
+        // Fetch and refresh logs console immediately after healing
+        pollSelfHealingStatus();
     } catch (e) {
         if (systemIntegrityVal) systemIntegrityVal.textContent = "100";
         if (selfHealBtnText) selfHealBtnText.textContent = "💚 SELF-HEALING SHIELD ACTIVE";
         setStatus("System Restored!", "#4ade80");
+        pollSelfHealingStatus();
     }
 }
 

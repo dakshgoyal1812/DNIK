@@ -862,6 +862,16 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
           <dt>AI Core</dt>
           <dd style="color: #00f5d4; font-family: var(--font-mono);">STABLE</dd>
         </div>
+        <div class="readout">
+          <dt>Auto-Healed Count</dt>
+          <dd id="healedCountVal" style="color: #4ade80; font-family: var(--font-mono);">0</dd>
+        </div>
+      </div>
+
+      <!-- Real-time Self-Healing Log Console -->
+      <div style="margin-top: 16px; border-top: 1px solid var(--line-soft); padding-top: 12px;">
+        <span class="label" style="display: block; margin-bottom: 6px;">Self-Healing Log Console</span>
+        <div id="selfHealLogs" style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 245, 212, 0.2); border-radius: var(--r-sm); padding: 8px; font-family: var(--font-mono); font-size: 0.6875rem; color: #a5f3fc; height: 110px; overflow-y: auto; white-space: pre-wrap; line-height: 1.4; scrollbar-width: thin; scrollbar-color: rgba(0, 245, 212, 0.4) transparent;">Waiting for diagnostic logs...</div>
       </div>
     </div>
 
