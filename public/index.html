@@ -677,6 +677,9 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
     <span class="chip" id="personaBadge" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px;">
       <i class="dot" style="background: #4ade80; box-shadow: 0 0 8px #4ade80;"></i>AUTO-PERSONA AI ACTIVE
     </span>
+    <span class="chip" id="selfHealBadge" data-state="online" title="Autonomous Self-Healing Active" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; font-family: var(--font-mono); font-size: 0.6875rem; padding: 5px 12px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 6px;">
+      <i class="dot" style="background: #4ade80; box-shadow: 0 0 8px #4ade80;"></i>💚 Self-Healing: Active | Health: 100%
+    </span>
     <div class="select" title="Natural Female Voice Selector" style="margin-left: 4px;">
       <select id="voiceSelect">
         <option value="Swara" selected>🎙️ Edge TTS: Swara (Hinglish Female)</option>
@@ -749,6 +752,7 @@ h1,h2,h3{ margin:0; text-wrap:balance; }
       </div>
 
       <div class="chips" id="quickPrompts">
+        <button type="button" id="healAriaBtn" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.4); background: rgba(74, 222, 128, 0.1);">💚 Heal Aria</button>
         <button type="button" id="chipDiagBtn" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">System diagnostic</button>
         <button type="button" id="chipExprBtn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">Change expression</button>
         <button type="button" id="chipCapBtn" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">Capabilities</button>
